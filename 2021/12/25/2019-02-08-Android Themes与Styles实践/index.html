@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.1.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/avatar.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/avatar.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.ico">
+  <link rel="mask-icon" href="/images/avatar.png" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="https://fonts.loli.net/css?family=Noto Sans SC:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"yamlee.me","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"default"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="分清Style和Theme首先我们需要知道的是Theme和Style都是定义在res&#x2F;values&#x2F;styles.xml的文件下，做个类比的话，style和theme就类似于web前端中的CSS样式表，用来定义控件的显示样式。 Stylestyle是只针对单个View的属性集合，例如对TextView定义颜色，字体大小等">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Android Themes与Styles实践">
+<meta property="og:url" content="http://yamlee.me/2021/12/25/2019-02-08-Android%20Themes%E4%B8%8EStyles%E5%AE%9E%E8%B7%B5/index.html">
+<meta property="og:site_name" content="Lee Blog">
+<meta property="og:description" content="分清Style和Theme首先我们需要知道的是Theme和Style都是定义在res&#x2F;values&#x2F;styles.xml的文件下，做个类比的话，style和theme就类似于web前端中的CSS样式表，用来定义控件的显示样式。 Stylestyle是只针对单个View的属性集合，例如对TextView定义颜色，字体大小等">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-12-25T00:45:55.084Z">
+<meta property="article:modified_time" content="2022-04-08T04:19:37.129Z">
+<meta property="article:author" content="YamLee">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://yamlee.me/2021/12/25/2019-02-08-Android%20Themes%E4%B8%8EStyles%E5%AE%9E%E8%B7%B5/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Android Themes与Styles实践 | Lee Blog</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-122582412-1"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'UA-122582412-1');
+      }
+    </script>
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Lee Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">专注移动开发</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yamlee.me/2021/12/25/2019-02-08-Android%20Themes%E4%B8%8EStyles%E5%AE%9E%E8%B7%B5/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="YamLee">
+      <meta itemprop="description" content="专注移动开发">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Lee Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Android Themes与Styles实践
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2021-12-25 08:45:55" itemprop="dateCreated datePublished" datetime="2021-12-25T08:45:55+08:00">2021-12-25</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2022-04-08 12:19:37" itemprop="dateModified" datetime="2022-04-08T12:19:37+08:00">2022-04-08</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Android%E5%BC%80%E5%8F%91%E6%8A%80%E5%B7%A7/" itemprop="url" rel="index"><span itemprop="name">Android开发技巧</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="分清Style和Theme"><a href="#分清Style和Theme" class="headerlink" title="分清Style和Theme"></a>分清Style和Theme</h2><p>首先我们需要知道的是Theme和Style都是定义在<em><strong>res&#x2F;values&#x2F;styles.xml</strong></em>的文件下，做个类比的话，style和theme就类似于web前端中的CSS样式表，用来定义控件的显示样式。</p>
+<h3 id="Style"><a href="#Style" class="headerlink" title="Style"></a>Style</h3><p>style是只针对单个View的属性集合，例如对TextView定义颜色，字体大小等</p>
+<span id="more"></span>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=<span class="string">&quot;1.0&quot;</span> encoding=<span class="string">&quot;utf-8&quot;</span>?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">resources</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">style</span> <span class="attr">name</span>=<span class="string">&quot;GreenText&quot;</span> <span class="attr">parent</span>=<span class="string">&quot;TextAppearance.AppCompat&quot;</span>&gt;</span><span class="language-xml"></span></span><br><span class="line"><span class="language-xml">        <span class="tag">&lt;<span class="name">item</span> <span class="attr">name</span>=<span class="string">&quot;android:textColor&quot;</span>&gt;</span>#00FF00<span class="tag">&lt;/<span class="name">item</span>&gt;</span></span></span><br><span class="line"><span class="language-xml">    </span><span class="tag">&lt;/<span class="name">style</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">resources</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">TextView</span></span></span><br><span class="line"><span class="tag">    <span class="attr">style</span>=<span class="string">&quot;@style/GreenText&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">...</span> /&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>可以看到style的定义非常简单，就是在style标签下定义不同的属性item即可。</p>
+<h3 id="Theme"><a href="#Theme" class="headerlink" title="Theme"></a>Theme</h3><p>Theme可以理解为style的一种特殊类型，针对一个集合的样式属性的应用，比方说在Application，Activity或ViewGroup中使用Theme来定义这个集合下面所有UI控件的样式，Theme中定义的样式会应用到这个集合中的每一个view</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">style</span> <span class="attr">name</span>=<span class="string">&quot;AppTheme&quot;</span> <span class="attr">parent</span>=<span class="string">&quot;Theme.AppCompat.Light.DarkActionBar&quot;</span>&gt;</span><span class="language-xml"></span></span><br><span class="line"><span class="language-xml">    <span class="comment">&lt;!-- Customize your theme here. --&gt;</span></span></span><br><span class="line"><span class="language-xml">    <span class="tag">&lt;<span class="name">item</span> <span class="attr">name</span>=<span class="string">&quot;colorPrimary&quot;</span>&gt;</span>@color/colorPrimary<span class="tag">&lt;/<span class="name">item</span>&gt;</span></span></span><br><span class="line"><span class="language-xml">    <span class="tag">&lt;<span class="name">item</span> <span class="attr">name</span>=<span class="string">&quot;colorPrimaryDark&quot;</span>&gt;</span>@color/colorPrimaryDark<span class="tag">&lt;/<span class="name">item</span>&gt;</span></span></span><br><span class="line"><span class="language-xml">    <span class="tag">&lt;<span class="name">item</span> <span class="attr">name</span>=<span class="string">&quot;colorAccent&quot;</span>&gt;</span>@color/colorAccent<span class="tag">&lt;/<span class="name">item</span>&gt;</span></span></span><br><span class="line"><span class="language-xml"></span><span class="tag">&lt;/<span class="name">style</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">manifest</span> <span class="attr">...</span> &gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">application</span> <span class="attr">android:theme</span>=<span class="string">&quot;@style/AppTheme&quot;</span> <span class="attr">...</span> &gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">application</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">manifest</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">manifest</span> <span class="attr">...</span> &gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">application</span> <span class="attr">...</span> &gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">activity</span> <span class="attr">android:theme</span>=<span class="string">&quot;@style/Theme.AppCompat.Light&quot;</span> <span class="attr">...</span> &gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">activity</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">application</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">manifest</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>Theme与style定义是一样的，但是在使用时是通过<strong>android:theme</strong>属性来指定</p>
+<p>###注意事项</p>
+<ul>
+<li>不管是style还是theme，在应用到view时，view只会相应自己拥有的属性，就是说对ImageView应用Text的style其中设置字体颜色，大小的配置是不会在ImageView上起作用的</li>
+<li>在Android 5（Api 21）或Android Support Library V22.1之后View新增了<strong>android:theme</strong>的属性，给指定View设置theme会使的View及此View的子View都会设置theme对应的样式</li>
+<li>总结Theme和Style的最大区别就是Style只针对单个View的样式设置，而Theme则针对View集合的样式设置</li>
+</ul>
+<h2 id="Style的继承及自定义"><a href="#Style的继承及自定义" class="headerlink" title="Style的继承及自定义"></a>Style的继承及自定义</h2><p>不管是Style还是Theme,自定义都建议（强制）先继承Support包下的Style，不要直接继承Framework下的style,因为Support下的Style， Google官方都做了良好的封装和向后兼容测试，继承Support包下的Style是最稳妥的</p>
+<p>建议</p>
+<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;style <span class="attribute">name</span>=<span class="string">&quot;AppTheme&quot;</span> <span class="attribute">parent</span>=<span class="string">&quot;Theme.AppCompat.Light.DarkActionBar&quot;</span>&gt;</span><br></pre></td></tr></table></figure>
+
+<p>禁止</p>
+<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;style <span class="attribute">name</span>=<span class="string">&quot;AppTheme2&quot;</span> <span class="attribute">parent</span>=<span class="string">&quot;android:Theme.Black&quot;</span>/&gt;</span><br></pre></td></tr></table></figure>
+
+
+<h3 id="Style继承与自定义方式"><a href="#Style继承与自定义方式" class="headerlink" title="Style继承与自定义方式"></a>Style继承与自定义方式</h3><p>Style的继承与自定义主要分两种：继承第三方项目的Style(包括support或者其他开源项目)，另一种就是继承自己本项目中的style</p>
+<p>####继承Support包或第三方项目的Style</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">style</span> <span class="attr">name</span>=<span class="string">&quot;GreenText&quot;</span> <span class="attr">parent</span>=<span class="string">&quot;@android:style/TextAppearance&quot;</span>&gt;</span><span class="language-xml"></span></span><br><span class="line"><span class="language-xml">    <span class="tag">&lt;<span class="name">item</span> <span class="attr">name</span>=<span class="string">&quot;android:textColor&quot;</span>&gt;</span>#00FF00<span class="tag">&lt;/<span class="name">item</span>&gt;</span></span></span><br><span class="line"><span class="language-xml"></span><span class="tag">&lt;/<span class="name">style</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">style</span> <span class="attr">name</span>=<span class="string">&quot;GreenText&quot;</span> <span class="attr">parent</span>=<span class="string">&quot;TextAppearance.AppCompat&quot;</span>&gt;</span><span class="language-xml"></span></span><br><span class="line"><span class="language-xml">    <span class="tag">&lt;<span class="name">item</span> <span class="attr">name</span>=<span class="string">&quot;android:textColor&quot;</span>&gt;</span>#00FF00<span class="tag">&lt;/<span class="name">item</span>&gt;</span></span></span><br><span class="line"><span class="language-xml"></span><span class="tag">&lt;/<span class="name">style</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>通过parent指定父style，再通过重写item来重写相关的属性</p>
+<p>####继承本项目中的Style</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">style</span> <span class="attr">name</span>=<span class="string">&quot;GreenText.Large&quot;</span>&gt;</span><span class="language-xml"></span></span><br><span class="line"><span class="language-xml">    <span class="tag">&lt;<span class="name">item</span> <span class="attr">name</span>=<span class="string">&quot;android:textSize&quot;</span>&gt;</span>22dp<span class="tag">&lt;/<span class="name">item</span>&gt;</span></span></span><br><span class="line"><span class="language-xml"></span><span class="tag">&lt;/<span class="name">style</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>继承自己本项目中的style可以不用parent属性指定，通过<strong>ParentStyle.CustomStyle</strong>的形式来指定style名称</p>
+<blockquote>
+<p>如果在此种方法中也使用parent，parent中指定的style优先级高于通过点操作符指定的父类style。</p>
+</blockquote>
+<p>对于item中需要自定义的属性可以通过查看不同控件拥有的属性来自定义</p>
+<h3 id="Style属性层级优先级"><a href="#Style属性层级优先级" class="headerlink" title="Style属性层级优先级"></a>Style属性层级优先级</h3><p>因为控件的属性可以通过多种方式方式设置，如果不同方式同时设置必然会引起冲突，比如我在代码通过**TextView.setTextSize()**设置了字体大小，同时我给此TextView设置的Style也加了textSize的配置，那最终会使用谁定义的textSize呢，所以这里就有一个优先级的问题</p>
+<p>系统默认会按如下优先级应用，优先级从高到低：</p>
+<ol>
+<li>通过Span来设置TextView及TextView的子类控件属性</li>
+<li>Java或Kotlin编码来设置属性</li>
+<li>setAttributes方法来设置属性</li>
+<li>自定义Style来设置属性</li>
+<li>默认的Style属性</li>
+<li>通过Theme设置批量View的属性</li>
+<li>特定View的特定Style属性，如通过TextAppearance个TextView设置相关属性</li>
+</ol>
+<blockquote>
+<p>如果你在项目中设置的style修改一直不生效，此时就需要考虑是否其他地方也设置了相关属性，把style中的属性给覆盖了</p>
+</blockquote>
+<p>第七点的TextAppearance有必要做一下详细的解释，TextView除了通过**android:style&#x3D;”@style&#x2F;xxx”**来指定style,还可以通过textAppearance来指定一个style</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">TextView</span></span></span><br><span class="line"><span class="tag">    <span class="attr">...</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:textAppearance</span>=<span class="string">&quot;@android:style/TextAppearance.Material.Headline&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:text</span>=<span class="string">&quot;This text is styled via textAppearance!&quot;</span> /&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>系统通过提供textAppearance来指定字符级别的style样式，这样我们可以通过style来指定一些其他的样式</p>
+<h2 id="Theme自定义"><a href="#Theme自定义" class="headerlink" title="Theme自定义"></a>Theme自定义</h2><p>当通过AndroidStudio创建一个新项目时，AndroidStudio默认会为我们创建一个继承自Support包下AppTheme</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">style</span> <span class="attr">name</span>=<span class="string">&quot;AppTheme&quot;</span> <span class="attr">parent</span>=<span class="string">&quot;Theme.AppCompat.Light.DarkActionBar&quot;</span>&gt;</span><span class="language-xml"></span></span><br><span class="line"><span class="language-xml">    <span class="comment">&lt;!-- Customize your theme here. --&gt;</span></span></span><br><span class="line"><span class="language-xml">    <span class="tag">&lt;<span class="name">item</span> <span class="attr">name</span>=<span class="string">&quot;colorPrimary&quot;</span>&gt;</span>@color/colorPrimary<span class="tag">&lt;/<span class="name">item</span>&gt;</span></span></span><br><span class="line"><span class="language-xml">    <span class="tag">&lt;<span class="name">item</span> <span class="attr">name</span>=<span class="string">&quot;colorPrimaryDark&quot;</span>&gt;</span>@color/colorPrimaryDark<span class="tag">&lt;/<span class="name">item</span>&gt;</span></span></span><br><span class="line"><span class="language-xml">    <span class="tag">&lt;<span class="name">item</span> <span class="attr">name</span>=<span class="string">&quot;colorAccent&quot;</span>&gt;</span>@color/colorAccent<span class="tag">&lt;/<span class="name">item</span>&gt;</span></span></span><br><span class="line"><span class="language-xml"></span><span class="tag">&lt;/<span class="name">style</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>我们可以修改一些属性，比如颜色来改变如状态栏，底部导航或app bar等通用控件的颜色，又或者修改背景颜色</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">style</span> <span class="attr">name</span>=<span class="string">&quot;AppTheme&quot;</span> <span class="attr">parent</span>=<span class="string">&quot;Theme.AppCompat.Light.DarkActionBar&quot;</span>&gt;</span><span class="language-xml"></span></span><br><span class="line"><span class="language-xml">    ...</span></span><br><span class="line"><span class="language-xml">    <span class="tag">&lt;<span class="name">item</span> <span class="attr">name</span>=<span class="string">&quot;android:windowBackground&quot;</span>&gt;</span>@color/activityBackground<span class="tag">&lt;/<span class="name">item</span>&gt;</span></span></span><br><span class="line"><span class="language-xml"></span><span class="tag">&lt;/<span class="name">style</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>theme中可以自定义很多属性，具体可以查阅官方<a target="_blank" rel="noopener" href="https://developer.android.com/reference/android/R.styleable.html#Theme">R.styleable.Theme</a>,如果是要在theme中定义全局的View或具体控件的属性则需要查看其支持的xml属性配置</p>
+<p>在Android Support Library中定义的theme（Theme.AppCompat）相关属性配置可以查看<a target="_blank" rel="noopener" href="https://android.googlesource.com/platform/frameworks/support/+/master/v7/appcompat/res/values/attrs.xml">attrs.xml</a>文件查看</p>
+<blockquote>
+<p>如果是Support Library中theme的属性是不需要“android:”开头的，而从Framework继承来自定义的属性是需要“android:”开头</p>
+</blockquote>
+<p>当前Support包下支持的所有Theme可以查阅如下文件<a target="_blank" rel="noopener" href="https://android.googlesource.com/platform/frameworks/support/+/master/v7/appcompat/res/values/themes.xml">themes.xml</a></p>
+<h4 id="Theme的版本兼容"><a href="#Theme的版本兼容" class="headerlink" title="Theme的版本兼容"></a>Theme的版本兼容</h4><p>随着android版本升级，可能android5.0和android 6.0在某些主题属性上会有api的改变，为了兼容版本，可以通过在res文件夹下创建指定values版本的style来解决兼容问题</p>
+<figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">res<span class="regexp">/values/</span>styles.xml        <span class="comment"># 如果没有指定版本，默认使用此style中的定义</span></span><br><span class="line">res<span class="regexp">/values-v21/</span>styles.xml    <span class="comment"># 对于Api 21以上的版本会优先使用此style种的定义</span></span><br></pre></td></tr></table></figure>
+
+<p>举个例子，比如Android5.0(API level 21)及以上版本汇总，增加了window的切换动画，基础的** res&#x2F;values&#x2F;styles.xml**文件中如下：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">resources</span>&gt;</span></span><br><span class="line">    <span class="comment">&lt;!-- base set of styles that apply to all versions --&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">style</span> <span class="attr">name</span>=<span class="string">&quot;BaseAppTheme&quot;</span> <span class="attr">parent</span>=<span class="string">&quot;Theme.AppCompat.Light.DarkActionBar&quot;</span>&gt;</span><span class="language-xml"></span></span><br><span class="line"><span class="language-xml">        <span class="tag">&lt;<span class="name">item</span> <span class="attr">name</span>=<span class="string">&quot;colorPrimary&quot;</span>&gt;</span>@color/primaryColor<span class="tag">&lt;/<span class="name">item</span>&gt;</span></span></span><br><span class="line"><span class="language-xml">        <span class="tag">&lt;<span class="name">item</span> <span class="attr">name</span>=<span class="string">&quot;colorPrimaryDark&quot;</span>&gt;</span>@color/primaryTextColor<span class="tag">&lt;/<span class="name">item</span>&gt;</span></span></span><br><span class="line"><span class="language-xml">        <span class="tag">&lt;<span class="name">item</span> <span class="attr">name</span>=<span class="string">&quot;colorAccent&quot;</span>&gt;</span>@color/secondaryColor<span class="tag">&lt;/<span class="name">item</span>&gt;</span></span></span><br><span class="line"><span class="language-xml">    </span><span class="tag">&lt;/<span class="name">style</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">&lt;!-- declare the theme name that&#x27;s actually applied in the manifest file --&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">style</span> <span class="attr">name</span>=<span class="string">&quot;AppTheme&quot;</span> <span class="attr">parent</span>=<span class="string">&quot;BaseAppTheme&quot;</span> /&gt;</span><span class="language-xml"></span></span><br><span class="line"><span class="language-xml"><span class="tag">&lt;/<span class="name">resources</span>&gt;</span></span></span><br></pre></td></tr></table></figure>
+
+<p>Api 21的版本<strong>res&#x2F;values-v21&#x2F;styles.xml</strong></p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">resources</span>&gt;</span></span><br><span class="line">    <span class="comment">&lt;!-- extend the base theme to add styles available only with API level 21+ --&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">style</span> <span class="attr">name</span>=<span class="string">&quot;AppTheme&quot;</span> <span class="attr">parent</span>=<span class="string">&quot;BaseAppTheme&quot;</span>&gt;</span><span class="language-xml"></span></span><br><span class="line"><span class="language-xml">        <span class="tag">&lt;<span class="name">item</span> <span class="attr">name</span>=<span class="string">&quot;android:windowActivityTransitions&quot;</span>&gt;</span>true<span class="tag">&lt;/<span class="name">item</span>&gt;</span></span></span><br><span class="line"><span class="language-xml">        <span class="tag">&lt;<span class="name">item</span> <span class="attr">name</span>=<span class="string">&quot;android:windowEnterTransition&quot;</span>&gt;</span>@android:transition/slide_right<span class="tag">&lt;/<span class="name">item</span>&gt;</span></span></span><br><span class="line"><span class="language-xml">        <span class="tag">&lt;<span class="name">item</span> <span class="attr">name</span>=<span class="string">&quot;android:windowExitTransition&quot;</span>&gt;</span>@android:transition/slide_left<span class="tag">&lt;/<span class="name">item</span>&gt;</span></span></span><br><span class="line"><span class="language-xml">    </span><span class="tag">&lt;/<span class="name">style</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">resources</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="自定义控件样式"><a href="#自定义控件样式" class="headerlink" title="自定义控件样式"></a>自定义控件样式</h4><p>没有一个android的控件（TextView,Button…）在Framework或者Support Library中都有一个默认的style，例如在项目中使用一个Support包中的Theme，在使用Button控件时，就会使用<strong>Widget.AppCompat.Button</strong>样式。如果我们像对Button指定不同的样式，可以如下自定义</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">Button</span></span></span><br><span class="line"><span class="tag">    <span class="attr">style</span>=<span class="string">&quot;@style/Widget.AppCompat.Button.Borderless&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">...</span> /&gt;</span></span><br></pre></td></tr></table></figure>
+<p>如果想在整个应用都替换，可以在theme中指定</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">style</span> <span class="attr">name</span>=<span class="string">&quot;AppTheme&quot;</span> <span class="attr">parent</span>=<span class="string">&quot;Theme.AppCompat.Light.DarkActionBar&quot;</span>&gt;</span><span class="language-xml"></span></span><br><span class="line"><span class="language-xml">    <span class="tag">&lt;<span class="name">item</span> <span class="attr">name</span>=<span class="string">&quot;buttonStyle&quot;</span>&gt;</span>@style/Widget.AppCompat.Button.Borderless<span class="tag">&lt;/<span class="name">item</span>&gt;</span></span></span><br><span class="line"><span class="language-xml">    ...</span></span><br><span class="line"><span class="language-xml"></span><span class="tag">&lt;/<span class="name">style</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+
+<h2 id="样式设计规范及模块化建议"><a href="#样式设计规范及模块化建议" class="headerlink" title="样式设计规范及模块化建议"></a>样式设计规范及模块化建议</h2><p>为了项目开发的高效率和项目的可扩展性，一个好的设计规范可以帮助我们快速的迭代或者扩展项目，制定一个合理的UI规范显得尤为重要</p>
+<p>1.学习Material Design中的一些设计规范，最好（强制）让设计师一起学习了解<br>2.制定准确语义的设计元素，如颜色不能直接给十六进制的色值，而是定义好一个描述这个颜色的语义词如primary_color_dark等等，然后把这些定义好的规范放在一个公共的文档里来维护起来<br>3.可以通过一些第三方如<strong>zeplin</strong>等网站来统一管理设计图及Style Guide，这样的好处是在于设计师和工程师能及时的同步相关设计资源的改动及更新<br>4.在项目开发UI功能时，如果发现两个控件是一摸一样的样式，此时建议可以通过style抽取样式，这样做的好处是能统一管理及其他模块可能会复用。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>这几个问题你会吗？</p>
+<ol>
+<li>Styles和Themes的区别？</li>
+<li>如何制作通用的styles或者Themes?</li>
+<li>项目如何统一管理Style与Theme？</li>
+</ol>
+
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>YamLee
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://yamlee.me/2021/12/25/2019-02-08-Android%20Themes%E4%B8%8EStyles%E5%AE%9E%E8%B7%B5/" title="Android Themes与Styles实践">http://yamlee.me/2021/12/25/2019-02-08-Android Themes与Styles实践/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/zh-CN" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2021/12/25/2019-10-11-Android%20ConstraintLayout%E4%BD%BF%E7%94%A8%E5%AE%9E%E8%B7%B5/" rel="prev" title="Android ConstraintLayout使用实践">
+      <i class="fa fa-chevron-left"></i> Android ConstraintLayout使用实践
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2021/12/25/2016-10-25-%E6%B7%B1%E5%85%A5Android%20Data%20Binding%EF%BC%88%E4%B8%80%EF%BC%89%EF%BC%9A%E4%BD%BF%E7%94%A8%E8%AF%A6%E8%A7%A3/" rel="next" title="深入Android Data Binding（一）：使用详解">
+      深入Android Data Binding（一）：使用详解 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%88%86%E6%B8%85Style%E5%92%8CTheme"><span class="nav-number">1.</span> <span class="nav-text">分清Style和Theme</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Style"><span class="nav-number">1.1.</span> <span class="nav-text">Style</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Theme"><span class="nav-number">1.2.</span> <span class="nav-text">Theme</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Style%E7%9A%84%E7%BB%A7%E6%89%BF%E5%8F%8A%E8%87%AA%E5%AE%9A%E4%B9%89"><span class="nav-number">2.</span> <span class="nav-text">Style的继承及自定义</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Style%E7%BB%A7%E6%89%BF%E4%B8%8E%E8%87%AA%E5%AE%9A%E4%B9%89%E6%96%B9%E5%BC%8F"><span class="nav-number">2.1.</span> <span class="nav-text">Style继承与自定义方式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Style%E5%B1%9E%E6%80%A7%E5%B1%82%E7%BA%A7%E4%BC%98%E5%85%88%E7%BA%A7"><span class="nav-number">2.2.</span> <span class="nav-text">Style属性层级优先级</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Theme%E8%87%AA%E5%AE%9A%E4%B9%89"><span class="nav-number">3.</span> <span class="nav-text">Theme自定义</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Theme%E7%9A%84%E7%89%88%E6%9C%AC%E5%85%BC%E5%AE%B9"><span class="nav-number">3.0.1.</span> <span class="nav-text">Theme的版本兼容</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%87%AA%E5%AE%9A%E4%B9%89%E6%8E%A7%E4%BB%B6%E6%A0%B7%E5%BC%8F"><span class="nav-number">3.0.2.</span> <span class="nav-text">自定义控件样式</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%A0%B7%E5%BC%8F%E8%AE%BE%E8%AE%A1%E8%A7%84%E8%8C%83%E5%8F%8A%E6%A8%A1%E5%9D%97%E5%8C%96%E5%BB%BA%E8%AE%AE"><span class="nav-number">4.</span> <span class="nav-text">样式设计规范及模块化建议</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">5.</span> <span class="nav-text">总结</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="YamLee"
+      src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">YamLee</p>
+  <div class="site-description" itemprop="description">专注移动开发</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">18</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">9</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/yamlee" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;yamlee" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title"><i class="fa fa-link fa-fw"></i>
+      Links
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="http://yamlee.me/" title="http:&#x2F;&#x2F;yamlee.me&#x2F;">Title</a>
+        </li>
+    </ul>
+  </div>
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">YamLee</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

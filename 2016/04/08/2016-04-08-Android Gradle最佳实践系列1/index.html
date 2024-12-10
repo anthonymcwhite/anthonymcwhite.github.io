@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.1.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/avatar.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/avatar.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.ico">
+  <link rel="mask-icon" href="/images/avatar.png" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="https://fonts.loli.net/css?family=Noto Sans SC:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"yamlee.me","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"default"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="在2013年的Google Io,出于更好的重用代码和自定义编译流程，Google推出了AndroidStudio和新的编译系统Gradle，AndroidStudio能使用Gradle编译，但是Gradle又能单独部署编译，更方便的做CI。如果你还没有使用AndroidStudio你可以通过Android Developer WebSite下载。在本篇章节内容中，我们将学习如下内容：  了解An">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Android Gradle最佳实践系列1：Gradle快速入门及AndroidStudio介绍">
+<meta property="og:url" content="http://yamlee.me/2016/04/08/2016-04-08-Android%20Gradle%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5%E7%B3%BB%E5%88%971/index.html">
+<meta property="og:site_name" content="Lee Blog">
+<meta property="og:description" content="在2013年的Google Io,出于更好的重用代码和自定义编译流程，Google推出了AndroidStudio和新的编译系统Gradle，AndroidStudio能使用Gradle编译，但是Gradle又能单独部署编译，更方便的做CI。如果你还没有使用AndroidStudio你可以通过Android Developer WebSite下载。在本篇章节内容中，我们将学习如下内容：  了解An">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://ww3.sinaimg.cn/large/6b051377gw1f984kdzr6gj20m60dimy0.jpg">
+<meta property="og:image" content="http://ww1.sinaimg.cn/large/6b051377jw1f988enpoc5j20i709amyl.jpg">
+<meta property="article:published_time" content="2016-04-07T16:00:00.000Z">
+<meta property="article:modified_time" content="2022-04-08T04:06:59.657Z">
+<meta property="article:author" content="YamLee">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://ww3.sinaimg.cn/large/6b051377gw1f984kdzr6gj20m60dimy0.jpg">
+
+<link rel="canonical" href="http://yamlee.me/2016/04/08/2016-04-08-Android%20Gradle%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5%E7%B3%BB%E5%88%971/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Android Gradle最佳实践系列1：Gradle快速入门及AndroidStudio介绍 | Lee Blog</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-122582412-1"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'UA-122582412-1');
+      }
+    </script>
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Lee Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">专注移动开发</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yamlee.me/2016/04/08/2016-04-08-Android%20Gradle%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5%E7%B3%BB%E5%88%971/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="YamLee">
+      <meta itemprop="description" content="专注移动开发">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Lee Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Android Gradle最佳实践系列1：Gradle快速入门及AndroidStudio介绍
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2016-04-08 00:00:00" itemprop="dateCreated datePublished" datetime="2016-04-08T00:00:00+08:00">2016-04-08</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2022-04-08 12:06:59" itemprop="dateModified" datetime="2022-04-08T12:06:59+08:00">2022-04-08</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Android-Gradle%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5%E7%B3%BB%E5%88%97/" itemprop="url" rel="index"><span itemprop="name">Android Gradle最佳实践系列</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>在2013年的Google Io,出于更好的重用代码和自定义编译流程，Google推出了AndroidStudio和新的编译系统Gradle，AndroidStudio能使用Gradle编译，但是Gradle又能单独部署编译，更方便的做CI。如果你还没有使用AndroidStudio你可以通过<a target="_blank" rel="noopener" href="http://developer.android.com/sdk/index.html">Android Developer WebSite</a>下载。<br>在本篇章节内容中，我们将学习如下内容：</p>
+<ul>
+<li>了解Android Studio</li>
+<li>了解Gradle基础概念</li>
+<li>创建一个新的基于Gradle的项目</li>
+<li>使用Gradle wrapper</li>
+<li>如何将Eclipse项目转化为Gradle项目</li>
+</ul>
+<span id="more"></span>
+
+<h2 id="Android-Studio"><a href="#Android-Studio" class="headerlink" title="Android Studio"></a>Android Studio</h2><p>Android Studio于2013年5月发布（作为预览版本），同时支持Gradle。 Android Studio是基于JetBrains的IntelliJ IDEA开发，但是针对Android开发作了专门的功能定制。在Linux，Mac OS X和Microsoft Windows平台上均可免费下载，以下简称Android Studio为AS。</p>
+<p>与Eclipse相比，Android Studio有如下有点：改进了用户界面编辑器；更好的内存监视器；不错的编辑器字符翻译；Android Lint警告和更多针对Android开发人员定制的功能。同时，除了IntelliJ IDEA中存在的常规Project视图和Packages视图外，AS还具有Android的特殊项目结构视图，此特殊视图将Gradle脚本，drawables和其他资源以方便的方式分组。在发布了稳定版本1.0的Android Studio后，Google不再维护Eclipse的Android开发人员工具（ADT），并建议所有开发人员切换到Android Studio。这意味着Google将不再为Eclipse提供新的功能，所有与IDE相关的工具开发现在都集中在Android Studio上。如果你仍然在使用Eclipse，是时候改变了。</p>
+<h3 id="更新AS"><a href="#更新AS" class="headerlink" title="更新AS"></a>更新AS</h3><p>AndroidStudio有四个不同的更新渠道</p>
+<ul>
+<li><strong>Canary</strong> 此渠道是最新的更新，但是可能会产生bug</li>
+<li><strong>Dev</strong> 此渠道基于一个月更新一次</li>
+<li><strong>Beta</strong> 此渠道是用于新增功能全部完成后的版本，但是可能会产生bug</li>
+<li><strong>Stable</strong> 默认选项，新增功能经过测试后的稳定版本</li>
+</ul>
+<p>默认情况下，AS会在每次启动时检查是否有可用的更新并会弹出更新通知框。当你首次启动Android Studio时，它会启动一个向导来设置您的环境，并确保你拥有最新的Android SDK和必要的Google Library。 AS还提供了创建Android虚拟设备（AVD）的选项，因此你可以在模拟器上运行应用程序。</p>
+<h2 id="了解Gradle基础知识"><a href="#了解Gradle基础知识" class="headerlink" title="了解Gradle基础知识"></a>了解Gradle基础知识</h2><p>使用Gradle构建Android项目时，你需要设置一个构建脚本，脚本的名称通常规定为<strong>build.gradle</strong>。你会注意到，当我们在学习Gradle基础时，Gradle的很多语法都是约定俗称，并且通常会在配置文件中提供默认值。这使得我们在开始使用Gradle时，比使用Ant或Maven等构建系统更容易（Ant或Maven长期以来一直是Android项目构建系统）。</p>
+<p>Gradle构建脚本不是用传统的XML编写的，而是基于Groovy的一种特定领域语言（DSL），它是Java虚拟机（JVM）的一种动态语言。 Gradle背后的团队相信，使用基于动态语言的声明式DSL风格方法比更多程序化，自由浮动的Ant或者许多其他构建系统使用的任何基于XML的方法相比具有显着的优势。</p>
+<p>这并不意味着你需要先学习Groovy你才能开始写构建脚本。因为Groovy通俗易懂，如果你已经知道Java，学习曲线就更不是那么陡峭。如果你想创建自己的Gradle Task和Plugin（我们将在后面的章节中讨论），多学习Groovy有益于更深入的理解。另一方面，因为Groovy基于JVM，所以可以使用Java或任何其他基于JVM的语言编写自定义插件的代码。</p>
+<h3 id="项目和任务-Projects-and-tasks"><a href="#项目和任务-Projects-and-tasks" class="headerlink" title="项目和任务(Projects and tasks)"></a>项目和任务(Projects and tasks)</h3><p>Gradle中有两个重要的概念：项目（Project）和任务（Task）。 Gradle Build至少由一个项目组成，并且每个项目包含一个或多个任务。 每个build.gradle文件都代表一个项目。 任务在build.gradle构建脚本中定义。 初始化构建过程时，Gradle基于构建文件组装Project和Task对象。 Task对象由Action对象的列表组成，按照它们需要执行的顺序。 Action对象是一个被执行的代码块，类似于Java中的方法。</p>
+<h3 id="构建过程的生命周期（The-build-lifecycle）"><a href="#构建过程的生命周期（The-build-lifecycle）" class="headerlink" title="构建过程的生命周期（The build lifecycle）"></a>构建过程的生命周期（The build lifecycle）</h3><p>执行Gradle构建是最简单的形式，只是对依赖于其他任务的任务执行动作。 为了简化构建过程，构建工具将工作流的动态模型创建为<strong>定向非循环图（DAG）</strong>。<br>这意味着所有的任务一个接一个地处理，循环执行是不可能的。 一旦任务被执行，它不会被再次调用。 没有依赖关系的任务将始终在其他任务之前运行。 依赖图在构建的配置阶段生成。 Gradle构建有三个阶段：</p>
+<ul>
+<li><strong>初始化阶段（Initialization）:</strong> 这个阶段Gradle会创建项目实例。 如果有多个模块，每个模块都会按照自己的build.gradle文件初始化，从而将创建多个项目。</li>
+<li><strong>配置阶段（Configuration）:</strong> 在此阶段，将执行构建脚本，为每个项目对象创建和配置所有任务。</li>
+<li><strong>执行阶段（Execution）:</strong> 这是Gradle确定应该执行哪些任务的阶段。 应该执行哪些任务取决于启动构建所传递的参数以及当前的运行目录。</li>
+</ul>
+<h3 id="Build配置文件"><a href="#Build配置文件" class="headerlink" title="Build配置文件"></a>Build配置文件</h3><p>为了让Gradle构建一个项目，总是需要一个build.gradle文件。 Android的构建文件有几个必需元素：</p>
+<figure class="highlight gradle"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">buildscript</span> &#123;</span><br><span class="line">    <span class="keyword">repositories</span> &#123;</span><br><span class="line">		jcenter()</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">dependencies</span> &#123;</span><br><span class="line">        <span class="keyword">classpath</span> <span class="string">&#x27;com.android.tools.build:gradle:1.2.3&#x27;</span></span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>如上代码是实际构建配置的地方。在**repositories{…}**代码块中，将JCenter repository配置为构建脚本的依赖关系的源。 JCenter是一个Gradle预先内置的Maven存储库，Gradle默认已经配置好相关了，不需要你额外的设置 。 Gradle中还有几个内置的存储库，并且Gradle也支持添加自己的本地或远程仓库。</p>
+<p>构建脚本**dependencies{…}**代码块中还定义了对Android build tools的依赖，这个依赖就是Android插件。 Android插件提供构建和测试应用程序所需的一切。 每个Android项目都需要应用Android插件,代码如下：</p>
+<figure class="highlight nginx"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="attribute">apply</span> plugin: <span class="string">&#x27;com.android.application&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<p>插件用于扩展Gradle构建脚本的功能。 将插件应用于项目可以使你的构建脚本定义属性并使用插件中定义的任务。</p>
+<blockquote>
+<p>如果你正在构建一个Library模块，那么在模块的build.gradle文件中你需要使用<strong>com.android.library</strong>而不是<strong>com.android.application</strong>。 同时你不能在一个模块中同时使用这两者，因为这将导致构建错误。 模块可以是Android Application或Android Library，但不能同时是两者。</p>
+</blockquote>
+<p>在应用Android plugin之后，你就可以配置android构建相关的属性，Android插件定义了**android{…}**代码块,如下所示，你可以在你的项目build.grade文件中加入关于android的配置</p>
+<figure class="highlight mipsasm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">android </span>&#123;</span><br><span class="line">       compileSdkVersion <span class="number">22</span></span><br><span class="line">       <span class="keyword">buildToolsVersion </span><span class="string">&quot;22.0.1&quot;</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>上面的代码中，Android插件提供适合Android需求的DSL。 唯一需要的属性是compileSdkVersion和buildToolsVersion，由compileSdkVersion指定编译应用程序的SDK版本。 最好使用最新的Android API版本作为compileSdkVersion。</p>
+<h3 id="项目目录结构"><a href="#项目目录结构" class="headerlink" title="项目目录结构"></a>项目目录结构</h3><p>与旧的Eclipse项目相比，Android项目的文件夹结构发生了很大的变化，如下图，这是Gradle应用程序的通用文件结构：</p>
+<p><img src="http://ww3.sinaimg.cn/large/6b051377gw1f984kdzr6gj20m60dimy0.jpg"></p>
+<p>Gradle项目通常在Project根路径有一个额外的级别。 这使得以后更容易添加其他的模块。 应用程序的所有源代码都将进入<strong>app</strong>文件夹。 该文件夹也是模块的名称，默认情况下，不需一定命名成<strong>app</strong>。 例如，如果你使用Android Studio手机应用或者Android Wear智能手表应用的项目，默认情况下，分别命名成<strong>application</strong>和<strong>wearable</strong>。</p>
+<p>Gradle有一个<strong>source set</strong>的概念。 官方Gradle文档描述了<strong>source set</strong>是一组一起编译和执行的源文件。对于Android项目，main目录是包含应用程序默认版本的所有源代码和资源的<strong>source set</strong>。 当你开始为Android应用程序编写测试时，你需要把测试的源代码放在一个名为androidTest的独立<strong>source set</strong>中，该source set仅包含测试代码。</p>
+<p>以下是Android相关资源目录对应表：</p>
+<table>
+<thead>
+<tr>
+<th>目录</th>
+<th>对应Android内容</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>&#x2F;src&#x2F;main&#x2F;java</td>
+<td>应用的源代码</td>
+</tr>
+<tr>
+<td>&#x2F;src&#x2F;main&#x2F;res</td>
+<td>应用的资源代码layout，drawable，values等</td>
+</tr>
+<tr>
+<td>&#x2F;libs</td>
+<td>引用的jar或者aar</td>
+</tr>
+<tr>
+<td>&#x2F;build</td>
+<td>构建的输出内容，apk或测试报告等</td>
+</tr>
+</tbody></table>
+<h2 id="使用Grade-Wrapper"><a href="#使用Grade-Wrapper" class="headerlink" title="使用Grade Wrapper"></a>使用Grade Wrapper</h2><p>Gradle一直在更新，新版本可能会破坏向后兼容性。使用Gradle Wrapper是避免问题和确保构建稳定的好方法。</p>
+<p>Gradle Wrapper在Windows平台上提供批处理文件，在其他操作系统上提供shell脚本。运行脚本时，如果Gradle指定版本不存在就会下载其所需的版本，然后自动用于构建。这意味着，每个开发人员或需要构建应用程序的自动化系统（例如CI）只用运行wrapper程序，wrapper将处理Gradle版本等兼容问题，而不需要在开发机上自己每次都手动安装正确版本的Gradle或构建服务器。因此，建议将wrapper文件添加到版本控制系统中（Git或SVN等）。</p>
+<p>运行Gradle Wrappter与直接运行Gradle没有什么不同。你只需要在Linux和Mac OS X上执行gradlew，在Windows上执行gradlew.bat，而不是常规的gradle命令。</p>
+<h3 id="获取Gradle-Wrapper"><a href="#获取Gradle-Wrapper" class="headerlink" title="获取Gradle Wrapper"></a>获取Gradle Wrapper</h3><p>为了方便起见，每个新的Android项目默认都包括Gradle Wrapper，所以当你创建一个新的项目，你不必做任何事情。 当然，在你的计算机上手动安装Gradle并直接通过Gradle命令应用于你的项目也是可行的，但是这样就可能产生先前讨论的gradle兼容问题。Gradle Wrapper能执行Gradle所有的操作，并能使用正确的Gradle版本。所以，没有理由不使用wrapper在而使用单独Gradle工作。</p>
+<p>你可以通过在终端中并进入项目根目录运行.&#x2F;gradlew -v或从windows cmd中运行gradlew.bat -v来检查项目中是否存在Gradle wrapper。运行此命令将显示Gradle的版本以及有关设置的一些额外信息。 如果项目是从Eclipse项目转化过来的，默认情况下不会安装wrapper。 在这种情况下，可以使用Gradle生成它，但是您需要先安装Gradle以获取wrapper。</p>
+<blockquote>
+<p><a target="_blank" rel="noopener" href="http://gradle.org/downloads">Gradle下载页面</a>有二进制文件和源代码的链接，如果你在Mac OS X上，可以使用包管理器，如Homebrew。所有的安装说明 在<a target="_blank" rel="noopener" href="http://gradle.org/installation">安装页面</a>都有说明。</p>
+</blockquote>
+<p>下载并安装Gradle并将其添加到PATH后，创建一个包含以下三行的build.gradle文件：</p>
+<figure class="highlight pgsql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">task <span class="keyword">wrapper</span>(<span class="keyword">type</span>: <span class="keyword">Wrapper</span>) &#123;</span><br><span class="line">       gradleVersion = <span class="string">&#x27;2.4&#x27;</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>之后，运行gradle wrapper生成包装文件。在Gradle的最新版本中，你还可以运行wrapper任务而不修改build.gradle文件添加上面的代码，因为它默认已经作为任务包括在内。在这种情况下，可以直接使用–gradle-version参数指定版本，如下所示：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ gradle wrapper --gradle-version 2.4</span><br></pre></td></tr></table></figure>
+
+<p>如果不指定版本号，则wrapper配置成使用执行任务的Gradle版本。<br>这些是wrapper任务生成的所有文件：</p>
+<figure class="highlight 1c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">myapp/</span><br><span class="line"><span class="string">|----gradlew</span></span><br><span class="line"><span class="string">|----gradlew.bat</span></span><br><span class="line"><span class="string">|----gradle/wrapper/</span></span><br><span class="line">        <span class="string">|----gradle-wrapper.jar</span></span><br><span class="line">        <span class="string">|----gradle-wrapper.properties</span></span><br></pre></td></tr></table></figure>
+
+<p>从上可知Gradle Wrapper有如下三部分：</p>
+<ul>
+<li>一个在Window平台下运行的批处理文件和在Linux&#x2F;Mac OS X下运行的shell脚本</li>
+<li>一个JAR包，bat和shell会调用</li>
+<li>一个<strong>properties</strong>文件</li>
+</ul>
+<p>gradle-wrapper.properties文件是包含配置的文件，并用力爱确定使用Gradle的什么版本，其内容大致如下：</p>
+<figure class="highlight pgsql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#Sat May 30 17:41:49 CEST 2015</span></span><br><span class="line">distributionBase=GRADLE_USER_HOME</span><br><span class="line">distributionPath=<span class="keyword">wrapper</span>/dists</span><br><span class="line">zipStoreBase=GRADLE_USER_HOME</span><br><span class="line">zipStorePath=<span class="keyword">wrapper</span>/dists</span><br><span class="line">distributionUrl=https\://services.gradle.org/distributions/gradle<span class="number">-2.4</span>-<span class="keyword">all</span>.zip</span><br></pre></td></tr></table></figure>
+
+<p>如果要使用自定义的Gradle版本，可以更改distributionUrl。 这也意味着你使用的任何应用程序或库模块可能会有有不同的Gradle分发地址，因此在运行wrapper之前最好检查distributionUrl是否可以信任。</p>
+<p>在项目中使用的Gradle版本不是最新版本时Android Studio会显示通知，并建议你自动为其更新。本质上，Android Studio意识更改gradle-wrapper中的distributionUrl配置属并触发重新构建，以便下载最新版本。</p>
+<h3 id="运行构建任务"><a href="#运行构建任务" class="headerlink" title="运行构建任务"></a>运行构建任务</h3><p>在终端或命令提示符中，进入到项目根目录，并使用grade wrapper命令运行tasks：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ gradlew tasks</span><br></pre></td></tr></table></figure>
+
+<p>这将打印出所有可用任务的列表。 如果添加–all参数，将获得每个任务的依赖关系等更详细的描述。</p>
+<blockquote>
+<p>在Windows上，需要运行gradlew.bat，在Linux和Mac OS X上，完整命令为.&#x2F;gradle。 为了简洁，之后所有的相关命令都简写成gradlew</p>
+</blockquote>
+<p>在开发调试Android项目时构建项目打包，需要运行assemble调试任务：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ gradlew assembleDebug</span><br></pre></td></tr></table></figure>
+
+<p>此任务将生成一个调试版本的APK。默认情况下，Gradle的Android插件将APK保存在MyApp&#x2F;app&#x2F;build&#x2F;outputs&#x2F;apk目录中。</p>
+<blockquote>
+<p><strong>缩写的任务名称</strong><br>为了避免在终端中进行大量输入，Gradle还提供了缩写的驼峰命名任务名称作为快捷方式。 例如，你可以通过从命令行界面运行gradlew assDeb或甚至gradlew aD来执行assembleDebug。<br>这里有一个注意事项。 只要骆驼情况缩写是唯一的，它就会正常运行，但是一旦另一个任务有相同的缩写，这个简写的名称就不起作用了。</p>
+</blockquote>
+<p>除了<strong>assemble</strong>任务，还有其他三种类型的任务：</p>
+<ul>
+<li><strong>check任务</strong>：主要用错误检查，如运行单元测试或者UI集成测试</li>
+<li><strong>build任务</strong>：同时出发assemble和check任务</li>
+<li><strong>clean任务</strong>：清除构建过程中所有输出（outputs目录下）</li>
+</ul>
+<h2 id="从Eclipse迁移项目"><a href="#从Eclipse迁移项目" class="headerlink" title="从Eclipse迁移项目"></a>从Eclipse迁移项目</h2><p>从Eclipse项目迁移到基于Gradle的项目有两种方法：</p>
+<ul>
+<li>使用Android Studio中的导入向导自动处理迁移</li>
+<li>将Gradle脚本添加到Eclipse项目并手动设置所有内容</li>
+</ul>
+<p>大多数项目都足够简单，AS导入向导能够自动转换一切。 如果有一些导入向导无法判断的东西，AS可以给你提示，然后你手动去修改。</p>
+<p>然而，有些项目可能非常复杂，需要手动转换。 如果你有一个复杂庞大的项目，你喜欢逐步转换项目，而不是一次性转换，你可以执行Ant任务，甚至从Gradle中执行完整的Ant构建。 这样做，你可以按照你喜欢的速度进行转换，并慢慢转换所有的组件。</p>
+<h3 id="使用AS导入向导"><a href="#使用AS导入向导" class="headerlink" title="使用AS导入向导"></a>使用AS导入向导</h3><p>要启动导入向导，你需要打开Android Studio，单击<strong>File</strong>菜单，然后单击<strong>Import Project…<strong>，或在Android Studio开始屏幕上，单击</strong>Import Non-Android Studio project</strong>。</p>
+<p>如果你的Eclipse项目中使用了JAR文件或其他Library，导入向导将建议用Gradle依赖项替换它们。 这些依赖关系可以来自本地Android SDK（例如Android Support包），甚至来自已知的在线repository。 如果未找到匹配的本地或线上依赖，则还是使用JAR文件，就像之前一样。 导入向导至少会为转换的项目创建一个模块。 如果你的项目中有源代码的Library库，那么这些库也将转换为模块。</p>
+<p>导入向导提示如下所示：</p>
+<p><img src="http://ww1.sinaimg.cn/large/6b051377jw1f988enpoc5j20i709amyl.jpg"></p>
+<p>转环视AS会创建一个新文件夹，以确保在转换时不丢失任何内容，你可以轻松地将导入向导的结果与原始文件进行比较。转换完成后，AS会打开该项目并显示一个导入摘要。</p>
+<p>摘要列出导入向导决定忽略的并且未复制到新项目的所有文件。如果你任然要包括这些文件，你必须手动将它们复制到新项目。在忽略的文件下方，摘要显示导入向导能够替换为Gradle依赖项的所有JAR文件。AS会尝试在JCenter上找到这些依赖项。如果你使用Support包，它现在包含在Google Repository中，你需要通过SDK Manager下载到你的计算机的，而不是直接使用JAR文件。 最后，摘要列出导入向导已移动的所有文件，显示其来源和目标。</p>
+<p>导入向导还会在项目根目录上添加三个Gradle文件：<strong>settings.gradle</strong>和<strong>build.gradle</strong>，模块中添加另一个<strong>build.gradle</strong>，如果你有任何包含源代码的Library，导入向导也会将它们转换为Gradle项目，并根据需要将所有内容组合在一起。</p>
+<p>该项目现在应该构建没有任何问题，但请记住，你可能需要在线连接下载一些必要的依赖项。</p>
+<p>更复杂的项目可能需要额外的工作，所以接下来我们将看看如何手动进行转换。</p>
+<blockquote>
+<p>Eclipse导出向导<br>Eclipse中还有一个导出向导，但它完全过时，因为Google Android的Android工具小组停止了Eclipse的Android开发工具。 因此，建议始终使用Android Studio中的导入向导。</p>
+</blockquote>
+<h3 id="手动转换"><a href="#手动转换" class="headerlink" title="手动转换"></a>手动转换</h3><p>有多种方法可以手动迁移到基于Gradle的Android项目。 它不需要更改为新的目录结构，甚至可以从Gradle脚本运行Ant脚本。 这使迁移过程非常灵活，并且它可以使大型项目的转换更容易。</p>
+<p>我们将在第9章“自定义高级构建”中查看运行的Ant任务。</p>
+<h4 id="保持老的项目结构"><a href="#保持老的项目结构" class="headerlink" title="保持老的项目结构"></a>保持老的项目结构</h4><p>如果不想移动文件，可以在项目中保留Eclipse文件夹结构。为此，你需要更改<strong>source set</strong>的配置。我们在谈论项目结构时提到了<strong>source set</strong>。 Gradle和Android插件有他们的默认值，但是可以重写这些配置。</p>
+<p>你需要做的第一件事是在项目目录中创建一个build.gradle文件。 此文件应该应用Android插件，并定义Gradle和Android插件所需的属性。 在其最简单的形式，它看起来应该是这样：</p>
+<figure class="highlight gradle"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">buildscript</span> &#123;</span><br><span class="line">	<span class="keyword">repositories</span> &#123;</span><br><span class="line">		jcenter()</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">dependencies</span> &#123;</span><br><span class="line">        <span class="keyword">classpath</span> <span class="string">&#x27;com.android.tools.build:gradle:1.2.3&#x27;</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">apply plugin: <span class="string">&#x27;com.android.application&#x27;</span></span><br><span class="line"></span><br><span class="line">android &#123;</span><br><span class="line">	compileSdkVersion <span class="number">22</span></span><br><span class="line">    buildToolsVersion <span class="string">&quot;22.0.1&quot;</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>然后，你可以通过重写source set来符合Eclipse项目结构，如下所示：</p>
+<figure class="highlight stylus"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">android &#123;</span><br><span class="line">    sourceSets &#123;</span><br><span class="line">        <span class="selector-tag">main</span> &#123;</span><br><span class="line">        	manifest<span class="selector-class">.srcFile</span> <span class="string">&#x27;AndroidManifest.xml&#x27;</span></span><br><span class="line">        	java<span class="selector-class">.srcDirs</span> = <span class="selector-attr">[<span class="string">&#x27;src&#x27;</span>]</span></span><br><span class="line">        	resources<span class="selector-class">.srcDirs</span> = <span class="selector-attr">[<span class="string">&#x27;src&#x27;</span>]</span></span><br><span class="line">        	aidl<span class="selector-class">.srcDirs</span> = <span class="selector-attr">[<span class="string">&#x27;src&#x27;</span>]</span></span><br><span class="line">        	renderscript<span class="selector-class">.srcDirs</span> = <span class="selector-attr">[<span class="string">&#x27;src&#x27;</span>]</span></span><br><span class="line">        	res<span class="selector-class">.srcDirs</span> = <span class="selector-attr">[<span class="string">&#x27;res&#x27;</span>]</span></span><br><span class="line">        	assets<span class="selector-class">.srcDirs</span> = <span class="selector-attr">[<span class="string">&#x27;assets&#x27;</span>]</span></span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">    androidTest<span class="selector-class">.setRoot</span>(<span class="string">&#x27;tests&#x27;</span>)</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在Eclipse文件结构中，所有源文件都会驻留在同一个文件夹中，因此你需要告诉Gradle所有这些组件都可以在src文件夹中找到。因此，你只需要将项目中的组件都包括其中即可，同时，你也不必但系将所有都添加进去会带来什么坏的影响。</p>
+<p>如果你对JAR文件有任何依赖关系，则需要告诉Gradle依赖所在的位置。假设JAR文件在一个名为libs的文件夹中，配置如下所示：</p>
+<figure class="highlight gradle"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">dependencies</span> &#123;</span><br><span class="line">       <span class="keyword">compile</span> <span class="keyword">fileTree</span>(dir: <span class="string">&#x27;libs&#x27;</span>, <span class="keyword">include</span>: [<span class="string">&#x27;*.jar&#x27;</span>])</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>上面代码的意思为将libs目录中的每个扩展名为.jar的文件都作为依赖。</p>
+<h4 id="转换为新的项目结构"><a href="#转换为新的项目结构" class="headerlink" title="转换为新的项目结构"></a>转换为新的项目结构</h4><p>如果你决定将项目手动转换为新的项目结构，则需要创建几个文件夹并移动一些文件。下表展示了一些最重要的文件和文件夹的概述，以及你需要将其移动到何处进行转换的新项目结构：</p>
+<table>
+<thead>
+<tr>
+<th>原位置</th>
+<th>新位置</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>src&#x2F;</td>
+<td>app&#x2F;src&#x2F;main&#x2F;java&#x2F;</td>
+</tr>
+<tr>
+<td>res&#x2F;</td>
+<td>app&#x2F;src&#x2F;main&#x2F;res&#x2F;</td>
+</tr>
+<tr>
+<td>assets&#x2F;</td>
+<td>app&#x2F;src&#x2F;main&#x2F;assets&#x2F;</td>
+</tr>
+<tr>
+<td>AndroidManifest.xml</td>
+<td>app&#x2F;src&#x2F;main&#x2F;AndroidManifest.xml</td>
+</tr>
+</tbody></table>
+<p>如果你有任何单元测试，你需要将源代码移动到**app&#x2F;src&#x2F;test&#x2F;java&#x2F;<strong>下，让Gradle自动识别它们。 功能测试属于</strong>app&#x2F;src&#x2F;androidTest&#x2F;java&#x2F;**文件夹。</p>
+<p>下一步是在项目的根目录中创建一个<strong>settings.gradle</strong>文件。 这个文件需要只包含一行，它的目的是告诉Gradle将应用程序模块包含在构建中：</p>
+<figure class="highlight gradle"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">include</span>: <span class="string">&#x27;:app&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<p>当如上的工作都准备好了，你还需要准备两个<strong>build.gradle</strong>文件，第一个属于项目的根目录（与settings.gradle在同一级别），用于定义项目范围的设置：</p>
+<figure class="highlight gradle"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">buildscript</span> &#123;</span><br><span class="line">    <span class="keyword">repositories</span> &#123;</span><br><span class="line">		jcenter()</span><br><span class="line">	&#125;</span><br><span class="line">    <span class="keyword">dependencies</span> &#123;</span><br><span class="line">        <span class="keyword">classpath</span> <span class="string">&#x27;com.android.tools.build:gradle:1.2.3&#x27;</span></span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>上面代码的作用主要是未项目中的所有模块设置了几个通用属性。第二个<strong>build.gradle</strong>放在app文件夹下，其内容为应用模块的相关设置：</p>
+<figure class="highlight nginx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="attribute">apply</span> plugin: <span class="string">&#x27;com.android.application&#x27;</span></span><br><span class="line">   android &#123;</span><br><span class="line">       <span class="attribute">compileSdkVersion</span> <span class="number">22</span></span><br><span class="line">       buildToolsVersion <span class="string">&quot;22.0.1&quot;</span></span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p>以上这些配置都是基础的配置。如果你有一个不依赖第三方代码的简单Android应用程序，者就足够了。但是如果你项目中有任何第三方依赖，你就需要将它们迁移到Gradle依赖中。</p>
+<h3 id="转换Library项目"><a href="#转换Library项目" class="headerlink" title="转换Library项目"></a>转换Library项目</h3><p>如果你的项目是供别人项目引用的第三方的Android Library，转换的步骤与以上大部分设置都相同，唯一不同的是，你需要使用Android Library插件，而不是Android Application插件。此过程的详细信息在第5章“管理多模块构建”中讨论。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>我们通过查看Gradle的优点以及为什么它比当前使用的其他构建系统更有用来开始本章。 我们简要地看了一下Android Studio，以及它如何帮助我们生成构建文件。</p>
+<p>在介绍之后，我们看了一下Gradle Wrapper，这使维护和共享项目更容易。 我们在Android Studio中创建了一个新项目，现在您已经知道如何将Eclipse项目自动和手动迁移到Android Studio和Gradle。 您还能够在Android Studio中使用Gradle构建项目，或者直接从命令行界面构建项目。</p>
+<p>在接下来的几章中，我们将讨论如何自定义构建，以便进一步自动化构建过程，并使维护更加轻松。 我们将首先检查所有标准Gradle文件，探索基本构建任务，并在下一章中定制构建的部分。</p>
+
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>YamLee
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://yamlee.me/2016/04/08/2016-04-08-Android%20Gradle%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5%E7%B3%BB%E5%88%971/" title="Android Gradle最佳实践系列1：Gradle快速入门及AndroidStudio介绍">http://yamlee.me/2016/04/08/2016-04-08-Android Gradle最佳实践系列1/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/zh-CN" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item"></div>
+      <div class="post-nav-item">
+    <a href="/2016/04/11/2016-04-11-Android%20Gradle%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5%E7%B3%BB%E5%88%972/" rel="next" title="Android Gradle最佳实践系列2：自定义Build配置">
+      Android Gradle最佳实践系列2：自定义Build配置 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Android-Studio"><span class="nav-number">1.</span> <span class="nav-text">Android Studio</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9B%B4%E6%96%B0AS"><span class="nav-number">1.1.</span> <span class="nav-text">更新AS</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%86%E8%A7%A3Gradle%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86"><span class="nav-number">2.</span> <span class="nav-text">了解Gradle基础知识</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%A1%B9%E7%9B%AE%E5%92%8C%E4%BB%BB%E5%8A%A1-Projects-and-tasks"><span class="nav-number">2.1.</span> <span class="nav-text">项目和任务(Projects and tasks)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9E%84%E5%BB%BA%E8%BF%87%E7%A8%8B%E7%9A%84%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F%EF%BC%88The-build-lifecycle%EF%BC%89"><span class="nav-number">2.2.</span> <span class="nav-text">构建过程的生命周期（The build lifecycle）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Build%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6"><span class="nav-number">2.3.</span> <span class="nav-text">Build配置文件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%A1%B9%E7%9B%AE%E7%9B%AE%E5%BD%95%E7%BB%93%E6%9E%84"><span class="nav-number">2.4.</span> <span class="nav-text">项目目录结构</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8Grade-Wrapper"><span class="nav-number">3.</span> <span class="nav-text">使用Grade Wrapper</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%8E%B7%E5%8F%96Gradle-Wrapper"><span class="nav-number">3.1.</span> <span class="nav-text">获取Gradle Wrapper</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BF%90%E8%A1%8C%E6%9E%84%E5%BB%BA%E4%BB%BB%E5%8A%A1"><span class="nav-number">3.2.</span> <span class="nav-text">运行构建任务</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%8EEclipse%E8%BF%81%E7%A7%BB%E9%A1%B9%E7%9B%AE"><span class="nav-number">4.</span> <span class="nav-text">从Eclipse迁移项目</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8AS%E5%AF%BC%E5%85%A5%E5%90%91%E5%AF%BC"><span class="nav-number">4.1.</span> <span class="nav-text">使用AS导入向导</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%89%8B%E5%8A%A8%E8%BD%AC%E6%8D%A2"><span class="nav-number">4.2.</span> <span class="nav-text">手动转换</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BF%9D%E6%8C%81%E8%80%81%E7%9A%84%E9%A1%B9%E7%9B%AE%E7%BB%93%E6%9E%84"><span class="nav-number">4.2.1.</span> <span class="nav-text">保持老的项目结构</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%BD%AC%E6%8D%A2%E4%B8%BA%E6%96%B0%E7%9A%84%E9%A1%B9%E7%9B%AE%E7%BB%93%E6%9E%84"><span class="nav-number">4.2.2.</span> <span class="nav-text">转换为新的项目结构</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BD%AC%E6%8D%A2Library%E9%A1%B9%E7%9B%AE"><span class="nav-number">4.3.</span> <span class="nav-text">转换Library项目</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">5.</span> <span class="nav-text">总结</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="YamLee"
+      src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">YamLee</p>
+  <div class="site-description" itemprop="description">专注移动开发</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">18</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">9</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/yamlee" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;yamlee" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title"><i class="fa fa-link fa-fw"></i>
+      Links
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="http://yamlee.me/" title="http:&#x2F;&#x2F;yamlee.me&#x2F;">Title</a>
+        </li>
+    </ul>
+  </div>
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">YamLee</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

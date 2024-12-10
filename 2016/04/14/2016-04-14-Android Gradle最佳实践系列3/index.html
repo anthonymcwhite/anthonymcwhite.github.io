@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.1.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/avatar.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/avatar.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.ico">
+  <link rel="mask-icon" href="/images/avatar.png" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="https://fonts.loli.net/css?family=Noto Sans SC:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"yamlee.me","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"default"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="gradle中的依赖可以说是gradle引以为傲的一个特性，我们只需要添加一行代码，gradle就可以自动通过配置的依赖仓库去下载我们所需要的第三方包，如果依赖的某个项目还会依赖其他的其他的项目,gradle也会通过（传递性依赖：transitive dependencies）自动解决其依赖 依赖仓库传统的第三方包引用需要下载相应的Jar包，然后加入到项目中，这种方式找Jar包比较繁琐，再就是Ja">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Android Gradle最佳实践系列3：依赖管理">
+<meta property="og:url" content="http://yamlee.me/2016/04/14/2016-04-14-Android%20Gradle%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5%E7%B3%BB%E5%88%973/index.html">
+<meta property="og:site_name" content="Lee Blog">
+<meta property="og:description" content="gradle中的依赖可以说是gradle引以为傲的一个特性，我们只需要添加一行代码，gradle就可以自动通过配置的依赖仓库去下载我们所需要的第三方包，如果依赖的某个项目还会依赖其他的其他的项目,gradle也会通过（传递性依赖：transitive dependencies）自动解决其依赖 依赖仓库传统的第三方包引用需要下载相应的Jar包，然后加入到项目中，这种方式找Jar包比较繁琐，再就是Ja">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2016-04-13T16:00:00.000Z">
+<meta property="article:modified_time" content="2022-04-08T04:06:59.666Z">
+<meta property="article:author" content="YamLee">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://yamlee.me/2016/04/14/2016-04-14-Android%20Gradle%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5%E7%B3%BB%E5%88%973/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Android Gradle最佳实践系列3：依赖管理 | Lee Blog</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-122582412-1"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'UA-122582412-1');
+      }
+    </script>
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Lee Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">专注移动开发</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yamlee.me/2016/04/14/2016-04-14-Android%20Gradle%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5%E7%B3%BB%E5%88%973/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="YamLee">
+      <meta itemprop="description" content="专注移动开发">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Lee Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Android Gradle最佳实践系列3：依赖管理
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2016-04-14 00:00:00" itemprop="dateCreated datePublished" datetime="2016-04-14T00:00:00+08:00">2016-04-14</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2022-04-08 12:06:59" itemprop="dateModified" datetime="2022-04-08T12:06:59+08:00">2022-04-08</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Android-Gradle%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5%E7%B3%BB%E5%88%97/" itemprop="url" rel="index"><span itemprop="name">Android Gradle最佳实践系列</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>gradle中的依赖可以说是gradle引以为傲的一个特性，我们只需要添加一行代码，gradle就可以自动通过配置的依赖仓库去下载我们所需要的第三方包，如果依赖的某个项目还会依赖其他的其他的项目,gradle也会通过<strong>（传递性依赖：transitive dependencies）</strong>自动解决其依赖</p>
+<h2 id="依赖仓库"><a href="#依赖仓库" class="headerlink" title="依赖仓库"></a>依赖仓库</h2><p>传统的第三方包引用需要下载相应的Jar包，然后加入到项目中，这种方式找Jar包比较繁琐，再就是Jar包的升级比较麻烦，但是通过在gradle中配置一个依赖仓库，在项目中只需要添加一行依赖的代码就能让gadle从指定的仓库中自动下载相应的依赖包。</p>
+<blockquote>
+<p>gradle默认不会添加依赖仓库，但是Android Studio会在project的根build.gradle文件中添加如下代码</p>
+</blockquote>
+<span id="more"></span>
+
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">repositories&#123;</span><br><span class="line">		google()</span><br><span class="line">		mavenCentral()</span><br><span class="line">		jcenter()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>注意jCenter2021年底将会停止维护，建议使用mavenCentral或者google的maven库</p>
+</blockquote>
+<p>gradle支持三种依赖库：Maven，Ivy和静态文件或者目录（aar,jar等文件或者libs目录），添加依赖后，执行相关gradle任务就会同步，gradle会将对应版本的依赖包下载到本地（~&#x2F;.gradle目录下），一个依赖版本只会下载一次。</p>
+<p>添加依赖只需要在相应模块的build.gradle文件下添加如下代码块</p>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">dependencies &#123;</span><br><span class="line">	implementation <span class="attr">group:</span> <span class="string">&#x27;com.google.code.gson&#x27;</span>, <span class="attr">name:</span> <span class="string">&#x27;gson&#x27;</span>,<span class="attr">version:</span><span class="string">&#x27;2.3&#x27;</span></span><br><span class="line">    implementation <span class="attr">group:</span> <span class="string">&#x27;com.squareup.retrofit&#x27;</span>, <span class="attr">name:</span> <span class="string">&#x27;retrofit&#x27;</span>,<span class="attr">version:</span> <span class="string">&#x27;1.9.0&#x27;</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>从上可知，一行依赖代码有三个要素：group，name,version,其中name是必须的，group和version是可选的，但是默认都是添加group和version保证其准确性和gradle的运行正确，gradle还提供如下简写方式，一般我们也建议使用如下简写方式</p>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">dependencies&#123;</span><br><span class="line">	implementation <span class="string">&#x27;com.google.code.gson:gson:2.3&#x27;</span></span><br><span class="line">	implementation <span class="string">&#x27;com.squareup.retrofit:retrofit:1.9.0&#x27;</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="内置版本仓库"><a href="#内置版本仓库" class="headerlink" title="内置版本仓库"></a>内置版本仓库</h3><p>为了方便，Gradle已经内置了三个Maven版本仓库，如果要使用，只需要在repositories代码块中进行声明，其内置的Maven版本仓库为：JCenter,Maven Center和local Maven repository。如下代码演示了如何添加版本仓库</p>
+<blockquote>
+<p>在Android Studio中使用Android Gradle Plugin会添加一个名为google的内置maven库，Android相关的依赖都可以在 <em><strong>google()</strong></em> 的Maven库中下载，所以建议把google()放在第一位</p>
+</blockquote>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">repositories &#123;</span><br><span class="line">    google()</span><br><span class="line">    mavenCentral()  </span><br><span class="line">    jcenter()</span><br><span class="line">    mavenLocal()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>mavenCentral和jCenter都是有名的版本仓库，不必同时使用，因为JCenter停止维护并且即将关闭公共库管理，所以现在还是建议使用mavenCentral</p>
+<p>关于mavenLocal如果原先你使用Maven管理过依赖，那么在gradle中添加mavenLocal（）即可使用原先的依赖包，但是确保在你的用户主目录有.m2目录，在OS X或Linux系统路径为： <strong>~&#x2F;.m2</strong>  ,在Windowns环境下是 <strong>%UserProfile%.m2</strong> 目录下</p>
+<h3 id="远程仓库"><a href="#远程仓库" class="headerlink" title="远程仓库"></a>远程仓库</h3><p>有一些大的公司或者组织更喜欢将自己的开源出来的二进制包放在自己的Maven或者Ivy服务器下而不是发布到MavenCetral或者Jcenter上，所以如果要单独添加这些版本仓库里的依赖，可以参考如下代码</p>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">repositories &#123;</span><br><span class="line">       maven &#123;</span><br><span class="line">           url <span class="string">&quot;http://repo.acmecorp.com/maven2&quot;</span></span><br><span class="line">       &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>同理Ivy库如下</p>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">repositories &#123;</span><br><span class="line">       ivy &#123;</span><br><span class="line">           url <span class="string">&quot;http://repo.acmecorp.com/repo&quot;</span></span><br><span class="line">       &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>如果你的公司有自己的Maven或者Ivy库，同时需要通过用户名和密码验证，可以参考如下代码</p>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"> repositories &#123;</span><br><span class="line">       maven &#123;</span><br><span class="line">           url <span class="string">&quot;http://repo.acmecorp.com/maven2&quot;</span></span><br><span class="line">           credentials &#123;</span><br><span class="line">               username <span class="string">&#x27;user&#x27;</span></span><br><span class="line">               password <span class="string">&#x27;secretpassword&#x27;</span></span><br><span class="line">           &#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="本地依赖"><a href="#本地依赖" class="headerlink" title="本地依赖"></a>本地依赖</h2><blockquote>
+<p>在某些情况下，你可能任然需要下载Jar包，或者要引用一些So包，因为公共的版本仓库上没有相应的包，这一节主要介绍这种情况下该如何配置gradle</p>
+</blockquote>
+<h3 id="文件依赖"><a href="#文件依赖" class="headerlink" title="文件依赖"></a>文件依赖</h3><p>添加一个Jar包作为依赖，你可以使用gradle提供的<strong>files</strong>方法，如下代码演示了如何使用</p>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">dependencies &#123;</span><br><span class="line">       implementation files(<span class="string">&#x27;libs/domoarigato.jar&#x27;</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>如果你有很多的Jar包，你可以直接添加jar包所在的目录</p>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">dependencies &#123;</span><br><span class="line">       implementation fileTree(<span class="string">&#x27;libs&#x27;</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>默认情况下，在AndroidStudio中新创建一个项目会默认创建libs目录，在build.gradle文件中默认添加了如下代码</p>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"> dependencies &#123;</span><br><span class="line">       implementation fileTree(<span class="attr">dir:</span> <span class="string">&#x27;libs&#x27;</span>, <span class="attr">include:</span> [<span class="string">&#x27;*.jar&#x27;</span>])</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>所以在AndroidStudio创建的项目中你可以直接将jar包放入libs目录下</p>
+<h3 id="So包的引用"><a href="#So包的引用" class="headerlink" title="So包的引用"></a>So包的引用</h3><p>从C或者C++编译过来的针对不同平台So包的引用，你只需要在模块的根目录下创建<strong>jniLibs</strong>目录，然后针对不同的平台放入不同的平台编译过的so包，具体架构可看如下图</p>
+<figure class="highlight stata"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">app</span></span><br><span class="line"> ├── AndroidManifest.xml</span><br><span class="line"> └── jniLibs</span><br><span class="line">     ├── armeabi</span><br><span class="line">     │   └── nativelib.<span class="keyword">so</span></span><br><span class="line">     ├── armeabi-v7a</span><br><span class="line">     │   └── nativelib.<span class="keyword">so</span></span><br><span class="line">     ├── mips</span><br><span class="line">     │   └── nativelib.<span class="keyword">so</span></span><br><span class="line">     └── x86</span><br><span class="line">         └── nativelib.<span class="keyword">so</span></span><br></pre></td></tr></table></figure>
+
+<p>如果添加上述结构不管用，可能是AndroidStudio 版本或者build tools版本过低不支持，你可通过在build.gradle文件加入如下代码解决此问题</p>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"> android &#123;</span><br><span class="line">       sourceSets.main &#123;</span><br><span class="line">           jniLibs.srcDir <span class="string">&#x27;src/main/libs&#x27;</span></span><br><span class="line">       &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="库项目的依赖（Library-Projects）"><a href="#库项目的依赖（Library-Projects）" class="headerlink" title="库项目的依赖（Library Projects）"></a>库项目的依赖（Library Projects）</h3><blockquote>
+<p>如果你创作了一些很酷的UI控件或者实用的工具包，你可以通过创建Library Project来解决这个问题，Library Project能生成一个.aar的文件，这个aar文件即可以被app项目引用，或者你可以直接引用library模块，详细见下文</p>
+</blockquote>
+<h4 id="创建和使用库模块"><a href="#创建和使用库模块" class="headerlink" title="创建和使用库模块"></a>创建和使用库模块</h4><p>跟Android application plugin不一样，库项目在build.gradle文件的开头使用的是</p>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">apply <span class="attr">plugin:</span> <span class="string">&#x27;com.android.library‘</span></span><br></pre></td></tr></table></figure>
+
+<p>有两种方式可以引用库模块，方式一是在你的项目（project）中直接引用，方式二是通过库模块生成aar文件，然后再到你的项目中引用aar文件</p>
+<p>如果你通过方式一引用项目你需要在<strong>settings.gradle</strong>文件中添加如下样式的代码</p>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">include <span class="string">&#x27;:app&#x27;</span>, <span class="string">&#x27;:library&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<p>然后在build.gradle文件的dependencies块中加入如下代码</p>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">implementation project(<span class="string">&#x27;:library&#x27;</span>)</span><br></pre></td></tr></table></figure>
+
+<h4 id="使用-aar文件"><a href="#使用-aar文件" class="headerlink" title="使用.aar文件"></a>使用.aar文件</h4><p>如果你想在不同的项目中重用你的库组件而又不想导入库项目，那么你可以使用.aar文件。你可以在你的库项目的&#x2F;output&#x2F;aar&#x2F;目录中找到生成aar文件，将aar文件添加成依赖，你可以在你的项目下创建<strong>aars</strong>目录，然后添加repository，如下代码所示</p>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">repositories &#123;</span><br><span class="line">       flatDir &#123;</span><br><span class="line">	   		dirs <span class="string">&#x27;aars&#x27;</span></span><br><span class="line">	   	 &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>然后再添加依赖代码，如下所示</p>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">dependencies &#123;</span><br><span class="line">       implementation(<span class="attr">name:</span><span class="string">&#x27;libraryname&#x27;</span>, <span class="attr">ext:</span><span class="string">&#x27;aar&#x27;</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<h2 id="Gradle依赖需要理解的几个概念"><a href="#Gradle依赖需要理解的几个概念" class="headerlink" title="Gradle依赖需要理解的几个概念"></a>Gradle依赖需要理解的几个概念</h2><blockquote>
+<p>gradle在配置依赖的时候有一些概念需要理解，即便现在我们可能还没有用到，但是理解这些如“implementation”、“testImplementation”这些scope属性的意义可以更好的使用gradle</p>
+</blockquote>
+<h3 id="scope的配置"><a href="#scope的配置" class="headerlink" title="scope的配置"></a>scope的配置</h3><p>在配置依赖的时候有时候你可能只在某个特定的设备上使用，如你在某个设备上使用蓝牙的功能，你需要加入蓝牙sdk的引用，但是设备上本身含有蓝牙功能的二进制文件，所以你的sdk就不用加入的apk文件中，所以这个依赖范围的配置就应运而生</p>
+<p>gradle中scope的标准配置类型为如下几种类型：</p>
+<blockquote>
+<p>新老版本的Gradle scope有对应的调整，这里通过 <em><strong>新&#x2F;老</strong></em> 格式表示区分，老的表示已弃用</p>
+</blockquote>
+<ol>
+<li><p><strong>implementation&#x2F;compile：</strong>此类型为默认的类型，所有配置为此类型的依赖包不仅会加入到classpath中同时也会加入到apk文件中</p>
+</li>
+<li><p><strong>runtimeOnly&#x2F;apk：</strong> 此类型只会加入到apk文件中，不会加入到编译的classpath中</p>
+</li>
+<li><p><strong>compileOnly&#x2F;provided：</strong> 此类型同apk类型正好相反，此类型只会加入到编译的classpath中，不会加入到apk中，apk和provide都只支持jar包，如果依赖library project会产生错误</p>
+</li>
+<li><p><strong>testImplementation&#x2F;testCompile：</strong> 当gradle运行用于单元测试的task时会将依赖包加入classpath</p>
+</li>
+<li><p><strong>androidTestImplementation&#x2F;androidTestCompile：</strong> 当gradle运行function测试时会将此类依赖包加入classpath，并且加入到test apk中</p>
+</li>
+</ol>
+<p>以上五类为标准的配置类型，如果你还配置了build variant，就会有根据不同的build varialt配置，如<strong>debugCompile</strong>、<strong>releaseProvided</strong>等等</p>
+<h3 id="版本号的规定习惯"><a href="#版本号的规定习惯" class="headerlink" title="版本号的规定习惯"></a>版本号的规定习惯</h3><blockquote>
+<p>依赖包得版本号是依赖管理的一个重要标准，一个依赖包版本号的格式通常是按照 <em><strong>major.minor.patch</strong></em>的格式来规定的，并且升级版本号通常按照如下标准来升级</p>
+</blockquote>
+<ul>
+<li>当提供的api不兼容老版本了，即升级major</li>
+<li>如果功能有大的改进，并且是兼容以前版本的就升级minor</li>
+<li>当你修改了一下bug，打了一些补丁就升级patch</li>
+</ul>
+<h3 id="动态的版本号"><a href="#动态的版本号" class="headerlink" title="动态的版本号"></a>动态的版本号</h3><blockquote>
+<p>在某些情况下，你可能需要所依赖项目最新版本，但是你有不能每次自己去查询版本然后再修改，这个时候你可以使用动态版本号，如下代码示例所示</p>
+</blockquote>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">dependencies &#123;</span><br><span class="line">       implementation <span class="string">&#x27;com.android.support:support-v4:22.2.+&#x27;</span></span><br><span class="line">       implementation <span class="string">&#x27;com.android.support:appcompat-v7:22.2+&#x27;</span></span><br><span class="line">       implementation <span class="string">&#x27;com.android.support:recyclerview-v7:+&#x27;</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>v4包是设置主版本号22，小版本好是2，补丁号使用最新的；v7包是在主版本号为22的版本下，小版本是最新的；而V7得recycleview包是当前能在版本仓库下获取的最新的，没有主版本号的限制</p>
+<blockquote>
+<p>需要注意的是，当使用动态版本号时，有可能使得gradle获取依赖包时不稳定而导致构建失败，更严重可能导致获取到不同版本到本地缓存中从而引起程序调用api紊乱，Androidstudio也会在使用动态版本号时做出提示</p>
+</blockquote>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>这一部分主要说明了如何在gradle中添加包的依赖，以及添加版本仓库的依赖，和libray project的依赖，同时对依赖中代码关键字的一些概念作了阐述。</p>
+
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>YamLee
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://yamlee.me/2016/04/14/2016-04-14-Android%20Gradle%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5%E7%B3%BB%E5%88%973/" title="Android Gradle最佳实践系列3：依赖管理">http://yamlee.me/2016/04/14/2016-04-14-Android Gradle最佳实践系列3/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/zh-CN" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2016/04/11/2016-04-11-Android%20Gradle%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5%E7%B3%BB%E5%88%972/" rel="prev" title="Android Gradle最佳实践系列2：自定义Build配置">
+      <i class="fa fa-chevron-left"></i> Android Gradle最佳实践系列2：自定义Build配置
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2016/04/17/2016-04-17-Android%20Gradle%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5%E7%B3%BB%E5%88%974/" rel="next" title="Android Gradle最佳实践系列4：创建Build Variants">
+      Android Gradle最佳实践系列4：创建Build Variants <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BE%9D%E8%B5%96%E4%BB%93%E5%BA%93"><span class="nav-number">1.</span> <span class="nav-text">依赖仓库</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%86%85%E7%BD%AE%E7%89%88%E6%9C%AC%E4%BB%93%E5%BA%93"><span class="nav-number">1.1.</span> <span class="nav-text">内置版本仓库</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BF%9C%E7%A8%8B%E4%BB%93%E5%BA%93"><span class="nav-number">1.2.</span> <span class="nav-text">远程仓库</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9C%AC%E5%9C%B0%E4%BE%9D%E8%B5%96"><span class="nav-number">2.</span> <span class="nav-text">本地依赖</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%96%87%E4%BB%B6%E4%BE%9D%E8%B5%96"><span class="nav-number">2.1.</span> <span class="nav-text">文件依赖</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#So%E5%8C%85%E7%9A%84%E5%BC%95%E7%94%A8"><span class="nav-number">2.2.</span> <span class="nav-text">So包的引用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BA%93%E9%A1%B9%E7%9B%AE%E7%9A%84%E4%BE%9D%E8%B5%96%EF%BC%88Library-Projects%EF%BC%89"><span class="nav-number">2.3.</span> <span class="nav-text">库项目的依赖（Library Projects）</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%88%9B%E5%BB%BA%E5%92%8C%E4%BD%BF%E7%94%A8%E5%BA%93%E6%A8%A1%E5%9D%97"><span class="nav-number">2.3.1.</span> <span class="nav-text">创建和使用库模块</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8-aar%E6%96%87%E4%BB%B6"><span class="nav-number">2.3.2.</span> <span class="nav-text">使用.aar文件</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Gradle%E4%BE%9D%E8%B5%96%E9%9C%80%E8%A6%81%E7%90%86%E8%A7%A3%E7%9A%84%E5%87%A0%E4%B8%AA%E6%A6%82%E5%BF%B5"><span class="nav-number">3.</span> <span class="nav-text">Gradle依赖需要理解的几个概念</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#scope%E7%9A%84%E9%85%8D%E7%BD%AE"><span class="nav-number">3.1.</span> <span class="nav-text">scope的配置</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%89%88%E6%9C%AC%E5%8F%B7%E7%9A%84%E8%A7%84%E5%AE%9A%E4%B9%A0%E6%83%AF"><span class="nav-number">3.2.</span> <span class="nav-text">版本号的规定习惯</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8A%A8%E6%80%81%E7%9A%84%E7%89%88%E6%9C%AC%E5%8F%B7"><span class="nav-number">3.3.</span> <span class="nav-text">动态的版本号</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">4.</span> <span class="nav-text">总结</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="YamLee"
+      src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">YamLee</p>
+  <div class="site-description" itemprop="description">专注移动开发</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">18</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">9</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/yamlee" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;yamlee" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title"><i class="fa fa-link fa-fw"></i>
+      Links
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="http://yamlee.me/" title="http:&#x2F;&#x2F;yamlee.me&#x2F;">Title</a>
+        </li>
+    </ul>
+  </div>
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">YamLee</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

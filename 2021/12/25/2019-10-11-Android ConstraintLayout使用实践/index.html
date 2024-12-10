@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.1.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/avatar.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/avatar.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.ico">
+  <link rel="mask-icon" href="/images/avatar.png" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="https://fonts.loli.net/css?family=Noto Sans SC:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"yamlee.me","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"default"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="ConstraintLayout使用实践ConstraintLayout是2017年Google IO上推出的一种新的布局方式，相较于其他几种布局（LinearLayout,RelativeLayout等），ConstraintLayout设计用于构造扁平的布局层级，减少layout的嵌套，从而提升界面绘制的速度，在布局中使用ConstraintLayout性能比其他几种布局会提升很多，后面我们会">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Android ConstraintLayout使用实践">
+<meta property="og:url" content="http://yamlee.me/2021/12/25/2019-10-11-Android%20ConstraintLayout%E4%BD%BF%E7%94%A8%E5%AE%9E%E8%B7%B5/index.html">
+<meta property="og:site_name" content="Lee Blog">
+<meta property="og:description" content="ConstraintLayout使用实践ConstraintLayout是2017年Google IO上推出的一种新的布局方式，相较于其他几种布局（LinearLayout,RelativeLayout等），ConstraintLayout设计用于构造扁平的布局层级，减少layout的嵌套，从而提升界面绘制的速度，在布局中使用ConstraintLayout性能比其他几种布局会提升很多，后面我们会">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://s2.loli.net/2022/12/12/yuE2q8UNJgip6lA.gif">
+<meta property="og:image" content="https://s2.loli.net/2022/12/12/yVgSD6vZRzhWILU.jpg">
+<meta property="og:image" content="https://s2.loli.net/2022/12/12/iJTPnbIezMw6sjd.jpg">
+<meta property="og:image" content="https://s2.loli.net/2022/12/12/HhatewqJMdmrz6k.jpg">
+<meta property="og:image" content="https://s2.loli.net/2022/12/12/ZgLRqnE4xAXtleC.jpg">
+<meta property="og:image" content="https://s2.loli.net/2022/12/12/odv3KtzErwaPjIZ.jpg">
+<meta property="og:image" content="https://s2.loli.net/2022/12/12/lqLpwRBdc6ogSur.jpg">
+<meta property="og:image" content="https://s2.loli.net/2022/12/12/jSHJhLkPmuirKI9.jpg">
+<meta property="og:image" content="https://s2.loli.net/2022/12/12/IH2U9VXRhmMtKoJ.gif">
+<meta property="og:image" content="https://s2.loli.net/2022/12/12/Cp91gZcQm2tlNEw.jpg">
+<meta property="og:image" content="https://s2.loli.net/2022/12/12/abuGyeRdp3CN1Sl.jpg">
+<meta property="og:image" content="https://s2.loli.net/2022/12/12/GvP6lu2kI7QWEe8.jpg">
+<meta property="og:image" content="https://s2.loli.net/2022/12/12/kibXtqSrfTU8wIh.jpg">
+<meta property="og:image" content="https://s2.loli.net/2022/12/12/9EnPlwFuoR4Ytdm.jpg">
+<meta property="og:image" content="https://s2.loli.net/2022/12/12/h5uOxBfUpLS1K9q.jpg">
+<meta property="og:image" content="https://s2.loli.net/2022/12/12/haW6AtLolJG9pRk.jpg">
+<meta property="og:image" content="https://s2.loli.net/2022/12/12/NoMARXvIZ6W5L2p.jpg">
+<meta property="og:image" content="https://s2.loli.net/2022/12/12/ZYAfmhdXFu4i25G.jpg">
+<meta property="article:published_time" content="2021-12-25T00:45:55.084Z">
+<meta property="article:modified_time" content="2022-12-12T06:04:02.697Z">
+<meta property="article:author" content="YamLee">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://s2.loli.net/2022/12/12/yuE2q8UNJgip6lA.gif">
+
+<link rel="canonical" href="http://yamlee.me/2021/12/25/2019-10-11-Android%20ConstraintLayout%E4%BD%BF%E7%94%A8%E5%AE%9E%E8%B7%B5/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Android ConstraintLayout使用实践 | Lee Blog</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-122582412-1"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'UA-122582412-1');
+      }
+    </script>
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Lee Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">专注移动开发</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yamlee.me/2021/12/25/2019-10-11-Android%20ConstraintLayout%E4%BD%BF%E7%94%A8%E5%AE%9E%E8%B7%B5/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="YamLee">
+      <meta itemprop="description" content="专注移动开发">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Lee Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Android ConstraintLayout使用实践
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2021-12-25 08:45:55" itemprop="dateCreated datePublished" datetime="2021-12-25T08:45:55+08:00">2021-12-25</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2022-12-12 14:04:02" itemprop="dateModified" datetime="2022-12-12T14:04:02+08:00">2022-12-12</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Android-Jetpack%E5%89%96%E6%9E%90/" itemprop="url" rel="index"><span itemprop="name">Android Jetpack剖析</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="ConstraintLayout使用实践"><a href="#ConstraintLayout使用实践" class="headerlink" title="ConstraintLayout使用实践"></a>ConstraintLayout使用实践</h2><p>ConstraintLayout是2017年Google IO上推出的一种新的布局方式，相较于其他几种布局（LinearLayout,RelativeLayout等），ConstraintLayout设计用于构造扁平的布局层级，减少layout的嵌套，从而提升界面绘制的速度，在布局中使用ConstraintLayout性能比其他几种布局会提升很多，后面我们会详细介绍到。</p>
+<h3 id="Why-ConstraintLayout"><a href="#Why-ConstraintLayout" class="headerlink" title="Why ConstraintLayout?"></a>Why ConstraintLayout?</h3><span id="more"></span>
+<h4 id="性能优势"><a href="#性能优势" class="headerlink" title="性能优势"></a>性能优势</h4><p>关于view的性能问题，我们首先应该要了解Android是如何绘制view的，View的绘制主要分为如下三个步骤:</p>
+<h5 id="1-Measure过程"><a href="#1-Measure过程" class="headerlink" title="1.Measure过程"></a>1.Measure过程</h5><p>系统在绘制整个view层级时是依次从上到下绘制的，第一个需要确定的是view的大小，如果是ViewGroup，在确定其大小之后还需要再测量其子view的大小</p>
+<h5 id="2-Layout过程"><a href="#2-Layout过程" class="headerlink" title="2. Layout过程"></a>2. Layout过程</h5><p>当view树中所有的view大小确定完毕后，系统开始确定每个view所处的位置，这个过程称为layout</p>
+<h5 id="3-Draw过程"><a href="#3-Draw过程" class="headerlink" title="3. Draw过程"></a>3. Draw过程</h5><p>系统绘制的最后一步也是从上到下，每一个view的onDraw方法中的Canvas对象包含了绘制的基本信息，这个canvas传给GPU然后根据第一二步确定的大小和位置来确定最终的view形态</p>
+<figure class="image" align="center">
+  <img src="https://s2.loli.net/2022/12/12/yuE2q8UNJgip6lA.gif" alt="View Tree绘制过程">
+  <figcaption>图1：View Tree绘制过程</figcaption>
+</figure>
+
+<p>从上图可知，每一个完整的view树的绘制过程都是从上到下，这就意味着，如果我们布局中嵌套的层级越多，在绘制中所需要的时间和内存空间就越多，性能也就越差。</p>
+<p>拿一个官方的例子来说：</p>
+<figure class="image" align="center">
+  <img src="https://s2.loli.net/2022/12/12/yVgSD6vZRzhWILU.jpg" alt="布局Demo" height="600">
+  <figcaption>图2：布局Demo</figcaption>
+</figure>
+
+<p>如上图，如果完成一个如上所示的布局，按照以前的布局来设计的话，可能大致是这样的</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">RelativeLayout</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">ImageView</span> /&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">ImageView</span> /&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">RelativeLayout</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">TextView</span> /&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">LinearLayout</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">TextView</span> /&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">RelativeLayout</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">EditText</span> /&gt;</span></span><br><span class="line">      <span class="tag">&lt;/<span class="name">RelativeLayout</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">LinearLayout</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">LinearLayout</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">TextView</span> /&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">RelativeLayout</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">EditText</span> /&gt;</span></span><br><span class="line">      <span class="tag">&lt;/<span class="name">RelativeLayout</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">LinearLayout</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">TextView</span> /&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">RelativeLayout</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">LinearLayout</span> &gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">Button</span> /&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">Button</span> /&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">LinearLayout</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">RelativeLayout</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>为了对比使用ConstraintLayout而产生的性能差异，我们通过Systrace工具来监测</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line">python <span class="variable">$ANDROID_HOME</span>/platform-tools/systrace/systrace.py --time=20 -o ~/trace.html gfx view res</span><br><span class="line"></span><br><span class="line">gfx - Graphics</span><br><span class="line">input - Input</span><br><span class="line">view - View System</span><br><span class="line">webview - WebView</span><br><span class="line">wm - Window Manager</span><br><span class="line">am - Activity Manager</span><br><span class="line">sm - Sync Manager</span><br><span class="line">audio - Audio</span><br><span class="line">video - Video</span><br><span class="line">camera - Camera</span><br><span class="line">hal - Hardware Modules</span><br><span class="line">res - Resource Loading</span><br><span class="line">dalvik - Dalvik VM</span><br><span class="line">rs - RenderScript</span><br><span class="line">bionic - Bionic C Library</span><br><span class="line">power - Power Management</span><br><span class="line">pm - Package Manager</span><br><span class="line">ss - System Server</span><br><span class="line">database - Database</span><br><span class="line">network - Network</span><br><span class="line">adb - ADB</span><br><span class="line">vibrator - Vibrator</span><br><span class="line">aidl - AIDL calls</span><br><span class="line">pdx - PDX services</span><br><span class="line"><span class="built_in">sched</span> - CPU Scheduling</span><br><span class="line">freq - CPU Frequency</span><br><span class="line">idle - CPU Idle</span><br><span class="line">disk - Disk I/O</span><br><span class="line"><span class="built_in">sync</span> - Synchronization</span><br></pre></td></tr></table></figure>
+
+
+
+<p>通过运行如上命令，会生成一个trace.html的文件，通过浏览器打开可以得到系统监测的一些数据</p>
+<figure class="image" align="center">
+  <img src="https://s2.loli.net/2022/12/12/iJTPnbIezMw6sjd.jpg" alt="传统布局Systrace监测结果">
+  <figcaption>图3：传统布局Systrace监测结果</figcaption>
+</figure>
+
+<p>我们可以看到在alert选项菜单中产生了89个绘制警告。</p>
+<p>现在我们采用ConstraintLayout来实现同样的效果，代码大致是这样</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">android.support.constraint.ConstraintLayout</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">ImageView</span> /&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">ImageView</span> /&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">TextView</span> /&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">EditText</span> /&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">TextView</span> /&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">TextView</span> /&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">EditText</span> /&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">Button</span> /&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">Button</span> /&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">TextView</span> /&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">android.support.constraint.ConstraintLayout</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>将布局采用ConstraintLayout替换之后，我们再用systrace监测，或得到如下结果</p>
+<figure class="image" align="center">
+  <img src="https://s2.loli.net/2022/12/12/HhatewqJMdmrz6k.jpg" alt="ConstraintLayout布局Systrace监测结果">
+  <figcaption>图4：ConstraintLayout布局Systrace监测结果</figcaption>
+</figure>
+
+<p>可以看到view绘制的警告数有大幅度减少。</p>
+<p>除了通过systrace跟踪性能问题，在android 7.0(Api 24)及之后版本中加入了帧绘制的<br>监听<strong>OnFrameMetricsAvailableListener</strong>,这个监听器可以在回调中接收到系统每一帧<br>绘制的时长参数</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">window.addOnFrameMetricsAvailableListener(frameMetricsAvailableListener, frameMetricsHandler);</span><br></pre></td></tr></table></figure>
+
+<p>这里，我们需要检测view的测量时间，所以如下代码</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Window.OnFrameMetricsAvailableListener &#123; _, frameMetrics, _ -&gt;</span><br><span class="line">        <span class="keyword">val</span> frameMetricsCopy = FrameMetrics(frameMetrics);</span><br><span class="line">        <span class="comment">// Layout measure duration in nanoseconds</span></span><br><span class="line">        <span class="keyword">val</span> layoutMeasureDurationNs = frameMetricsCopy.getMetric(FrameMetrics.LAYOUT_MEASURE_DURATION)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>通过多次跟踪最后的出的综合平均数据可如下图所示</p>
+<figure class="image" align="center">
+  <img src="https://s2.loli.net/2022/12/12/ZgLRqnE4xAXtleC.jpg" alt="性能对照表">
+  <figcaption>图5：性能对照表</figcaption>
+</figure>
+
+<p>最终的到的数据结果为：使用ConstraintLayout布局比使用传统的布局方式measure&#x2F;layout时间大致缩短了40%</p>
+<blockquote>
+<p>以上数据在 Nexus 5X的设备，Android 8.0及ConstraintLayout 1.0.2版本上监测</p>
+</blockquote>
+<h3 id="使用实践"><a href="#使用实践" class="headerlink" title="使用实践"></a>使用实践</h3><h4 id="相对位置布局-Relative-positioning"><a href="#相对位置布局-Relative-positioning" class="headerlink" title="相对位置布局(Relative positioning)"></a>相对位置布局(Relative positioning)</h4><p>相对位置布局的方式跟RelativeLayout布局类似，根据控件与控件之间的相对位置来固定控件的位置</p>
+<p>控件与控件之间相对位置从方向上来看可以做如下划分</p>
+<ul>
+<li><p>水平方向：left,right,start和end（start和end作用等同于left和right,但是推荐用start和end,因为系统方向配置有时候是RTL-Right To Left,阿拉伯国家的阅读方向是从右至左的，所以start和end会自动转换）</p>
+</li>
+<li><p>垂直方向：top,bottom和text baseline(顶部和底部都好理解，这里baseline需要说明一下,align_baseline用作内容对齐，比方说TextView中的文字内容对齐)</p>
+</li>
+</ul>
+<figure class="image" align="center">
+  <img src="https://s2.loli.net/2022/12/12/odv3KtzErwaPjIZ.jpg">
+  <figcaption>图6：相对位置示例</figcaption>
+</figure>
+
+
+<p>如上图ButtonB相对于ButtonA的右侧</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">Button</span> <span class="attr">android:id</span>=<span class="string">&quot;@+id/buttonA&quot;</span> <span class="attr">...</span> /&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">Button</span> <span class="attr">android:id</span>=<span class="string">&quot;@+id/buttonB&quot;</span> <span class="attr">...</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:layout_constraintLeft_toRightOf</span>=<span class="string">&quot;@+id/buttonA&quot;</span> /&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>layout_constraintLeft_toRightOf这个属性表示将buttonB的左边放置于buttonA的右边</p>
+<figure class="image" align="center">
+  <img src="https://s2.loli.net/2022/12/12/lqLpwRBdc6ogSur.jpg">
+  <figcaption>图7：相对位置参考属性</figcaption>
+</figure>
+
+
+<p>上图列出了控件位置信息，如下列表是配置相对位置的具体xml属性</p>
+<ul>
+<li>layout_constraintLeft_toLeftOf</li>
+<li>layout_constraintLeft_toRightOf</li>
+<li>layout_constraintRight_toLeftOf</li>
+<li>layout_constraintRight_toRightOf</li>
+<li>layout_constraintTop_toTopOf</li>
+<li>layout_constraintTop_toBottomOf</li>
+<li>layout_constraintBottom_toTopOf</li>
+<li>layout_constraintBottom_toBottomOf</li>
+<li>layout_constraintStart_toEndOf</li>
+<li>layout_constraintStart_toStartOf</li>
+<li>layout_constraintEnd_toStartOf</li>
+<li>layout_constraintEnd_toEndOf</li>
+<li>layout_constraintBaseline_toBaselineOf</li>
+</ul>
+<p>以上属性接收的参数除了是其他控件的id外，还可使用<strong>parent</strong>表示相对于父控件，如：</p>
+<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&lt;Button android:<span class="attribute">id</span>=<span class="string">&quot;@+id/buttonB&quot;</span> <span class="built_in">..</span>.</span><br><span class="line">        app:<span class="attribute">layout_constraintLeft_toRightOf</span>=<span class="string">&quot;parent&quot;</span> /&gt;</span><br></pre></td></tr></table></figure>
+
+<h4 id="控件Margin设置-Margins"><a href="#控件Margin设置-Margins" class="headerlink" title="控件Margin设置(Margins)"></a>控件Margin设置(Margins)</h4><p>当控件相对位置设置好了，通常我们需要设置控件与控件的距离，这里就需要设置Margin，margin属性与我们在其他Layout,如RelativeLayout中的margin设置功能是一样的，这里需要注意的是ConstraintLayout中的margin设置只接受0或正数数值或引用dimension中的数值，不接受负数的margin，设置了负数默认都会当成0处理</p>
+<ul>
+<li>android:layout_marginStart</li>
+<li>android:layout_marginEnd</li>
+<li>android:layout_marginLeft</li>
+<li>android:layout_marginTop</li>
+<li>android:layout_marginRight</li>
+<li>android:layout_marginBottom</li>
+</ul>
+<h5 id="控件设置为Gone后相对控件的margin设置"><a href="#控件设置为Gone后相对控件的margin设置" class="headerlink" title="控件设置为Gone后相对控件的margin设置"></a>控件设置为Gone后相对控件的margin设置</h5><p>还是控件A与控件B的例子，控件B在控件A的左边，这时如果设置控件A消失，我们设置控件A的visibility为gone，控件A消失了，这时控件B就左移到了原先控件A的位置，但是控件B的左边距要跟控件A原先的左边距保持一样才是正确的，这时便可以用到如下的goneMargin属性：</p>
+<ul>
+<li>layout_goneMarginStart</li>
+<li>layout_goneMarginEnd</li>
+<li>layout_goneMarginLeft</li>
+<li>layout_goneMarginTop</li>
+<li>layout_goneMarginRight</li>
+<li>layout_goneMarginBottom</li>
+</ul>
+<h4 id="居中设置-Centering-positioning"><a href="#居中设置-Centering-positioning" class="headerlink" title="居中设置(Centering positioning)"></a>居中设置(Centering positioning)</h4><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">android.support.constraint.ConstraintLayout</span> <span class="attr">...</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">Button</span> <span class="attr">android:id</span>=<span class="string">&quot;@+id/button&quot;</span> <span class="attr">...</span></span></span><br><span class="line"><span class="tag">              <span class="attr">app:layout_constraintLeft_toLeftOf</span>=<span class="string">&quot;parent&quot;</span></span></span><br><span class="line"><span class="tag">              <span class="attr">app:layout_constraintRight_toRightOf</span>=<span class="string">&quot;parent/&gt;</span></span></span><br><span class="line"><span class="string"><span class="tag">&lt;/&gt;</span></span></span><br></pre></td></tr></table></figure>
+
+<p>当一个控件同时限制左右位置或上下位置与同一个控件或者parent时，此控件会处在横向空间或者垂直控件中间，居中显示</p>
+<p><strong>Bias</strong></p>
+<p>有时候我们的需求中会遇到控件在中间位置靠左百分之多少的位置或靠上百分之多少的位置，这个时候就可以使用bias属性</p>
+<ul>
+<li>layout_constraintHorizontal_bias 横向位置的偏离率</li>
+<li>layout_constraintVertical_bias 垂直位置的偏离率</li>
+</ul>
+<p>举个例子</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">android.support.constraint.ConstraintLayout</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">Button</span> <span class="attr">android:id</span>=<span class="string">&quot;@+id/button&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:layout_constraintHorizontal_bias</span>=<span class="string">&quot;0.3&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:layout_constraintLeft_toLeftOf</span>=<span class="string">&quot;parent&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:layout_constraintRight_toRightOf</span>=<span class="string">&quot;parent/&gt;</span></span></span><br><span class="line"><span class="string"><span class="tag">&lt;/android.support.constraint.ConstraintLayout&gt;</span></span></span><br></pre></td></tr></table></figure>
+
+<p>效果如下图所示，当控件居中时bias是0.5，设置为0.3，表示控件距离作为30%的距离，使用此种方式可以更好的解决因屏幕尺寸大小不一样带来的适配或者旋转屏幕来带的尺寸改变的问题</p>
+<figure class="image" align="center">
+  <img src="https://s2.loli.net/2022/12/12/jSHJhLkPmuirKI9.jpg">
+  <figcaption>图7：Bia偏离设置</figcaption>
+</figure>
+
+
+
+<h4 id="环形相对位置-Circular-positioning"><a href="#环形相对位置-Circular-positioning" class="headerlink" title="环形相对位置(Circular positioning)"></a>环形相对位置(Circular positioning)</h4><figure class="image" align="center">
+  <img src="https://s2.loli.net/2022/12/12/IH2U9VXRhmMtKoJ.gif">
+  <figcaption>图7：环形需求demo</figcaption>
+</figure>
+
+
+<p>在ConstraintLayout 1.1及以后版本，加入了环形相对位置，通过设置环形相对的角度及相对半径即可</p>
+<ul>
+<li>layout_constraintCircle : 相对一另一个控件的Id</li>
+<li>layout_constraintCircleRadius : 与相对控件圆心的距离</li>
+<li>layout_constraintCircleAngle :与相对控件的角度(参数从0到360)</li>
+</ul>
+<figure class="image" align="center">
+  <img src="https://s2.loli.net/2022/12/12/Cp91gZcQm2tlNEw.jpg">
+  <figcaption>图8：环形相对位置</figcaption>
+</figure>
+
+
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">Button</span> <span class="attr">android:id</span>=<span class="string">&quot;@+id/buttonA&quot;</span> <span class="attr">...</span> /&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">Button</span> <span class="attr">android:id</span>=<span class="string">&quot;@+id/buttonB&quot;</span> <span class="attr">...</span></span></span><br><span class="line"><span class="tag">  <span class="attr">app:layout_constraintCircle</span>=<span class="string">&quot;@+id/buttonA&quot;</span></span></span><br><span class="line"><span class="tag">  <span class="attr">app:layout_constraintCircleRadius</span>=<span class="string">&quot;100dp&quot;</span></span></span><br><span class="line"><span class="tag">  <span class="attr">app:layout_constraintCircleAngle</span>=<span class="string">&quot;45&quot;</span> /&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>效果如下图所示</p>
+<figure class="image" align="center">
+  <img src="https://s2.loli.net/2022/12/12/abuGyeRdp3CN1Sl.jpg">
+  <figcaption>图9：A,B控件环形位置设置</figcaption>
+</figure>
+
+
+<h4 id="控件可见性以及对其他控件的影响-Visibility-behavior"><a href="#控件可见性以及对其他控件的影响-Visibility-behavior" class="headerlink" title="控件可见性以及对其他控件的影响(Visibility behavior)"></a>控件可见性以及对其他控件的影响(Visibility behavior)</h4><p>ConstraintLayout对于控件的visibility设置为View.GONE后有一些特殊的处理需要我们注意</p>
+<p>当我们将控件设置为gone后，控件将不再展示，但是通过控件获取的宽高值跟之前没有变化，有如下两点需要注意：</p>
+<ul>
+<li>当整个view布局完成后，被设置成gone的控件宽高可以看成是0（可以理解成一个透明的点）</li>
+<li>当设置成gone的控件对其他控件或者父布局有margin，这些margin会被清除当成0</li>
+</ul>
+<figure class="image" align="center">
+  <img src="https://s2.loli.net/2022/12/12/GvP6lu2kI7QWEe8.jpg">
+  <figcaption>图10：Visibility Gone</figcaption>
+</figure>
+
+
+<p>如上图所示，控件A gone掉之后A距左的margin也被清除，这样比方说在做一些动画时如，控件A消失，控件B左移到控件A的位置，不应该还留有控件A的左边距距离</p>
+<h4 id="控件尺寸的设置-Dimension-constraints"><a href="#控件尺寸的设置-Dimension-constraints" class="headerlink" title="控件尺寸的设置(Dimension constraints)"></a>控件尺寸的设置(Dimension constraints)</h4><h5 id="ConstraintLayout长宽尺寸限制"><a href="#ConstraintLayout长宽尺寸限制" class="headerlink" title="ConstraintLayout长宽尺寸限制"></a>ConstraintLayout长宽尺寸限制</h5><p>在ConstraintLayout中，我们可以设置其最大最小宽高，当ConstraintLayout的宽高是WRAP_CONTENT时，如下属性便可以起作用</p>
+<ul>
+<li>android:minWidth 设置ConstraintLayout的最小宽度</li>
+<li>android:minHeight 设置ConstraintLayout的最小高度</li>
+<li>android:maxWidth 设置ConstraintLayout的最大宽度</li>
+<li>android:maxHeight 设置ConstraintLayout的最大高度</li>
+</ul>
+<h5 id="控件的长宽尺寸限制"><a href="#控件的长宽尺寸限制" class="headerlink" title="控件的长宽尺寸限制"></a>控件的长宽尺寸限制</h5><p>控件长宽限制通过<strong>android:layout_width</strong>和<strong>android:layout_height</strong>来定义，如要有如下三种形式：</p>
+<ul>
+<li>指定长宽，如<em>100dp</em>或者<em>R.dimen.button_width</em></li>
+<li>使用WRAP_CONTENT,通过控件自己的内容来计算长宽</li>
+<li>使用 <em>0dp</em>等同于<strong>MATCH_CONSTRAINT</strong>撑满父布局</li>
+</ul>
+<figure class="image" align="center">
+  <img src="https://s2.loli.net/2022/12/12/kibXtqSrfTU8wIh.jpg">
+  <figcaption>图11：Margin</figcaption>
+</figure>
+
+<p>前两种方式跟android中其他Layout一样，但是第三种有区别，ConstraintLayout中不建议使用<strong>MATCH_PARENT</strong>,通过使用<strong>0dp</strong>即可</p>
+<p><strong>WRAP_CONTENT属性版本的变动</strong></p>
+<p>在ConstraintLayout 1.1版本之前，如果控件的宽高属性设置为WRAP_CONTENT，ConstraintLayout在计算宽高是不会将控件的margin等限制考虑进去，也就是说控件可能超出屏幕。1.1以及后版本中增加了如下属性用来控制WRAP_CONTENT的控件也将margin的constraint作为布局计算</p>
+<ul>
+<li>app:layout_constrainedWidth&#x3D;”true|false”</li>
+<li>app:layout_constrainedHeight&#x3D;”true|false”</li>
+</ul>
+<p><strong>MATCH_CONSTRAINT属性</strong></p>
+<p>match_constraint这个属性跟其他layout中的match_parent类似，默认是占满所有可用空间，如下属性可用来对控件长宽做一些其他限制</p>
+<ul>
+<li>layout_constraintWidth_min 和 layout_constraintHeight_min : 设置控件的最小宽高</li>
+<li>layout_constraintWidth_max 和 layout_constraintHeight_max : 设置控件的最大宽高</li>
+<li>layout_constraintWidth_percent 和 layout_constraintHeight_percent : 设置控件占据父控件的百分比作为此控件的宽高</li>
+</ul>
+<p>设置宽高的最大最小值，可以设置具体的dp为单位的数值，也可以设置为“wrap”属性，其效果与设置为wrap_content一致</p>
+<p>设置百分比的宽高时有如下限制：</p>
+<ul>
+<li>layout_width或layout_height需设置为0dp(即MATCH_CONSTRAINT)</li>
+<li>如果设置了宽高的default值，那么default值必须也是百分比app:layout_constraintWidth_default&#x3D;”percent”或者app:layout_constraintHeight_default&#x3D;”percent”（此限制在1.1-beta1和1.1-beta2是强制的，在接下来的版本中不是强制的）</li>
+<li>layout_constraintWidth_percent或layout_constraintHeight_percent的范围 0到1之间，包含0，1</li>
+</ul>
+<h5 id="宽高比"><a href="#宽高比" class="headerlink" title="宽高比"></a>宽高比</h5><p>在ConstraintLayout中，我们可以设置控件为固定的宽高比，如下例子所示：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">Button</span> <span class="attr">android:layout_width</span>=<span class="string">&quot;wrap_content&quot;</span></span></span><br><span class="line"><span class="tag">       <span class="attr">android:layout_height</span>=<span class="string">&quot;0dp&quot;</span></span></span><br><span class="line"><span class="tag">       <span class="attr">app:layout_constraintDimensionRatio</span>=<span class="string">&quot;1:1&quot;</span> /&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>在使用固定宽高比时，至少宽高中有一个的尺寸被设置为0dp(match_constraint),上面的例子button的高度总是与宽度一直，宽高比为1：1</p>
+<p>layout_constraintDimensionRatio这个属性可接受一个float的浮点数值，及 width除以height得出的数，也可以使用一个比例表达式“width:height”</p>
+<p>当控件宽高都是match_constraint(0dp)时，可以通过在layout_constraintDimensionRatio属性值中指定宽高来作为调整项，如下例子：“H,16:9”表示宽度固定充满父布局，高度为宽度的9&#x2F;16,同理也可设置为<br>“W,16:9”</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">Button</span> <span class="attr">android:layout_width</span>=<span class="string">&quot;0dp&quot;</span></span></span><br><span class="line"><span class="tag">               <span class="attr">android:layout_height</span>=<span class="string">&quot;0dp&quot;</span></span></span><br><span class="line"><span class="tag">               <span class="attr">app:layout_constraintDimensionRatio</span>=<span class="string">&quot;H,16:9&quot;</span></span></span><br><span class="line"><span class="tag">               <span class="attr">app:layout_constraintBottom_toBottomOf</span>=<span class="string">&quot;parent&quot;</span></span></span><br><span class="line"><span class="tag">               <span class="attr">app:layout_constraintTop_toTopOf</span>=<span class="string">&quot;parent&quot;</span>/&gt;</span></span><br></pre></td></tr></table></figure>
+
+
+<h4 id="链式布局-Chains"><a href="#链式布局-Chains" class="headerlink" title="链式布局(Chains)"></a>链式布局(Chains)</h4><p>链式布局主要用于在垂直或水平方向上一组控件的统一模式处理</p>
+<h5 id="创建链"><a href="#创建链" class="headerlink" title="创建链"></a>创建链</h5><p>当一组控件通过双向链接constrained即表示这一组控件是链式布局，如下图实例所示</p>
+<figure class="image" align="center">
+  <img src="https://s2.loli.net/2022/12/12/9EnPlwFuoR4Ytdm.jpg">
+  <figcaption>图12：链</figcaption>
+</figure>
+
+
+<h5 id="链式头"><a href="#链式头" class="headerlink" title="链式头"></a>链式头</h5><p>链式布局中水平方向最左边的或者垂直方向最上面的那个控件即为链式头，链式头控制着整个<br>链式布局，即在链式头中的链式属性作用于整个链式布局</p>
+<h5 id="链的种类"><a href="#链的种类" class="headerlink" title="链的种类"></a>链的种类</h5><p>链式布局通常用在我们多个控件平分横向或者垂直方向控件，但是控件分布的类型有多种<br>这里主要有5中链式类型，通过在链式头中设置 layout_constraintHorizontal_chainStyle或者layout_constraintVertical_chainStyle属性，具体的种类如下图所示</p>
+<figure class="image" align="center">
+  <img src="https://s2.loli.net/2022/12/12/h5uOxBfUpLS1K9q.jpg">
+  <figcaption>图13：Chain Style</figcaption>
+</figure>
+
+<p><strong>CHAIN_SPREAD</strong><br> 此种类型表示控件在可用空间完全展开，n个控件隔离出n+1个空间，chainStyle在未设置情况下<br> 默认是此种类型</p>
+<p><strong>CHAIN_SPREAD_INSIDE</strong><br> 此种类型与第一种类似，但是链的首部和尾部紧贴空间边缘，未隔离，n个控件隔离出n-1个空间</p>
+<p><strong>Weighted chain</strong><br> 当链式中的空间是match_constraint,此种模式下的chain通过设置控件的layout_constraintHorizontal_weight或者<br> layout_constraintVertical_weight来设置权重，这个跟LinearLayout中控件的weight属性类似</p>
+<p><strong>CHAIN_PACKED</strong><br> 此种模式下，链式布局中的控件紧挨着，默认居中显示,当设置了layout_constraintHorizontal_bias或者<br> 当设置了layout_constraintVertical_bias时，控件就会做指定bias百分不的距离偏移</p>
+<h5 id="链内margin设置"><a href="#链内margin设置" class="headerlink" title="链内margin设置"></a>链内margin设置</h5><p>如果链式布局中的控件设置了margin,那个margin的距离加载原先链式隔离的空间上，举例来说，A，B，C三个Button横向spread链式布局，如果A设置rightMargin为10dp，那么A跟B的间距除了原先距离还要再加上这10dp.<br>Button的margin将与button作为一个整体来计算控件的链式分割的距离</p>
+<h4 id="虚拟辅助对象-Virtual-Helpers-objects"><a href="#虚拟辅助对象-Virtual-Helpers-objects" class="headerlink" title="虚拟辅助对象(Virtual Helpers objects)"></a>虚拟辅助对象(Virtual Helpers objects)</h4><p>辅助对象主要是用来更好的构建布局,在Android Studio的Layout Editor右键单击布局区域便可以唤出选项菜单</p>
+<figure class="image" align="center">
+  <img src="https://s2.loli.net/2022/12/12/haW6AtLolJG9pRk.jpg" height="500">
+  <figcaption>图14：AndroidStudio Layout Editor</figcaption>
+</figure>
+
+
+<h5 id="Guideline"><a href="#Guideline" class="headerlink" title="Guideline"></a>Guideline</h5><p>Guideline类似于ps或者sketch中的辅助标线，从上图可知可以创建横向的或者竖直的辅助线,Guideline有三种标尺模式：距左（距顶），距右（距低），百分比，分别在竖直标线的顶部或横向标线的左边有个原型按钮，通过点击此按钮来进行切换。距左（距顶）模式可以设置标线距离左边指定距离，距右（距低）同理，而百分比则表示标线从左至右的百分比距离，如50%则表示居中。选择哪种模式可以根据自己的喜好。</p>
+<figure class="image" align="center">
+  <img src="https://s2.loli.net/2022/12/12/NoMARXvIZ6W5L2p.jpg">
+  <figcaption>图15：Guideline</figcaption>
+</figure>
+
+<p>如上图示例，分别建立了竖直和水平的guideline并将其置于50%及中间处,button控件的右边和底部通过对guideline做constraint限制</p>
+<h5 id="Barrier"><a href="#Barrier" class="headerlink" title="Barrier"></a>Barrier</h5><p>Barrier中文可译为界线的意思，根据意思可以理解这个barrier对象用来将控件与控件之间<br>做隔离，举一个具体的例子来说明下</p>
+<figure class="image" align="center">
+  <img src="https://s2.loli.net/2022/12/12/ZYAfmhdXFu4i25G.jpg">
+  <figcaption>图16：Barrier样例</figcaption>
+</figure>
+
+<p>如上图所示，我们加入如上图所示布局的UI,布局左边上面我们定义为text1,左边下边的我们定义为textView2,右边的我们定义为text3,textView3的左边依赖于text1的右边，一切看上去都没有问题。但是有一天我们发现text2的内容比较多时，超过了text1的长度，text2会跟text3重叠，产生这个问题的原因在于text3只与text1做了关联，没有与text2做关联，从而导致了内容重叠。</p>
+<p>解决这个问题我们最常见的做法是新建一个orientation为vertical的LinearLayout，将text1与<br>text2放入LinearLayout,然后LinearLayout与text3关联。但这无疑增加了布局的复杂性，ConstraintLayout可以通过barrier来解决此问题。</p>
+<p>通过新建一个vertical barrier,设置barrierDirection为end,barrierDirection表示barrier放置在依赖<br>对象的哪个方向。接下来将text1与text2通过constraint_referenced_ids属性设置为依赖对象，这样barrier就<br>放置在了text1与text2的右边，最后我们只需要将text3的左边依赖barrier就解决了问题</p>
+<h5 id="Group"><a href="#Group" class="headerlink" title="Group"></a>Group</h5><p>Group虚拟对象用于方便处理多个控件的Visibility属性，我们在开发过程中又遇到比方说打开或关闭某个开关，ui中的多个控件消失或显示，通过ConstraintLayout我们只需要将需要这样操作的空间放到同一个Group下，对Group操作即可，Group并不是一个新的View，单纯只是对多个控件对象的引用集合</p>
+<h5 id="Layer"><a href="#Layer" class="headerlink" title="Layer"></a>Layer</h5><p>Layer虚拟对象与Group类似，也是对多个控件集合操作，只是Layer是统一操作控件变化，如放大缩小，旋转，动画等，读者可自行尝试</p>
+<h4 id="优化器-Optimizer"><a href="#优化器-Optimizer" class="headerlink" title="优化器(Optimizer)"></a>优化器(Optimizer)</h4><p>在ConstraintLayout 1.1及后续版本，开发者可通过<strong>app:layout_optimizationLevel</strong>属性对ConstraintLayout进行优化</p>
+<ul>
+<li>none : 不采用任何优化</li>
+<li>standard :如果我们不指定优化，默认就是standard模式，此模式默认做direct和barrier的优化</li>
+<li>direct : 对于固定位置的元素优化，如边界线和Guideline</li>
+<li>barrier : 通过找到布局中使用的barrier,如果可能使用更简单的constraint</li>
+<li>chain : 优化链式布局(experimental)</li>
+<li>dimensions : optimize dimensions measures (experimental), reducing the number of measures of match constraints elements</li>
+</ul>
+<blockquote>
+<p>layout_optimizationLevel可接受多个level值，如:app:layout_optimizationLevel&#x3D;”direct|barrier|chain”</p>
+</blockquote>
+
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>YamLee
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://yamlee.me/2021/12/25/2019-10-11-Android%20ConstraintLayout%E4%BD%BF%E7%94%A8%E5%AE%9E%E8%B7%B5/" title="Android ConstraintLayout使用实践">http://yamlee.me/2021/12/25/2019-10-11-Android ConstraintLayout使用实践/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/zh-CN" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2021/12/25/2015-10-04-AndroidStudio-Develop-Guide/" rel="prev" title="AndroidStudio高效插件">
+      <i class="fa fa-chevron-left"></i> AndroidStudio高效插件
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2021/12/25/2019-02-08-Android%20Themes%E4%B8%8EStyles%E5%AE%9E%E8%B7%B5/" rel="next" title="Android Themes与Styles实践">
+      Android Themes与Styles实践 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#ConstraintLayout%E4%BD%BF%E7%94%A8%E5%AE%9E%E8%B7%B5"><span class="nav-number">1.</span> <span class="nav-text">ConstraintLayout使用实践</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Why-ConstraintLayout"><span class="nav-number">1.1.</span> <span class="nav-text">Why ConstraintLayout?</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%80%A7%E8%83%BD%E4%BC%98%E5%8A%BF"><span class="nav-number">1.1.1.</span> <span class="nav-text">性能优势</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#1-Measure%E8%BF%87%E7%A8%8B"><span class="nav-number">1.1.1.1.</span> <span class="nav-text">1.Measure过程</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#2-Layout%E8%BF%87%E7%A8%8B"><span class="nav-number">1.1.1.2.</span> <span class="nav-text">2. Layout过程</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#3-Draw%E8%BF%87%E7%A8%8B"><span class="nav-number">1.1.1.3.</span> <span class="nav-text">3. Draw过程</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8%E5%AE%9E%E8%B7%B5"><span class="nav-number">1.2.</span> <span class="nav-text">使用实践</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%9B%B8%E5%AF%B9%E4%BD%8D%E7%BD%AE%E5%B8%83%E5%B1%80-Relative-positioning"><span class="nav-number">1.2.1.</span> <span class="nav-text">相对位置布局(Relative positioning)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%8E%A7%E4%BB%B6Margin%E8%AE%BE%E7%BD%AE-Margins"><span class="nav-number">1.2.2.</span> <span class="nav-text">控件Margin设置(Margins)</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%8E%A7%E4%BB%B6%E8%AE%BE%E7%BD%AE%E4%B8%BAGone%E5%90%8E%E7%9B%B8%E5%AF%B9%E6%8E%A7%E4%BB%B6%E7%9A%84margin%E8%AE%BE%E7%BD%AE"><span class="nav-number">1.2.2.1.</span> <span class="nav-text">控件设置为Gone后相对控件的margin设置</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%B1%85%E4%B8%AD%E8%AE%BE%E7%BD%AE-Centering-positioning"><span class="nav-number">1.2.3.</span> <span class="nav-text">居中设置(Centering positioning)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%8E%AF%E5%BD%A2%E7%9B%B8%E5%AF%B9%E4%BD%8D%E7%BD%AE-Circular-positioning"><span class="nav-number">1.2.4.</span> <span class="nav-text">环形相对位置(Circular positioning)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%8E%A7%E4%BB%B6%E5%8F%AF%E8%A7%81%E6%80%A7%E4%BB%A5%E5%8F%8A%E5%AF%B9%E5%85%B6%E4%BB%96%E6%8E%A7%E4%BB%B6%E7%9A%84%E5%BD%B1%E5%93%8D-Visibility-behavior"><span class="nav-number">1.2.5.</span> <span class="nav-text">控件可见性以及对其他控件的影响(Visibility behavior)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%8E%A7%E4%BB%B6%E5%B0%BA%E5%AF%B8%E7%9A%84%E8%AE%BE%E7%BD%AE-Dimension-constraints"><span class="nav-number">1.2.6.</span> <span class="nav-text">控件尺寸的设置(Dimension constraints)</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#ConstraintLayout%E9%95%BF%E5%AE%BD%E5%B0%BA%E5%AF%B8%E9%99%90%E5%88%B6"><span class="nav-number">1.2.6.1.</span> <span class="nav-text">ConstraintLayout长宽尺寸限制</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%8E%A7%E4%BB%B6%E7%9A%84%E9%95%BF%E5%AE%BD%E5%B0%BA%E5%AF%B8%E9%99%90%E5%88%B6"><span class="nav-number">1.2.6.2.</span> <span class="nav-text">控件的长宽尺寸限制</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%AE%BD%E9%AB%98%E6%AF%94"><span class="nav-number">1.2.6.3.</span> <span class="nav-text">宽高比</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%93%BE%E5%BC%8F%E5%B8%83%E5%B1%80-Chains"><span class="nav-number">1.2.7.</span> <span class="nav-text">链式布局(Chains)</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%88%9B%E5%BB%BA%E9%93%BE"><span class="nav-number">1.2.7.1.</span> <span class="nav-text">创建链</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E9%93%BE%E5%BC%8F%E5%A4%B4"><span class="nav-number">1.2.7.2.</span> <span class="nav-text">链式头</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E9%93%BE%E7%9A%84%E7%A7%8D%E7%B1%BB"><span class="nav-number">1.2.7.3.</span> <span class="nav-text">链的种类</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E9%93%BE%E5%86%85margin%E8%AE%BE%E7%BD%AE"><span class="nav-number">1.2.7.4.</span> <span class="nav-text">链内margin设置</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%99%9A%E6%8B%9F%E8%BE%85%E5%8A%A9%E5%AF%B9%E8%B1%A1-Virtual-Helpers-objects"><span class="nav-number">1.2.8.</span> <span class="nav-text">虚拟辅助对象(Virtual Helpers objects)</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#Guideline"><span class="nav-number">1.2.8.1.</span> <span class="nav-text">Guideline</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Barrier"><span class="nav-number">1.2.8.2.</span> <span class="nav-text">Barrier</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Group"><span class="nav-number">1.2.8.3.</span> <span class="nav-text">Group</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Layer"><span class="nav-number">1.2.8.4.</span> <span class="nav-text">Layer</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BC%98%E5%8C%96%E5%99%A8-Optimizer"><span class="nav-number">1.2.9.</span> <span class="nav-text">优化器(Optimizer)</span></a></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="YamLee"
+      src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">YamLee</p>
+  <div class="site-description" itemprop="description">专注移动开发</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">18</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">9</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/yamlee" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;yamlee" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title"><i class="fa fa-link fa-fw"></i>
+      Links
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="http://yamlee.me/" title="http:&#x2F;&#x2F;yamlee.me&#x2F;">Title</a>
+        </li>
+    </ul>
+  </div>
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">YamLee</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

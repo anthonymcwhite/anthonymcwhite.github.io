@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.1.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/avatar.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/avatar.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.ico">
+  <link rel="mask-icon" href="/images/avatar.png" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="https://fonts.loli.net/css?family=Noto Sans SC:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"yamlee.me","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"default"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="在前六个系列中，主要介绍了Gradle常规的使用实践和一些基础属性，这一部分将会更深入的介绍gradle的task和plugin部分，主要包括如下内容：  理解Groovy 自定义Tasks 深入Android plugin 定义自己的plugin">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Android Gradle最佳实践系列7：Gradle Task和自定义插件开发">
+<meta property="og:url" content="http://yamlee.me/2016/04/28/2016-04-28-Android%20Gradle%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5%E7%B3%BB%E5%88%977/index.html">
+<meta property="og:site_name" content="Lee Blog">
+<meta property="og:description" content="在前六个系列中，主要介绍了Gradle常规的使用实践和一些基础属性，这一部分将会更深入的介绍gradle的task和plugin部分，主要包括如下内容：  理解Groovy 自定义Tasks 深入Android plugin 定义自己的plugin">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://i.loli.net/2021/08/22/daRznuwrFPDj4Vb.jpg">
+<meta property="article:published_time" content="2016-04-27T16:00:00.000Z">
+<meta property="article:modified_time" content="2022-04-08T04:06:59.655Z">
+<meta property="article:author" content="YamLee">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://i.loli.net/2021/08/22/daRznuwrFPDj4Vb.jpg">
+
+<link rel="canonical" href="http://yamlee.me/2016/04/28/2016-04-28-Android%20Gradle%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5%E7%B3%BB%E5%88%977/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Android Gradle最佳实践系列7：Gradle Task和自定义插件开发 | Lee Blog</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-122582412-1"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'UA-122582412-1');
+      }
+    </script>
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Lee Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">专注移动开发</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yamlee.me/2016/04/28/2016-04-28-Android%20Gradle%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5%E7%B3%BB%E5%88%977/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="YamLee">
+      <meta itemprop="description" content="专注移动开发">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Lee Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Android Gradle最佳实践系列7：Gradle Task和自定义插件开发
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2016-04-28 00:00:00" itemprop="dateCreated datePublished" datetime="2016-04-28T00:00:00+08:00">2016-04-28</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2022-04-08 12:06:59" itemprop="dateModified" datetime="2022-04-08T12:06:59+08:00">2022-04-08</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Android-Gradle%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5%E7%B3%BB%E5%88%97/" itemprop="url" rel="index"><span itemprop="name">Android Gradle最佳实践系列</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>在前六个系列中，主要介绍了Gradle常规的使用实践和一些基础属性，这一部分将会更深入的介绍gradle的task和plugin部分，主要包括如下内容：</p>
+<ol>
+<li>理解Groovy</li>
+<li>自定义Tasks</li>
+<li>深入Android plugin</li>
+<li>定义自己的plugin</li>
+</ol>
+<span id="more"></span>
+
+<h2 id="理解Groovy"><a href="#理解Groovy" class="headerlink" title="理解Groovy"></a>理解Groovy</h2><p> 大部分Android的开发者都是使用Java作为开发语言，groovy跟java相较而言并无多大区别，反而更易读。接下来这部分主要对groovy做一个简要的使用介绍</p>
+<blockquote>
+<p>更多关于Groovy的使用，可以访问<a target="_blank" rel="noopener" href="http://grovy-lang.org/">Goovy官网</a>查看更多文档</p>
+</blockquote>
+<h3 id="关于Groovy"><a href="#关于Groovy" class="headerlink" title="关于Groovy"></a>关于Groovy</h3><p>Goovy是继承自Java，运行在JVM上的一门脚本语言，它的宗旨是更简单，更通俗易通。接下来我们通过对比Java和Groovy语言实现上的异同来了解Groovy是如何工作的</p>
+<p>在Java中，打印一个字符串在屏幕上如下代码实现</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">System.out.println(<span class="string">&quot;Hello, world!&quot;</span>);</span><br></pre></td></tr></table></figure>
+
+<p>在Groovy中，如下</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">println</span> <span class="string">&#x27;Hello, world!&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<p>可以看到groovy的实现有如下不同</p>
+<ul>
+<li>没有<strong>System.out</strong>的命名空间</li>
+<li>没有小括弧包裹方法参数</li>
+<li>没有分号在代码行末尾</li>
+</ul>
+<p>上面的例子中groovy的字符串参数使用单引号引用，在groovy中单引号和双引号都可以使用，但是某些地方有些微的不同，双引号的字符可以使用占位符，如下为使用字符串的一些例子</p>
+<figure class="highlight elixir"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">name</span></span> = <span class="string">&#x27;Andy&#x27;</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">greeting</span></span> = <span class="string">&quot;hello, $name!&quot;</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">name_size</span></span> = <span class="string">&quot;Your name is $&#123;name.size&#125; characters long.&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p>grreting值为 <strong>“hello,Andy”</strong> ,name_size的值为 <strong>“Your name is 4 characters long.”</strong></p>
+<p>字符的变量引用还支持动态的方法运行</p>
+<figure class="highlight oxygene"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">def <span class="keyword">method</span> = &#x27;<span class="title function_">toString</span>&#x27;</span><br><span class="line"><span class="title function_">new</span> <span class="title function_">Date</span><span class="params">()</span>.&quot;$<span class="title function_">method</span>&quot;<span class="params">()</span></span><br></pre></td></tr></table></figure>
+
+<p>上面的这种写法在Java中可能觉得很奇怪，但是在像Groovy这种动态语言，这种写法很常见</p>
+<h3 id="Groovy中的类和成员变量"><a href="#Groovy中的类和成员变量" class="headerlink" title="Groovy中的类和成员变量"></a>Groovy中的类和成员变量</h3><p>Groovy中新建类与Java类似，如下为一个简单的Groovy类包含一个成员变量和方法</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">MyGroovyClass</span> &#123;</span><br><span class="line">       <span class="title class_">String</span> greeting</span><br><span class="line">       <span class="title class_">String</span> <span class="title function_">getGreeting</span>(<span class="params"></span>) &#123;</span><br><span class="line">           <span class="keyword">return</span> <span class="string">&#x27;Hello!&#x27;</span></span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>可以看到上面的类，方法和成员变量都没有像 <strong>public或者private</strong> 这样的限制，不像Java中默认的访问限制，Groovy中的class和method默认是public，成员变量是private，使用 <strong>MyGroovyClass</strong> 类，如下所示：</p>
+<figure class="highlight smali"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">def<span class="built_in"> instance </span>=<span class="built_in"> new </span>MyGroovyClass()</span><br><span class="line">instance.setGreeting &#x27;Hello, Groovy!&#x27;</span><br><span class="line">instance.getGreeting()</span><br></pre></td></tr></table></figure>
+
+<p>通过使用关键词 <em><strong>def</strong></em> 创建变量，如上创建新的MyGroovyClass对象后，就可以通过instance访问getGreeting()方法，Groovy默认会给成员变量创建get和set方法，如</p>
+<figure class="highlight arduino"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">println instance.<span class="built_in">getGreeting</span>()</span><br><span class="line">println instance.greeting</span><br></pre></td></tr></table></figure>
+
+<p>上面两行代码调用其实是一样的instance.greeting实际上也是调用的instance.getGreeting（）方法</p>
+<h3 id="方法"><a href="#方法" class="headerlink" title="方法"></a>方法</h3><p>方法的定义groovy与java有两点不同</p>
+<ul>
+<li>groovy不强制要求定义方法的返回类型</li>
+<li>groovy总是会在方法结束加上return语句</li>
+</ul>
+<p>详细可参考如下对比</p>
+<p><strong>Java代码如下</strong></p>
+<figure class="highlight dart"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">public <span class="built_in">int</span> square(<span class="built_in">int</span> <span class="built_in">num</span>) &#123;</span><br><span class="line">       <span class="keyword">return</span> <span class="built_in">num</span> * <span class="built_in">num</span>;</span><br><span class="line">&#125;</span><br><span class="line">square(<span class="number">2</span>);</span><br></pre></td></tr></table></figure>
+
+<p><strong>Groovy代码如下</strong></p>
+<figure class="highlight dart"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">def square(def <span class="built_in">num</span>) &#123;</span><br><span class="line">       <span class="built_in">num</span> * <span class="built_in">num</span></span><br><span class="line">&#125;</span><br><span class="line">square <span class="number">4</span></span><br></pre></td></tr></table></figure>
+
+<p>通过两段代码比较，可以看到groovy代码没有int的方法返回值限制，也没有return语句（但是在实际中，为了代码的易读性，应该加上return语句），在调用方法的时候参数没有圆括号包裹。</p>
+<p>还有一种更简洁的方法声明，可参考如下代码</p>
+<figure class="highlight dart"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">def square = &#123; <span class="built_in">num</span> -&gt;</span><br><span class="line">       <span class="built_in">num</span> * <span class="built_in">num</span></span><br><span class="line">&#125;</span><br><span class="line">square <span class="number">8</span></span><br></pre></td></tr></table></figure>
+<p>这种方式不是标准的方法定义，而是闭包的一种实现，在Java中没有闭包的概念，但是在Groovy中闭包占据着重要的地位。</p>
+<h3 id="闭包"><a href="#闭包" class="headerlink" title="闭包"></a>闭包</h3><p>闭包是一个能够接收参数也能返回结果匿名的方法块。它能被赋值到一个变量，也能当做一个参数传递。<br>闭包的定义可以如上一个代码块演示，也可以更简洁一点</p>
+<figure class="highlight applescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Closure square = &#123;</span><br><span class="line">       <span class="keyword">it</span> * <span class="keyword">it</span></span><br><span class="line">&#125;</span><br><span class="line">square <span class="number">16</span></span><br></pre></td></tr></table></figure>
+
+<p>在声明的时候可以使用 <strong>def</strong> 关键字，使用 <strong>Closure</strong> 可以让代码更清晰，在闭包中使用的参数，如果不声明，groovy默认使用 <strong>it</strong> 代替，但是只能在闭包只有一个参数的时候使用，如果使用it，但是调用的时候没有给闭包传入参数，那么it则为null</p>
+<p>在Gradle中，大部分代码的实现几乎都是以闭包的方式实现的，像 <strong>android{}</strong> ， <strong>dependencies{}</strong> 块其实都是闭包的实现</p>
+<h3 id="集合"><a href="#集合" class="headerlink" title="集合"></a>集合</h3><p>在Gradle中使用Groovy的集合主要有两种：List和Map</p>
+<p>创建List如下所示</p>
+<figure class="highlight accesslog"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">List list = <span class="string">[1, 2, 3, 4, 5]</span></span><br></pre></td></tr></table></figure>
+
+<p>遍历list集合也很简单</p>
+<figure class="highlight golo"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">list</span>.<span class="keyword">each</span>()&#123;element -&gt;</span><br><span class="line">	<span class="keyword">println</span> element</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>each</strong> 方法可以迭代list中的每一个数据，通过it参数还可以让上面的方法更精简</p>
+<figure class="highlight golo"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"> <span class="keyword">list</span>.<span class="keyword">each</span>() &#123;</span><br><span class="line">       <span class="keyword">println</span> it</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>Map类型在Gradle的配置中使用的较多，定义map如下所示</p>
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="attribute">Map</span> pizzaPrices =<span class="meta"> [margherita:10, pepperoni:12]</span></span><br></pre></td></tr></table></figure>
+
+<p>获取map中的值可以通过get方法或者方括号引用</p>
+<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">pizzaPrices.<span class="built_in">get</span>(<span class="string">&#x27;pepperoni&#x27;</span>)</span><br><span class="line">pizzaPrices[<span class="string">&#x27;pepperoni&#x27;</span>]</span><br></pre></td></tr></table></figure>
+
+<p>map也支持一种更简洁的方法来取值，如下所示</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pizzaPrices.pepperoni</span><br></pre></td></tr></table></figure>
+
+<h3 id="Groovy在Gradle中的使用"><a href="#Groovy在Gradle中的使用" class="headerlink" title="Groovy在Gradle中的使用"></a>Groovy在Gradle中的使用</h3><p>通过连接groovy的一些基础概念，可以让我们更好的理解Gradle中配置代码的含义，如</p>
+<figure class="highlight nginx"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="attribute">apply</span> plugin: <span class="string">&#x27;com.android.application&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<p>这行代码的意义，在不简写的情况下其实是这样的</p>
+<figure class="highlight stylus"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">project<span class="selector-class">.apply</span>(<span class="selector-attr">[plugin: <span class="string">&#x27;com.android.application&#x27;</span>]</span>)</span><br></pre></td></tr></table></figure>
+
+<p>apply是project类的一个方法，参数是一个map参数，map中只用一个数据，key是“plugin”，value是“com.android.application”</p>
+<p>还可以看到依赖的配置</p>
+<figure class="highlight gradle"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">dependencies</span> &#123;</span><br><span class="line">       <span class="keyword">compile</span> <span class="string">&#x27;com.google.code.gson:gson:2.3&#x27;</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>从上代码可知，这个代码块是一个闭包，在project的dependencies方法中，不简写的代码如下所示</p>
+<figure class="highlight gradle"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">project</span>.<span class="keyword">dependencies</span>(&#123;</span><br><span class="line">       add(<span class="string">&#x27;compile&#x27;</span>, <span class="string">&#x27;com.google.code.gson:gson:2.3&#x27;</span>, &#123;</span><br><span class="line">           <span class="comment">// Configuration statements</span></span><br><span class="line">       &#125;)</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
+
+<p>从上代码可知dependencies传进来的闭包交给 <strong>DependencyHandler</strong> 类的add方法中，add方法接受一个配置名称（“compile”）和依赖的路径“com.google.code.gson:gson:2.3”</p>
+<blockquote>
+<p>更多关于Gradle配置介绍，可参考<a target="_blank" rel="noopener" href="https://docs.gradle.org/current/javadoc/org/gradle/api/Project.html">Gradle Project介绍</a></p>
+</blockquote>
+<h2 id="深入Task"><a href="#深入Task" class="headerlink" title="深入Task"></a>深入Task</h2><p>自定义任务可以提高日常的开发效率，如自定义重命名apk名称的任务，处理版本号等，自定义任务可以在构建过程中的任何一步运行，非常强大</p>
+<h3 id="定义任务"><a href="#定义任务" class="headerlink" title="定义任务"></a>定义任务</h3><p><strong>Tasks</strong> 属于Project类，每一个task都实现 <strong>Task</strong> 接口.定义任务最简单的方式运行task方法，任务的名称作为参数</p>
+<figure class="highlight gradle"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">task</span> hello&#123;</span><br><span class="line">	<span class="keyword">println</span> <span class="string">&#x27;hello world&#x27;</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>上面代码创建的hello任务,我们运行它会得到这样的输出</p>
+<figure class="highlight elixir"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">$ </span>./gradlew hello</span><br><span class="line"><span class="title class_">Hello</span>, world!</span><br><span class="line"><span class="symbol">:hello</span></span><br></pre></td></tr></table></figure>
+
+<p>初看可能会认为任务运行成功，但实际上“Hello ,world!”的输出是在任务运行之前。这个问题主要是因为gradel的task生命周期为 <strong>初始化 -&gt; 运行配置 -&gt; 运行任务</strong> 。task也对应三种语法：初始化语法，配置语法，任务指令语法；上面的任务其实是配置语法，即使我们运行其他的任务，“Hello,world!”也会输出</p>
+<p>正确任务创建代码应该如下所示</p>
+<figure class="highlight gradle"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"> <span class="keyword">task</span> hello &lt;&lt; &#123;</span><br><span class="line">     <span class="keyword">println</span> <span class="string">&#x27;Hello, world!&#x27;</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>上面的代码唯一的不同多了一个“&lt;&lt;”符号，这个符号表示这个任务执行的是运行任务语法而不是配置语法，为了比较两者的区别，可以参考如下代码</p>
+<figure class="highlight gradle"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">task</span> hello &lt;&lt; &#123;</span><br><span class="line">  <span class="keyword">println</span> <span class="string">&#x27;Execution&#x27;</span></span><br><span class="line">&#125;</span><br><span class="line">hello &#123;</span><br><span class="line">  <span class="keyword">println</span> <span class="string">&#x27;Configuration&#x27;</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>输出结果为</p>
+<figure class="highlight elixir"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">$ </span>./gradlew hello</span><br><span class="line"><span class="title class_">Configuration</span></span><br><span class="line"><span class="symbol">:hello</span></span><br><span class="line"><span class="title class_">Execution</span></span><br></pre></td></tr></table></figure>
+
+<p>因为Groovy有很多简写方式，在Gradlle中有几种定义task的方式</p>
+<figure class="highlight stylus"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="title">task</span><span class="params">(hello)</span></span> &lt;&lt; &#123;</span><br><span class="line">     println <span class="string">&#x27;Hello, world!&#x27;</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="title">task</span><span class="params">(<span class="string">&#x27;hello&#x27;</span>)</span></span> &lt;&lt; &#123;</span><br><span class="line">     println <span class="string">&#x27;Hello, world!&#x27;</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">tasks<span class="selector-class">.create</span>(name: <span class="string">&#x27;hello&#x27;</span>) &lt;&lt; &#123;</span><br><span class="line">     println <span class="string">&#x27;Hello, world!&#x27;</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>上面的代码第一种和第二种方式是一样的，我们可以加单引号也可以不加，圆括弧也是可选项，上面task的定义其实就是task方法接收两个参数，一个string的任务名参数，和一个闭包， <strong>task()</strong> 是Gradle  <strong>Project</strong> 类中的方法</p>
+<p>最后一个种实现不是通过task方法，而是通过tasks（TaskContainer的实例）对象的create方法，create方法接收一个map和闭包作为参数</p>
+<h3 id="剖析Task"><a href="#剖析Task" class="headerlink" title="剖析Task"></a>剖析Task</h3><p>Task接口是所有任务的基础接口，包含了一些通用的属性和方法，DefaultTask实现了这个接口，我们创建的的任务都继承于DefaultTask类</p>
+<blockquote>
+<p>准确的来讲，DefaultTask不是真正的Task接口的实现类，Gradle内部有一个AbstractTask类实现了Task接口，但是AbstractTask是内部实现，我们不能继承重写，而DefaultTask继承自AbstractTask所以我们通过继承DefaultTask来创建任务</p>
+</blockquote>
+<p>每一个Task包含了Action对象的集合，当一个任务执行时，所有这些action按顺序执行。给Task添加action，可以通过 <strong>doFirst()</strong> 和 <strong>doLast()</strong> 两个方法实现，这两个方法都接受一个闭包作为参数，然后传入Action对象中调用</p>
+<p>在创建Task时，至少要实现doFirst和doLast中其中的一个，在先前我们的写法中，左位移符号（&lt;&lt;）其实是doFisrt方法的简写，如下为代码示例</p>
+<figure class="highlight gradle"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">task</span> hello &#123;</span><br><span class="line">     <span class="keyword">println</span> <span class="string">&#x27;Configuration&#x27;</span></span><br><span class="line">     <span class="keyword">doLast</span> &#123;</span><br><span class="line">       <span class="keyword">println</span> <span class="string">&#x27;Goodbye&#x27;</span></span><br><span class="line">	   &#125;</span><br><span class="line">     <span class="keyword">doFirst</span> &#123;</span><br><span class="line">       <span class="keyword">println</span> <span class="string">&#x27;Hello&#x27;</span></span><br><span class="line">	   &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>输出为：</strong></p>
+<figure class="highlight elixir"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">$ </span>gradlew hello</span><br><span class="line"><span class="title class_">Configuration</span></span><br><span class="line"><span class="symbol">:hello</span></span><br><span class="line"><span class="title class_">Hello</span></span><br><span class="line"><span class="title class_">Goodbye</span></span><br></pre></td></tr></table></figure>
+
+<p>可以看到doFirst总是在任务的开始执行，doLast方法在任务的结尾执行，这意味着在使用这两个方法的时候要注意顺序，尤其是在顺序很重要的逻辑上。</p>
+<p>如果task执行需要按顺序，我们可以使用 <strong>mustRunAfter()</strong> 方法，这个方法表示两个方法的执行的先后顺序关系，一个方法必须在另一个方法执行之后才能执行</p>
+<figure class="highlight gradle"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">task</span> task1 &lt;&lt; &#123;</span><br><span class="line">    <span class="keyword">println</span> <span class="string">&#x27;task1&#x27;</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">task</span> task2 &lt;&lt; &#123;</span><br><span class="line">    <span class="keyword">println</span> <span class="string">&#x27;task2&#x27;</span></span><br><span class="line">&#125;</span><br><span class="line">task2.mustRunAfter task1</span><br></pre></td></tr></table></figure>
+
+<p>同时运行task1和task2会得到，不管命令中使用什么顺序，task2都在task1之后执行</p>
+<figure class="highlight elixir"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">$ </span>./gradlew task2 task1</span><br><span class="line"><span class="symbol">:task1</span></span><br><span class="line">task1</span><br><span class="line"><span class="symbol">:task2</span></span><br><span class="line">task2</span><br></pre></td></tr></table></figure>
+
+<p><strong>mustRunAfter()</strong> 方法没有添加依赖关系，也就是说执行只task2，task1不会执行，如果想使任务依赖另一个任务，使用 <strong>dependsOn()</strong> 方法</p>
+<figure class="highlight gradle"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">task</span> task1 &lt;&lt; &#123;</span><br><span class="line">    <span class="keyword">println</span> <span class="string">&#x27;task1&#x27;</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">task</span> task2 &lt;&lt; &#123;</span><br><span class="line">    <span class="keyword">println</span> <span class="string">&#x27;task2&#x27;</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">task2.dependsOn task1</span><br></pre></td></tr></table></figure>
+<p>输出为：</p>
+<figure class="highlight elixir"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">$ </span>gradlew task2</span><br><span class="line"><span class="symbol">:task1</span></span><br><span class="line">task1</span><br><span class="line"><span class="symbol">:task2</span></span><br><span class="line">task2</span><br></pre></td></tr></table></figure>
+
+<p>使用mustRunAfter方法，task1始终在task2之前执行，但是需要task1和task2都运行。使用dependsOn方法，即便只运行task2，因为task2依赖于task1，task1也会先执行后再执行task2。</p>
+<h3 id="使用Task简化Android打包流程"><a href="#使用Task简化Android打包流程" class="headerlink" title="使用Task简化Android打包流程"></a>使用Task简化Android打包流程</h3><p>在Android中，当功能开发完毕，把apk发布到Android市场（Google Play等应用市场），需要对应用apk包进行签名，签名的配置如下:</p>
+<figure class="highlight fsharp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">android</span> &#123;</span><br><span class="line">    <span class="keyword">signingConfigs</span> &#123;</span><br><span class="line">		<span class="keyword">release</span> &#123;</span><br><span class="line">			storeFile file(<span class="string">&quot;release.keystore&quot;</span>)</span><br><span class="line">            storePassword <span class="string">&quot;password&quot;</span></span><br><span class="line">            keyAlias <span class="string">&quot;ReleaseKey&quot;</span></span><br><span class="line">            keyPassword <span class="string">&quot;password&quot;</span></span><br><span class="line">		&#125;</span><br><span class="line">	 &#125;</span><br><span class="line">	 </span><br><span class="line">    <span class="keyword">buildTypes</span> &#123;</span><br><span class="line">        <span class="keyword">release</span> &#123;</span><br><span class="line">            signingConfig signingConfigs.release</span><br><span class="line">        &#125;</span><br><span class="line">	 &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>配置如上其实是很不安全的，一些安全信息如密码和key都写在了代码里，如果是上传到Git中的话，很轻易别人就拿到了这些信息。这里，可以通过自定义一个task每次打包之前询问密码，或者如果觉得这样比较繁琐，可以写在一个不被版本控制的文件中，如在项目根目录创建一个 <strong>private.properties</strong> 文件，然后在 <strong>.gitignore</strong> 文件中忽略它.</p>
+<p><strong>private.properties</strong> 文件中内容可以这么写</p>
+<figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">release.password</span> = thepassword</span><br></pre></td></tr></table></figure>
+
+<p>我们现在定义一个 <strong>getReleasePassword</strong> 的任务</p>
+<figure class="highlight pgsql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">task getReleasePassword &lt;&lt; &#123;</span><br><span class="line">       def <span class="keyword">password</span> = <span class="string">&#x27;&#x27;</span></span><br><span class="line">       <span class="keyword">if</span> (rootProject.file(<span class="string">&#x27;private.properties&#x27;</span>).<span class="keyword">exists</span>()) &#123;</span><br><span class="line">           Properties properties = <span class="built_in">new</span> Properties();</span><br><span class="line">           properties.<span class="keyword">load</span>( rootProject.file</span><br><span class="line">             (<span class="string">&#x27;private.properties&#x27;</span>).newDataInputStream())</span><br><span class="line">           <span class="keyword">password</span> = properties.getProperty(<span class="string">&#x27;release.password&#x27;</span>)</span><br><span class="line">		&#125;<span class="keyword">else</span>&#123;</span><br><span class="line">			<span class="keyword">if</span> (!<span class="keyword">password</span>?.trim()) &#123;</span><br><span class="line">           		<span class="keyword">password</span> = <span class="built_in">new</span> String(<span class="keyword">System</span>.console().readPassword</span><br><span class="line">             (&quot;\nWhat&#x27;s the secret password? &quot;))</span><br><span class="line">       		&#125;</span><br><span class="line">		&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这个方法的主要作用就是判断当前项目根目录中是否有 <strong>private.properties</strong> 文件存在，如果存在就load这个文件，找到key为 <strong>releas.password</strong> 的值;为了确保没有properties文件的用户也能运行，所以当找到不到properties文件时就在控制台询问用户输入.</p>
+<figure class="highlight pgsql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (!<span class="keyword">password</span>?.trim()) &#123;</span><br><span class="line">    <span class="keyword">password</span> = <span class="built_in">new</span> String(<span class="keyword">System</span>.console().readPassword</span><br><span class="line">             (&quot;\nWhat&#x27;s the secret password? &quot;))</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>关于上面部分的代码，首先是判断password是否为空， <strong>password?.trim()</strong> ,问号的作用是当password不为null时才调用trim方法，在groovy的if语句中字符的null或者空串都是false，所以不用单独判断</p>
+<p><strong>System.console().readPassword()</strong> 方法是groovy提供用来读取在控制台用户密码输入的方法，它返回的是一个字符数组，所以需要new String()去构造字符串</p>
+<p>我们读取到密码后，就可以在gradle配置中对签名信息进行复制</p>
+<blockquote>
+<p>这里假定keyPassword和storePassword是一致的</p>
+</blockquote>
+<figure class="highlight stylus"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">android<span class="selector-class">.signingConfigs</span><span class="selector-class">.release</span><span class="selector-class">.storePassword</span> = password</span><br><span class="line">android<span class="selector-class">.signingConfigs</span><span class="selector-class">.release</span><span class="selector-class">.keyPassword</span> = password</span><br></pre></td></tr></table></figure>
+
+<p>在Gradle打包过程中，只有在发布release包的时候才会做正式签名，所以这个任务需要依赖release任务，在 <strong>build.gradle</strong> 文件中添加如下代码：</p>
+<figure class="highlight stylus"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"> tasks<span class="selector-class">.whenTaskAdded</span> &#123; theTask -&gt;</span><br><span class="line">       <span class="keyword">if</span> (theTask<span class="selector-class">.name</span><span class="selector-class">.equals</span>(<span class="string">&quot;packageRelease&quot;</span>)) &#123;</span><br><span class="line">           theTask<span class="selector-class">.dependsOn</span> <span class="string">&quot;getReleasePassword&quot;</span></span><br><span class="line">       &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>上面代码的主要意图是在Android的打包流程中在最后打apk时是有一个名为 <strong>packageRelease</strong> 任务实现，这个任务就是给apk加入签名信息，在执行这个任务之前必须要获取keystore的密码，所以这个任务的执行必须要依赖于先前自定义的 <strong>getReleasePassword</strong> 任务，这里不能直接调用packageRelease.dependsOn()去设置依赖，因为Android在打包过程中具体的打包任务其实是根据build variants动态生成的，所以在gradle构建build variant之前是没有packageRelease这个任务的，只有在每次build开始时去构建build variant才会有个packageRelease任务</p>
+<p>执行 <strong>.&#x2F;gradlew assembleRelease</strong> 命令会得到如下输出</p>
+<p><img src="https://i.loli.net/2021/08/22/daRznuwrFPDj4Vb.jpg"></p>
+<p>从上面的截图可知，程序打包是没有找到private.properties文件，所以加了一些友好性的提示，去如何创建private.properties文件，然后再提示用户在控制台输入密码，从而完成打包</p>
+<p>这个task的例子简单的介绍了如何在Android build流程中完成自定义任务，接下来的部分将详细介绍Android Gradle Plugin。</p>
+<h2 id="深入Android-Gradle-Plugin"><a href="#深入Android-Gradle-Plugin" class="headerlink" title="深入Android Gradle Plugin"></a>深入Android Gradle Plugin</h2><p>在整个Android的开发过程中，大部分我们需要自定义的task都会跟Android插件（通过 <strong>apply plugin: ‘com.android.application’</strong> 引入android插件）关联使用</p>
+<p>使用Android Pugin中的构建流程需要合理使用build variants，使用起来非常简单，如下所示</p>
+<figure class="highlight stylus"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">android<span class="selector-class">.applicationVariants</span><span class="selector-class">.all</span> &#123; variant -&gt;</span><br><span class="line">     <span class="comment">// Do something</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>applicationVariants</strong> 是所有variants的集合，通过迭代出每一个variant就可以获得对特定variant的应用，然后获得variant相应的属性，例如名称，描述等等；如果项目是一个Android Libraray那么applicationVariants应该改为librayVariants</p>
+<blockquote>
+<p>注意到上部分代码在迭代集合内容时采用的是all()方法而不是原先介绍的each()方法，这是因为each只有在build variants创建之前触发，而all方法只要有新加入的variants就会被触发</p>
+</blockquote>
+<p>这个技巧能够用来动态改变apk的名称，例如给apk名称加上版本号等，接下来的部分将详细介绍如何动态修改apk名称</p>
+<h3 id="自动重命名APK文件"><a href="#自动重命名APK文件" class="headerlink" title="自动重命名APK文件"></a>自动重命名APK文件</h3><p>在Android的打包流程中，最常见的需求就是通过给apk的名称加上版本号、渠道号重命名默认的Apk文件名称，具体实现可参考如下代码</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">android.applicationVariants.all &#123; variant -&gt;</span><br><span class="line">    variant.outputs.all &#123; output -&gt;</span><br><span class="line">        def builtType = variant.buildType.name</span><br><span class="line">        def versionName = variant.versionName</span><br><span class="line">        def versionCode = variant.versionCode</span><br><span class="line">        def flavor = variant.flavorName</span><br><span class="line">        outputFileName = <span class="string">&quot;app-$&#123;flavor&#125;-$&#123;builtType&#125;-$&#123;versionName&#125;-$&#123;versionCode&#125;.apk&quot;</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>从上面的代码片段可知，每一个build variant有一个outputs集合，Android App的outputs就是一个APK文件，output对象有一个属性叫outputFileName，通过修改outputFileName就可以修改最后apk的文件名。</p>
+<p>结合Android插件hook的功能，我们还可以创建很多自动化的任务。 接下来，我们将学习如何为应用程序的每个build variant创建一个任务。</p>
+<h3 id="动态创建新Task"><a href="#动态创建新Task" class="headerlink" title="动态创建新Task"></a>动态创建新Task</h3><p>由于Gradle的工作原理和任务构建方式便利性，我们可以基于Android构建版本，在配置阶段轻松创建自己的任务。为了演示这个强大的功能，我们将学习到如何创建一个install任务，不仅仅是安装apk，而且安装之后再运行应用程序。 <strong>install</strong> 任务是Android插件的一部分，但是如果我们在命令行界面运行 <strong>gradlew installDebug</strong> 命令来安装应用程序，在安装完成后仍然需要手动启动应用。这一节将介绍如何创建install任务并自动打开应用首页。</p>
+<p>首先来查看之前使用的 <strong>applicationVariants</strong> 属性：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">android.applicationVariants.all &#123; variant -&gt;</span><br><span class="line">    <span class="keyword">if</span> (variant.install) &#123;</span><br><span class="line">       tasks.<span class="built_in">create</span>(name: <span class="string">&quot;run$&#123;variant.name.capitalize()&#125;&quot;</span>,</span><br><span class="line">         dependsOn: variant.install) &#123;</span><br><span class="line">           description <span class="string">&quot;Installs the $&#123;variant.description&#125; and runs the main launcher activity.&quot;</span></span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>对于每个build variant，我们需要检查它是否具有有效的install任务。因为正在创建的运行应用任务将依赖于install任务。一旦验证了安装任务存在，就会创建一个根据variant名称命名的新任务。这里需要使新任务依赖于variant的install任务，依赖设置的目的是为了在运行run任务之前先触发install任务。在tasks.create()方法中传递进来了一个闭包，闭包里面通过添加任务描述，当执行 <strong>gradlew tasks</strong> 时任务列表及其描述就会显示出来。</p>
+<p>除了添加任务描述外，我们还需要添加实际的任务操作。在此示例中，需要启动应用程序。可以使用Android调试工具（ADB）在连接的设备或模拟器上启动应用：</p>
+<figure class="highlight vim"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ adb <span class="keyword">shell</span> <span class="keyword">am</span> start -n <span class="keyword">com</span>.package.name/<span class="keyword">com</span>.package.name.Activity</span><br></pre></td></tr></table></figure>
+
+<p>Gradle有一个名为 <strong>exec()</strong> 的方法，可以执行命令行进程。为了使 <strong>exec()</strong> 工作，我们需要提供一个存在于PATH环境变量中的可执行文件，同时还需要使用 <strong>args</strong> 属性传递所有shell执行的参数，args接受一个字符串列表作为参数。 如下所示：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">doFirst &#123;</span><br><span class="line">       <span class="built_in">exec</span> &#123;</span><br><span class="line">           executable = <span class="string">&#x27;adb&#x27;</span></span><br><span class="line">           args = [<span class="string">&#x27;shell&#x27;</span>, <span class="string">&#x27;am&#x27;</span>, <span class="string">&#x27;start&#x27;</span>, <span class="string">&#x27;-n&#x27;</span>,<span class="string">&quot;<span class="variable">$&#123;variant.applicationId&#125;</span>/.MainActivity&quot;</span>]</span><br><span class="line">       &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>要获取完整应用包名，可以使用varaint的applicationId属性，如果不同的构建变体application id后缀不一致的话，这个属性也会包含后缀，这样就会产生一个问题，如下例子所示：</p>
+<figure class="highlight fsharp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">android</span> &#123;</span><br><span class="line">    <span class="keyword">defaultConfig</span> &#123;</span><br><span class="line">           applicationId <span class="symbol">&#x27;com</span>.gradleforandroid&#x27;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">buildTypes</span> &#123;</span><br><span class="line">        <span class="keyword">debug</span> &#123;</span><br><span class="line">            applicationIdSuffix &#x27;.debug&#x27;</span><br><span class="line">        &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>程序包名为 <strong>com.gradleforandroid.debug</strong> ，但Activity的路径仍为 <strong>com.gradleforandroid.Activity</strong> 。为了确保Activity获得正确的加载路径，需要从applictionId中删除后缀：</p>
+<figure class="highlight gradle"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">doFirst</span> &#123;</span><br><span class="line">    <span class="keyword">def</span> <span class="keyword">classpath</span> = variant.applicationId</span><br><span class="line">    <span class="keyword">if</span>(variant.buildType.applicationIdSuffix) &#123;</span><br><span class="line">           <span class="keyword">classpath</span> -= <span class="string">&quot;$&#123;variant.buildType.applicationIdSuffix&#125;&quot;</span></span><br><span class="line">   	&#125;</span><br><span class="line">    <span class="keyword">def</span> launchClass =<span class="string">&quot;$&#123;variant.applicationId&#125;/$&#123;classpath&#125;.MainActivity&quot;</span></span><br><span class="line">    exec &#123;</span><br><span class="line">        executable = <span class="string">&#x27;adb&#x27;</span></span><br><span class="line">        args = [<span class="string">&#x27;shell&#x27;</span>, <span class="string">&#x27;am&#x27;</span>, <span class="string">&#x27;start&#x27;</span>, <span class="string">&#x27;-n&#x27;</span>, launchClass]</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>上面代码中，首先，基于应用applicationId创建了一个名为classpath的变量。然后我们找到由 <strong>buildType.applicationIdSuffix</strong> 属性提供的后缀。 在Groovy中，可以使用减号运算符从另一个字符串中减去一个字符串。这些更改可以确保在安装apk后运行应用程序不会在使用后缀时失败。</p>
+<h2 id="创建自定义Gradle插件"><a href="#创建自定义Gradle插件" class="headerlink" title="创建自定义Gradle插件"></a>创建自定义Gradle插件</h2><p>如果我们有一个Gradle任务的集合，想在多个项目中进行复用，将这些任务提取到一个自定义插件轻松解决问题。不仅我们自己可以重用构建逻辑，还能分享给其他人使用。</p>
+<p>插件可以用Groovy编写，也可以用其他使用JVM的语言，例如Java和Scala。事实上，Gradle的Android插件的大部分是用Java和Groovy组合编写的。</p>
+<h3 id="创建简单插件"><a href="#创建简单插件" class="headerlink" title="创建简单插件"></a>创建简单插件</h3><p>要提取已存储在构建配置文件中的各种构建逻辑，可以在 <strong>build.gradle</strong> 文件中创建一个插件。这是开始创建自定义插件的最简单方法。</p>
+<p>要创建插件，需要创建一个实现插件接口的新类。这里将使用在本章前面编写的代码，动态创建运行任务。插件类定义如下所示：</p>
+<figure class="highlight gradle"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> RunPlugin <span class="keyword">implements</span> Plugin&lt;<span class="keyword">Project</span>&gt; &#123;</span><br><span class="line">     <span class="keyword">void</span> apply(<span class="keyword">Project</span> <span class="keyword">project</span>) &#123;</span><br><span class="line">			<span class="keyword">project</span>.android.applicationVariants.all &#123; variant -&gt;</span><br><span class="line">				<span class="keyword">if</span> (variant.install) &#123;</span><br><span class="line">					<span class="keyword">project</span>.tasks.create(name: <span class="string">&quot;run$&#123;variant.name.capitalize()&#125;&quot;</span>, dependsOn: variant.install) &#123;</span><br><span class="line">               			<span class="comment">// Task definition</span></span><br><span class="line">            		&#125;</span><br><span class="line">				&#125;</span><br><span class="line">			&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>Plugin</strong> 接口定义了一个 <strong>apply()</strong> 方法。Gradle在build.gradle中使用插件时调用此方法。 <strong>project</strong> 作为参数传递，以便插件可以配置项目或使用其中的方法和属性。在前面Task例子中，就不能直接调用Android插件中相关属性了，需要通过访问 <strong>project</strong> 对象来访问相应属性。请注意，我们访问Android插件的属性，需要在我们的自定义插件应用之前将Android插件在项目中apply。否则，可能会产生异常。</p>
+<p>task的代码与之前相同,只有一个方法调用修改，通过调用project.exec()代替调用exec()。要确保在build.gradle文件中apply插件，将此行添加到build.gradle文件中：</p>
+<figure class="highlight coq"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">apply</span> plugin: RunPlugin</span><br></pre></td></tr></table></figure>
+
+<h3 id="发布插件"><a href="#发布插件" class="headerlink" title="发布插件"></a>发布插件</h3><p>为了发布一个插件并共享给其他人，我们需要将插件移动到独立模块（或项目）。独立插件具有自己的构建文件用以配置依赖项和发布方式。插件模块生会成一个JAR文件，包含插件类和属性。我们可以使用此JAR文件将插件应用于多个模块和项目，并与其他人共享。</p>
+<p>与任何Gradle项目一样，需要先创建一个build.gradle文件以配置构建：</p>
+<figure class="highlight scss"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">apply plugin: <span class="string">&#x27;groovy&#x27;</span></span><br><span class="line"></span><br><span class="line">dependencies &#123;</span><br><span class="line">    implementation <span class="built_in">gradleApi</span>()</span><br><span class="line">    implementation <span class="built_in">localGroovy</span>()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>编写独立的Gradle插件，首先需要应用Groovy插件。Groovy插件扩展了Java插件，使得能够构建和打包Groovy类。 Groovy和纯Java都是支持的，所以如果喜欢，我们可以混合使用它们。甚至可以使用Groovy扩展一个Java类，或者反过来也行。</p>
+<p>构建配置文件中需要包含两个依赖关系：gradleApi()和localGroovy()。添加Gradle API来从自定义插件中访问Gradle相关基础接口，localGroovy()是Gradle安装附带的Groovy SDK的发行版。 为了方便起见，Gradle默认提供这些依赖项。 如果Gradle默认没有提供这些依赖，我们需要手动下载并引用它们。</p>
+<blockquote>
+<p>如果我们计划以公开方式分发插件，需要确保在构建配置文件中指定组和版本信息，如下所示：<br>    group &#x3D;’com.gradleforandroid’<br>    version &#x3D;’1.0’</p>
+</blockquote>
+<p>    <br>要开始使用独立插件模块中的代码，还要确保使用正确的目录结构：</p>
+<figure class="highlight gherkin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">plugin</span><br><span class="line">    |<span class="string">-src</span></span><br><span class="line"><span class="string">        </span>|<span class="string">-main</span></span><br><span class="line"><span class="string">        </span>|<span class="string">    </span>|<span class="string">-groovy</span></span><br><span class="line"><span class="string">        </span>|<span class="string">        </span>|<span class="string">-com.package.name</span></span><br><span class="line"><span class="string">        </span>|<span class="string">-resources</span></span><br><span class="line"><span class="string">             </span>|<span class="string">-META-INF</span></span><br><span class="line"><span class="string">                 </span>|<span class="string">-gradle-plugin    </span></span><br></pre></td></tr></table></figure>
+
+<p>和其他Gradle模块一样，需要提供一个src&#x2F;main目录。因为这是一个Groovy项目，main的子目录称为groovy而不是java。还有一个resource的子目录，将使用它来指定插件的属性。</p>
+<p>在包目录中创建一个名为 <strong>RunPlugin.groovy</strong> 的文件，在其中定义插件的类：</p>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.gradleforandroid</span><br><span class="line"><span class="keyword">import</span> org.gradle.api.Project</span><br><span class="line"><span class="keyword">import</span> org.gradle.api.Plugin</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">RunPlugin</span> <span class="keyword">implements</span> <span class="title class_">Plugin</span>&lt;Project&gt; &#123;</span><br><span class="line">    <span class="type">void</span> apply(Project project) &#123;</span><br><span class="line">        project.android.applicationVariants.all &#123; variant -&gt;</span><br><span class="line">               <span class="comment">// Task code</span></span><br><span class="line">	   &#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>为了让Gradle能够找到插件，需要创建一个属性文件，将此属性文件添加到 <strong>src&#x2F;main&#x2F;resources&#x2F;META-INF&#x2F;gradle-plugins&#x2F;</strong> 目录。文件的名称需要与我们的插件的id匹配。对于RunPlugin，该文件名为<strong>com.gradleforandroid.run.properties</strong>，文件内容如下：</p>
+<figure class="highlight abnf"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="attribute">implementation-class</span><span class="operator">=</span>com.gradleforandroid.RunPlugin</span><br></pre></td></tr></table></figure>
+
+<p>属性文件包含的唯一的东西是实现了Plugin接口类的包和名称。</p>
+<p>当插件和属性文件准备就绪后，我们可以使用 <strong>gradlew assemble</strong> 命令打包插件。最终会在输出目录中创建一个JAR文件。如果我们还想把插件推送到Maven仓库，就还需要应用Maven插件：</p>
+<figure class="highlight nginx"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="attribute">apply</span> plugin: <span class="string">&#x27;maven&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<p>接下来，配置uploadArchives任务，如下所示：</p>
+<figure class="highlight isbl"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">uploadArchives</span> &#123;</span><br><span class="line">       <span class="variable">repositories</span> &#123;</span><br><span class="line">           <span class="variable">mavenDeployer</span> &#123;</span><br><span class="line">             <span class="function"><span class="title">repository</span>(<span class="variable">url</span>: <span class="title">uri</span>(<span class="string">&#x27;repository_url&#x27;</span>))</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>uploadArchives任务是预定义的任务。在任务中配置存储仓库后，就可以执行此任务来发布插件。这里就不详细介绍如何设置Maven存储库。</p>
+<p>如果我们想让我们的插件公开，可以考虑发布到<a target="_blank" rel="noopener" href="https://plugins.gradle.org/">Gradleware的插件仓库</a>。插件仓库有很多Gradle插件集合（不只是特定于Android开发）。 我们可以在的<a target="_blank" rel="noopener" href="https://pluginsgradle.org/docs/submit">官方文档</a>中找到有关如何发布插件的详细信息。</p>
+<blockquote>
+<p>本文档不包括对自定义插件编写测试代码，但如果计划使插件公开可用，强烈建议进行代码的测试。我们可以在<a target="_blank" rel="noopener" href="https://gradle.org/docs/current/userguide/custom_plugins.html#N16CE1">Gradle用户指南</a>中找到有关编写插件测试的更多信息。</p>
+</blockquote>
+<h3 id="使用自定义插件"><a href="#使用自定义插件" class="headerlink" title="使用自定义插件"></a>使用自定义插件</h3><p>要使用插件，需要将插件添加为buildscript块的依赖项。 首先，配置一个新的依赖仓库。依赖仓库的配置取决于插件的分发方式。其次，就是需要在依赖关系块中配置插件的类路径。</p>
+<p>这里如果包括我们在前面的例子中创本地生成的JAR文件，可以定义一个 <strong>flatDir</strong> 存储库：</p>
+<figure class="highlight gradle"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">buildscript</span> &#123;</span><br><span class="line">       <span class="keyword">repositories</span> &#123;</span><br><span class="line">           <span class="keyword">flatDir</span> &#123; dirs <span class="string">&#x27;build_libs&#x27;</span> &#125;</span><br><span class="line">       &#125;</span><br><span class="line">       <span class="keyword">dependencies</span> &#123;</span><br><span class="line">           <span class="keyword">classpath</span> <span class="string">&#x27;com.gradleforandroid:plugin&#x27;</span></span><br><span class="line">        &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>如果将插件上传到Maven或Ivy仓库，配置会有不懂。 在<a href="">第3章“管理依赖关系”</a>中介绍了依赖关系管理，因此在这里就不再重复。</p>
+<p>在设置依赖之后，就需要应用插件：</p>
+<figure class="highlight avrasm"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">apply plugin: <span class="keyword">com</span>.gradleforandroid.RunPlugin</span><br></pre></td></tr></table></figure>
+
+<p>使用apply()方法时，Gradle创建一个插件类的实例，并执行插件自己的apply()方法，我们就可以正常使用自定义插件了。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>在本章中，我们学习到了Groovy与Java的不同，以及如何在Gradle中使用Groovy，还看到了如何创建自定义的任务，以及如何hook任务到Android插件中。</p>
+<p>在本章的最后一部分，还研究了如何创建插件，并确保可以通过创建一个独立的插件在多个项目中复用它们。 其实还有很多深入的知识不是本文档全部能覆盖的，更多的知识可以参考<a target="_blank" rel="noopener" href="https://gradle.org/docs/current/userguide/custom_plugins.html">Gradle用户指南</a>。</p>
+
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>YamLee
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://yamlee.me/2016/04/28/2016-04-28-Android%20Gradle%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5%E7%B3%BB%E5%88%977/" title="Android Gradle最佳实践系列7：Gradle Task和自定义插件开发">http://yamlee.me/2016/04/28/2016-04-28-Android Gradle最佳实践系列7/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/zh-CN" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2016/04/25/2016-04-25-Android%20Gradle%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5%E7%B3%BB%E5%88%976/" rel="prev" title="Android Gradle最佳实践系列6：运行测试">
+      <i class="fa fa-chevron-left"></i> Android Gradle最佳实践系列6：运行测试
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2016/05/02/2016-05-02-Android%20Gradle%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5%E7%B3%BB%E5%88%978/" rel="next" title="Android Gradle最佳实践系列8：设置CI(集成开发环境)">
+      Android Gradle最佳实践系列8：设置CI(集成开发环境) <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%90%86%E8%A7%A3Groovy"><span class="nav-number">1.</span> <span class="nav-text">理解Groovy</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%85%B3%E4%BA%8EGroovy"><span class="nav-number">1.1.</span> <span class="nav-text">关于Groovy</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Groovy%E4%B8%AD%E7%9A%84%E7%B1%BB%E5%92%8C%E6%88%90%E5%91%98%E5%8F%98%E9%87%8F"><span class="nav-number">1.2.</span> <span class="nav-text">Groovy中的类和成员变量</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%96%B9%E6%B3%95"><span class="nav-number">1.3.</span> <span class="nav-text">方法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%97%AD%E5%8C%85"><span class="nav-number">1.4.</span> <span class="nav-text">闭包</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%9B%86%E5%90%88"><span class="nav-number">1.5.</span> <span class="nav-text">集合</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Groovy%E5%9C%A8Gradle%E4%B8%AD%E7%9A%84%E4%BD%BF%E7%94%A8"><span class="nav-number">1.6.</span> <span class="nav-text">Groovy在Gradle中的使用</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%B7%B1%E5%85%A5Task"><span class="nav-number">2.</span> <span class="nav-text">深入Task</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%9A%E4%B9%89%E4%BB%BB%E5%8A%A1"><span class="nav-number">2.1.</span> <span class="nav-text">定义任务</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%89%96%E6%9E%90Task"><span class="nav-number">2.2.</span> <span class="nav-text">剖析Task</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8Task%E7%AE%80%E5%8C%96Android%E6%89%93%E5%8C%85%E6%B5%81%E7%A8%8B"><span class="nav-number">2.3.</span> <span class="nav-text">使用Task简化Android打包流程</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%B7%B1%E5%85%A5Android-Gradle-Plugin"><span class="nav-number">3.</span> <span class="nav-text">深入Android Gradle Plugin</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%87%AA%E5%8A%A8%E9%87%8D%E5%91%BD%E5%90%8DAPK%E6%96%87%E4%BB%B6"><span class="nav-number">3.1.</span> <span class="nav-text">自动重命名APK文件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8A%A8%E6%80%81%E5%88%9B%E5%BB%BA%E6%96%B0Task"><span class="nav-number">3.2.</span> <span class="nav-text">动态创建新Task</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%88%9B%E5%BB%BA%E8%87%AA%E5%AE%9A%E4%B9%89Gradle%E6%8F%92%E4%BB%B6"><span class="nav-number">4.</span> <span class="nav-text">创建自定义Gradle插件</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%9B%E5%BB%BA%E7%AE%80%E5%8D%95%E6%8F%92%E4%BB%B6"><span class="nav-number">4.1.</span> <span class="nav-text">创建简单插件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%91%E5%B8%83%E6%8F%92%E4%BB%B6"><span class="nav-number">4.2.</span> <span class="nav-text">发布插件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8%E8%87%AA%E5%AE%9A%E4%B9%89%E6%8F%92%E4%BB%B6"><span class="nav-number">4.3.</span> <span class="nav-text">使用自定义插件</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">5.</span> <span class="nav-text">总结</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="YamLee"
+      src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">YamLee</p>
+  <div class="site-description" itemprop="description">专注移动开发</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">18</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">9</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/yamlee" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;yamlee" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title"><i class="fa fa-link fa-fw"></i>
+      Links
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="http://yamlee.me/" title="http:&#x2F;&#x2F;yamlee.me&#x2F;">Title</a>
+        </li>
+    </ul>
+  </div>
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">YamLee</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

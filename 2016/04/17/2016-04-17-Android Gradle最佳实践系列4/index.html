@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.1.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/avatar.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/avatar.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.ico">
+  <link rel="mask-icon" href="/images/avatar.png" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="https://fonts.loli.net/css?family=Noto Sans SC:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"yamlee.me","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"default"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="当我们在开发一款应用时，通常会面临发布不同的版本需求。举两个常见的场景，场景一：我们正在开发新功能，开发完成后需要发布提测版本提交给QA测试人员，测试通过后再发布线上版本，这时线下版本和测试版本的服务器接口域名不一样又或者有不同的api接口；场景二：我们的app需要发布一个免费版本和付费版本，付费版本会有更高的使用权限。针对如上两种情况我们就需要发布四个apk，免费QA版，免费线上版，付费QA版，">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Android Gradle最佳实践系列4：创建Build Variants">
+<meta property="og:url" content="http://yamlee.me/2016/04/17/2016-04-17-Android%20Gradle%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5%E7%B3%BB%E5%88%974/index.html">
+<meta property="og:site_name" content="Lee Blog">
+<meta property="og:description" content="当我们在开发一款应用时，通常会面临发布不同的版本需求。举两个常见的场景，场景一：我们正在开发新功能，开发完成后需要发布提测版本提交给QA测试人员，测试通过后再发布线上版本，这时线下版本和测试版本的服务器接口域名不一样又或者有不同的api接口；场景二：我们的app需要发布一个免费版本和付费版本，付费版本会有更高的使用权限。针对如上两种情况我们就需要发布四个apk，免费QA版，免费线上版，付费QA版，">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://i.loli.net/2021/08/06/cpNeGrBjfq6gUzo.jpg">
+<meta property="og:image" content="https://i.loli.net/2021/08/06/BqXRg78yQpZlAzo.jpg">
+<meta property="og:image" content="https://i.loli.net/2021/08/06/gzS1is87TWK26hN.jpg">
+<meta property="og:image" content="https://i.loli.net/2021/08/06/y7YEqw6jUMWCdPo.jpg">
+<meta property="og:image" content="https://i.loli.net/2021/08/06/BUtFwH9ZXLkW7h4.jpg">
+<meta property="article:published_time" content="2016-04-16T16:00:00.000Z">
+<meta property="article:modified_time" content="2022-04-08T04:06:59.651Z">
+<meta property="article:author" content="YamLee">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://i.loli.net/2021/08/06/cpNeGrBjfq6gUzo.jpg">
+
+<link rel="canonical" href="http://yamlee.me/2016/04/17/2016-04-17-Android%20Gradle%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5%E7%B3%BB%E5%88%974/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Android Gradle最佳实践系列4：创建Build Variants | Lee Blog</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-122582412-1"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'UA-122582412-1');
+      }
+    </script>
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Lee Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">专注移动开发</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yamlee.me/2016/04/17/2016-04-17-Android%20Gradle%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5%E7%B3%BB%E5%88%974/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="YamLee">
+      <meta itemprop="description" content="专注移动开发">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Lee Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Android Gradle最佳实践系列4：创建Build Variants
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2016-04-17 00:00:00" itemprop="dateCreated datePublished" datetime="2016-04-17T00:00:00+08:00">2016-04-17</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2022-04-08 12:06:59" itemprop="dateModified" datetime="2022-04-08T12:06:59+08:00">2022-04-08</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Android-Gradle%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5%E7%B3%BB%E5%88%97/" itemprop="url" rel="index"><span itemprop="name">Android Gradle最佳实践系列</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>当我们在开发一款应用时，通常会面临发布不同的版本需求。举两个常见的场景，场景一：我们正在开发新功能，开发完成后需要发布提测版本提交给QA测试人员，测试通过后再发布线上版本，这时线下版本和测试版本的服务器接口域名不一样又或者有不同的api接口；场景二：我们的app需要发布一个免费版本和付费版本，付费版本会有更高的使用权限。针对如上两种情况我们就需要发布四个apk，免费QA版，免费线上版，付费QA版，付费线上版，如果在代码里面硬编码会使得项目异常复杂。gradle针对这种情况，提出了解决这种问题的方法，对于QA版或线上版可以配置<strong>build type</strong>，Androidstudio默认配置了Debug和Release两种type，对于付费版或者免费版，可以通过配置<strong>Build flavors</strong>。这两种类型组合起来就叫做<strong>build variant</strong></p>
+<h2 id="Build-types"><a href="#Build-types" class="headerlink" title="Build types"></a>Build types</h2><p>Gradle在Android中的build type是用来处理app或者library应该被构建成什么类型，在这个配置中，我们可以定义应用的包名是什么，是否自动去除掉没有引用的资源，是否开启混淆等等。具体配置可参考如下代码</p>
+<span id="more"></span>
+
+<figure class="highlight sml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">android &#123;</span><br><span class="line">       buildTypes &#123;</span><br><span class="line">           release &#123;</span><br><span class="line">               minifyEnabled <span class="literal">false</span></span><br><span class="line">               proguardFiles getDefaultProguardFile</span><br><span class="line">                 (<span class="symbol">&#x27;proguard</span>-android.txt&#x27;), <span class="symbol">&#x27;proguard</span>-rules.pro&#x27;</span><br><span class="line">           &#125;</span><br><span class="line">		&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>当我们新建一个项目或者模块时，build.gradle文件会默认配置上release的build type，默认配置关闭了混淆功能（即minifyEnabled设置为false）和定义混淆文件的位置。<br>除了release build type再就是debug build type也是默认创建好的，但是没有在代码里显示出来，如果你想修改默认Debug中的配置，需要单独声明出来。</p>
+<blockquote>
+<p>debug的build type默认设置debug属性为true，方便调试</p>
+</blockquote>
+<h3 id="创建build-types"><a href="#创建build-types" class="headerlink" title="创建build types"></a>创建build types</h3><p>当我们觉得默认的两种类型不够用时，我们能很容易的自定义build type，如下代码展示了创建一个新的build type名叫<strong>qa_test</strong>的类型</p>
+<figure class="highlight fsharp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">android</span> &#123;</span><br><span class="line">    <span class="keyword">buildTypes</span> &#123;</span><br><span class="line">        <span class="keyword">qa_test</span> &#123;</span><br><span class="line">   		   applicationIdSuffix <span class="string">&quot;.qatest&quot;</span></span><br><span class="line">    		  versionNameSuffix <span class="string">&quot;-qatest&quot;</span></span><br><span class="line">    		  buildConfigField <span class="string">&quot;String&quot;</span>, <span class="string">&quot;API_URL&quot;</span>,<span class="string">&quot;\&quot;http://staging.example.com/api\&quot;&quot;</span></span><br><span class="line">    		&#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>上面的代码主要配置qa_test的类型功能为：给包名加上了.qatest的后缀，这样我们能在手机上安装相同的程序，因为应用包名不一样；在version name上加上了-qatest的后缀，然后再BuildConfig类中加了一个API_URL的string属性。</p>
+<blockquote>
+<p>通过buildConfigField配置，会在编译后BuildConfig类中增加对应定义的常量</p>
+</blockquote>
+<p>在自定义build type是，还可以重用已用的build type，如下代码所示</p>
+<figure class="highlight fsharp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"> <span class="keyword">android</span> &#123;</span><br><span class="line">       <span class="keyword">buildTypes</span> &#123;</span><br><span class="line">           qa_test.initWith(buildTypes.debug)</span><br><span class="line">           <span class="keyword">qa_test</span> &#123;</span><br><span class="line">               applicationIdSuffix <span class="string">&quot;.staging&quot;</span></span><br><span class="line">               versionNameSuffix <span class="string">&quot;-staging&quot;</span></span><br><span class="line">               debuggable <span class="operator">=</span> <span class="literal">false</span></span><br><span class="line">            &#125; </span><br><span class="line">        &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>**initWith()**方法为qa_test类型拷贝了debug类型的所有属性，但是我们也可以修改其中的属性，通过显示声明出来。</p>
+<h3 id="build-types代码目录结构设置"><a href="#build-types代码目录结构设置" class="headerlink" title="build types代码目录结构设置"></a>build types代码目录结构设置</h3><p>当我们创建一个新的build type，gradle也会默认指定一个同名的目录在项目里面，但是不会把目录自动创建出来，所以需要我们手动创建一个同名的目录，其结构如下所示</p>
+<p><img src="https://i.loli.net/2021/08/06/cpNeGrBjfq6gUzo.jpg"></p>
+<p>这种配置可以使得我们在任意build类型去自定义修改代码，比方说在release的类型登录界面带上正式版本的Logo，在debug版本的登录界面就带上测试版本的Logo</p>
+<blockquote>
+<p><strong>Tips</strong>：当我们创建了不同的build type，并在不同的type文件目录里面做不同的修改，但使用的源是基于main目录下的代码，比方说我们要在不同的type里面有不同的login界面，那么main包下面就不能包括LoginActivity，而只在不同buildtype下加入各自自定义的LoginActivity，如果我们也在main目录下加入，编译器会提示dumpllicated file的错误</p>
+</blockquote>
+<p>对于Resources资源，和处理Java代码有些许不同，对于layout、Drawable资源和图片，如果在不同的type里面定义了，那个定义的这些文件会直接替换掉main目录里面相同的资源文件；而对于String，Color的资源则会采取合并的策略，举个例子，如我们在main下的string.xml如下</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"> <span class="tag">&lt;<span class="name">resources</span>&gt;</span></span><br><span class="line">       <span class="tag">&lt;<span class="name">string</span> <span class="attr">name</span>=<span class="string">&quot;app_name&quot;</span>&gt;</span>TypesAndFlavors<span class="tag">&lt;/<span class="name">string</span>&gt;</span></span><br><span class="line">       <span class="tag">&lt;<span class="name">string</span> <span class="attr">name</span>=<span class="string">&quot;hello_world&quot;</span>&gt;</span>Hello world!<span class="tag">&lt;/<span class="name">string</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">resources</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>如果qa_test type中的string.xml如下</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"> <span class="tag">&lt;<span class="name">resources</span>&gt;</span></span><br><span class="line">       <span class="tag">&lt;<span class="name">string</span> <span class="attr">name</span>=<span class="string">&quot;app_name&quot;</span>&gt;</span>TypesAndFlavors QA_Test<span class="tag">&lt;/<span class="name">string</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">resources</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>合并后的string.xml如下所示</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"> <span class="tag">&lt;<span class="name">resources</span>&gt;</span></span><br><span class="line">       <span class="tag">&lt;<span class="name">string</span> <span class="attr">name</span>=<span class="string">&quot;app_name&quot;</span>&gt;</span>TypesAndFlavors QA_Test<span class="tag">&lt;/<span class="name">string</span>&gt;</span></span><br><span class="line">       <span class="tag">&lt;<span class="name">string</span> <span class="attr">name</span>=<span class="string">&quot;hello_world&quot;</span>&gt;</span>Hello world!<span class="tag">&lt;/<span class="name">string</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">resources</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>如果我们没有自定义string资源文件，那gradle就会默认使用main目录下的string。对于AndroidManifest.xml文件也是一样的合并策略，如果要修改manifest文件，只需要在对应的build type目录中的manifest文件加入我们需要的代码,gradle会自动合并，在后续部分会更深入的介绍gradle合并的原理</p>
+<h3 id="依赖"><a href="#依赖" class="headerlink" title="依赖"></a>依赖</h3><p>每一个build type有可能有自己独立的依赖，如果我们配置了，gradle会自动识别配置，例如要在debug type中加入一个日志框架，可以参考如下代码</p>
+<figure class="highlight gradle"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"> <span class="keyword">dependencies</span> &#123;</span><br><span class="line">       <span class="keyword">compile</span> <span class="keyword">fileTree</span>(dir: <span class="string">&#x27;libs&#x27;</span>, <span class="keyword">include</span>: [<span class="string">&#x27;*.jar&#x27;</span>])</span><br><span class="line">       <span class="keyword">compile</span> <span class="string">&#x27;com.android.support:appcompat-v7:22.2.0&#x27;</span></span><br><span class="line">       debugCompile <span class="string">&#x27;de.mindpipe.android:android-logging-log4j:1.0.3&#x27;</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>debugCompile</strong>表示只在debug type中把log4j加入到编译路径中，关于常用的集中依赖scope请参考<a href="http://yamlee.me/2016/04/13/Android%E5%BC%80%E5%8F%91Gradle%E7%9A%84%E4%BD%BF%E7%94%A8%E7%B3%BB%E5%88%97%E4%B8%89%E4%B9%8BGradle%E4%BE%9D%E8%B5%96%E7%AE%A1%E7%90%86/">系列三:Gradle依赖管理</a></p>
+<h2 id="Product-flavors"><a href="#Product-flavors" class="headerlink" title="Product flavors"></a>Product flavors</h2><p>与build type相反，build type用来构建不同类型的app，debug版或release版，而produc flavors则是用来在同一个app上创建不同的版本，如付费版和免费版。一个非常常见的应用场景就是我们创建了一个银行管理的app给不同银行提供服务，但是不同的银行App的logo不一样，有produc flavors就能在基于一套代码上创建不同版本的app或者library。</p>
+<p>如果我们不确定什么时候用build type，什么时候该用product flavors，那么问自己几个问题，如果是构建不同类型供内部使用或者是在google palay上提交一个新的app，建议使用build type；如果app要分发在不同的渠道上，那么建议product flavors</p>
+<h3 id="创建-product-flavors"><a href="#创建-product-flavors" class="headerlink" title="创建 product flavors"></a>创建 product flavors</h3><p>创建product flavors与build types非常相似，你只需要添加<strong>productFlavor</strong>代码块，如下代码所示</p>
+<figure class="highlight fsharp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"> <span class="keyword">android</span> &#123;</span><br><span class="line">       <span class="keyword">productFlavors</span> &#123;</span><br><span class="line">           <span class="keyword">red</span> &#123;</span><br><span class="line">               applicationId <span class="symbol">&#x27;com</span>.gradleforandroid.red&#x27;</span><br><span class="line">               versionCode <span class="number">3</span></span><br><span class="line">				&#125;</span><br><span class="line">			<span class="keyword">blue</span> &#123;</span><br><span class="line">            	applicationId <span class="symbol">&#x27;com</span>.gradleforandroid.blue&#x27;</span><br><span class="line">            	minSdkVersion <span class="number">14</span></span><br><span class="line">            	versionCode <span class="number">4</span></span><br><span class="line">				&#125;</span><br><span class="line">		&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>Product flavors与build types属性不同，因为product flavors其实是ProductFlavors类，build.gradle文件中默认添加的<em><strong>defaultConfig</strong></em>也是ProductFlavors类的实例。</p>
+<h3 id="product-flavors代码目录结构设置"><a href="#product-flavors代码目录结构设置" class="headerlink" title="product flavors代码目录结构设置"></a>product flavors代码目录结构设置</h3><p>与build type的设置类似，product flavors也可以配置自己的代码目录,可参考Build Type目录结构设置，这里不再赘述。</p>
+<h3 id="Multiflavor-variants"><a href="#Multiflavor-variants" class="headerlink" title="Multiflavor variants"></a>Multiflavor variants</h3><p>在某些情况下，我们可能需要进行flavors的组合，比方说你的app有两套主题，绿色主题和红色主题，然后有两个版本，付费版和免费版，你可能需要进行组合，类似于红色免费版，红色付费版，绿色免费版，绿色付费版。通过使用<strong>flavorDimensions</strong>可以解决flavors组合的问题，配置可参考如下代码</p>
+<figure class="highlight fsharp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">android</span> &#123;</span><br><span class="line">       flavorDimensions <span class="string">&quot;color&quot;</span>, <span class="string">&quot;price&quot;</span></span><br><span class="line">       <span class="keyword">productFlavors</span> &#123;</span><br><span class="line">           <span class="keyword">red</span> &#123;</span><br><span class="line">               flavorDimension <span class="string">&quot;color&quot;</span></span><br><span class="line">           &#125;</span><br><span class="line">           <span class="keyword">blue</span> &#123;</span><br><span class="line">               flavorDimension <span class="string">&quot;color&quot;</span></span><br><span class="line">			 &#125;</span><br><span class="line">			<span class="keyword">free</span> &#123;</span><br><span class="line">               flavorDimension <span class="string">&quot;price&quot;</span></span><br><span class="line">           &#125;</span><br><span class="line">            <span class="keyword">paid</span> &#123;</span><br><span class="line">               flavorDimension <span class="string">&quot;price&quot;</span></span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>当我们添加了flavor dimension之后，gradle会判断我们是否为flavor指定了flavorDimensions中设定的值，如果没有设置，gradle编译的时候就会报错,而且flavorDimensions中设置的顺序也是非常重要的，比方说如果红色主题的flavor和付费版的flavor中某处代码修改是一样的，那么在运行的时候就以flavorDimensions中配置的先后顺序为准，根据上面的配置，就是以红色主题中的代码为准。</p>
+<p>假设我们的build type的类型是配置的debug和release那么根据上面代码的配置生成的build variants为如下</p>
+<ul>
+<li><strong>blueFreeDebug</strong> 和 <strong>blueFreeRelease</strong></li>
+<li><strong>bluePaidDebug</strong> 和 <strong>bluePaidRelease</strong></li>
+<li><strong>redFreeDebug</strong> 和 <strong>redFreeRelease</strong></li>
+<li><strong>redPaidDebug</strong> 和 <strong>redPaidRelease</strong></li>
+</ul>
+<h2 id="Build-variants"><a href="#Build-variants" class="headerlink" title="Build variants"></a>Build variants</h2><p>build variants就是build type和product flavors组合的结果，当我们创建一个新的build type或者product flavor的时候，新的variants也就相应的创建了。例如，如果我们的build type是标准的debug和release，那么创建一个product flavor为red theme和blue theme的时候，相对应的build variants为自动生成。</p>
+<p><img src="https://i.loli.net/2021/08/06/BqXRg78yQpZlAzo.jpg"></p>
+<p>如上截图为Android Studio中Build Variants的工具框，默认在Android Studio界面的左下角边缘倒数第二个，亦或可以通过View | Tool Windows | Build Variants打开。</p>
+<p>如果我们没有配置product flavors，variants只会包括build types。如过我们也没有配置过build type，Gradle的Android插件也会默认配置debug build type，所以build variants不会出现为空的情况。</p>
+<h2 id="Tasks"><a href="#Tasks" class="headerlink" title="Tasks"></a>Tasks</h2><p>Gradle的Android插件会根据我们配置的build variant自动生成task。一个新的Android app项目会默认有debug和release两种build type，所以我们可以运行<strong>assembleDebug</strong>和<strong>assembleRelease</strong>去生成不同apk，或者直接运行<strong>assemble</strong>来生成两种build type的apk。当我们新添加build type，就会相应的添加新的task。当添加新的flavors product，task重新生成，变化会比较大，因为每一个product flavor和build type是组合的。所以即便是最简单的一个build type和一个flavor的组合，都会生成有三个对应的task：</p>
+<p><strong>assembleBlue</strong> 使用Blue flavor，相当于运行<strong>assembleBlueRelease</strong>和<strong>assembleBlueDebug</strong></p>
+<h2 id="代码目录配置（Source-sets）"><a href="#代码目录配置（Source-sets）" class="headerlink" title="代码目录配置（Source sets）"></a>代码目录配置（Source sets）</h2><p>Build variants就是build type和product flavor的组合，比如我们源代码中有main，releas，debug，red四个目录，其中，release和debug是build type的类别，red是设置的productflavor，那个对应的build variant就是redReleas,redDebug,也就是说redReleas使用的源码是red和release目录的合并，同理redDebug使用的是red和debug目录中代码的合并。</p>
+<h2 id="资源文件和manifest文件的合并"><a href="#资源文件和manifest文件的合并" class="headerlink" title="资源文件和manifest文件的合并"></a>资源文件和manifest文件的合并</h2><p>不同的build type和product flavor有不同的源码目录，在生成不同的build variant包时，会需要合并资源，例如我们在debug build type中的manifest文件设置了要存储log日志的权限，但是在main目录中的manifest文件却不需要，这样在生成编译debug build variant的时候就需要合并main目录中的manifest文件和debug目录中的manifest文件。其中选取的资源的优先级如下图所示：</p>
+<p><img src="https://i.loli.net/2021/08/06/gzS1is87TWK26hN.jpg"></p>
+<p>如上可知，如果flavor中有一个图片资源为logo.png，main目录中也有一个图片资源为logo.png。在打包的时候，因为flavor的优先级大于Main所以，会使用flavor中的logo.png</p>
+<blockquote>
+<p>关于资源和manifest文件的合并，有很多具体的细节在这里没法阐述，官方文档给了更多更详细的解释，可以访问这个地址 [Android Developer:Manifest-Merger](<a target="_blank" rel="noopener" href="http://tools.android.com/tech-docs/new-build-">http://tools.android.com/tech-docs/new-build-</a> system&#x2F;user-guide&#x2F;manifest-merger)</p>
+</blockquote>
+<h2 id="创建build-variants"><a href="#创建build-variants" class="headerlink" title="创建build variants"></a>创建build variants</h2><p>gradle使得处理复杂的build varinats非常容易，即使我们创建了两种build type和两种product flavors。build文件中代码还是非常清晰明了</p>
+<figure class="highlight fsharp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">android</span> &#123;</span><br><span class="line">       <span class="keyword">buildTypes</span> &#123;</span><br><span class="line">           <span class="keyword">debug</span> &#123;</span><br><span class="line">               buildConfigField <span class="string">&quot;String&quot;</span>, <span class="string">&quot;API_URL&quot;</span>,</span><br><span class="line">               <span class="string">&quot;\&quot;http://test.example.com/api\&quot;&quot;</span></span><br><span class="line">			&#125;</span><br><span class="line">           staging.initWith(android.buildTypes.debug)</span><br><span class="line">           <span class="keyword">staging</span> &#123;</span><br><span class="line">               buildConfigField <span class="string">&quot;String&quot;</span>, <span class="string">&quot;API_URL&quot;</span>,</span><br><span class="line">                 <span class="string">&quot;\&quot;http://staging.example.com/api\&quot;&quot;</span></span><br><span class="line">               applicationIdSuffix <span class="string">&quot;.staging&quot;</span></span><br><span class="line">           &#125;</span><br><span class="line">		&#125;</span><br><span class="line">       <span class="keyword">productFlavors</span> &#123;</span><br><span class="line">           <span class="keyword">red</span> &#123;</span><br><span class="line">               applicationId <span class="string">&quot;com.gradleforandroid.red&quot;</span></span><br><span class="line">               resValue <span class="string">&quot;color&quot;</span>, <span class="string">&quot;flavor_color&quot;</span>, <span class="string">&quot;#ff0000&quot;</span></span><br><span class="line">           &#125;</span><br><span class="line">           <span class="keyword">blue</span> &#123;</span><br><span class="line">               applicationId <span class="string">&quot;com.gradleforandroid.blue&quot;</span></span><br><span class="line">               resValue <span class="string">&quot;color&quot;</span>, <span class="string">&quot;flavor_color&quot;</span>, <span class="string">&quot;#0000ff&quot;</span></span><br><span class="line">			&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在上面的代码中，我们创建了四种build variants：blueDebug,blueStaging,redDebug,redStaging。每一个variant都自定义了API URL 和flavor color。运行程序blueDebug可能为如下所示</p>
+<p><img src="https://i.loli.net/2021/08/06/y7YEqw6jUMWCdPo.jpg"></p>
+<p>而redStaging可能如下图所示</p>
+<p><img src="https://i.loli.net/2021/08/06/BUtFwH9ZXLkW7h4.jpg"></p>
+<p>第一个截图是blueDebug，使用的是debug build type中的URL和blue product flavor中的颜色，同理可类推redStaging</p>
+<h2 id="Variant-filters"><a href="#Variant-filters" class="headerlink" title="Variant filters"></a>Variant filters</h2><p>在某些情况下，可能我们不想使用某种build variant，例如现在有debug和release的build type，red和blue的flavors，但是，blue还是测试环境根本现在用不到blue的release版本，那么我们可以直接过滤掉，在android studio中的buildVariants窗口就不会出现了，过滤可以在app模块或者library模块的build.gradle文件中加入如下代码：</p>
+<figure class="highlight xl"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="title">android</span>.variantFilter &#123; variant -&gt;</span></span><br><span class="line">    <span class="keyword">if</span> (variant.buildType.<span class="keyword">name</span>.equals(<span class="string">&#x27;release&#x27;</span>)) &#123;</span><br><span class="line">        <span class="function"><span class="title">variant</span>.getFlavors().each() &#123; flavor -&gt;</span></span><br><span class="line">            <span class="keyword">if</span> (flavor.<span class="keyword">name</span>.equals(<span class="string">&#x27;blue&#x27;</span>)) &#123;</span><br><span class="line">                variant.setIgnore(<span class="literal">true</span>);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;          </span><br></pre></td></tr></table></figure>
+
+<p>加入以上代码后，再同步项目，在AndroidStudio的BuildVariants窗口就可以看见没有了blue release的版本了</p>
+<h2 id="Signing-Configuration-apk签名配置"><a href="#Signing-Configuration-apk签名配置" class="headerlink" title="Signing Configuration(apk签名配置)"></a>Signing Configuration(apk签名配置)</h2><p>在将app发布到Google Play或者其他应用市场之前，我们需要对apk进行秘钥签名。如果我们针对用户有免费和付费两个版本，那么需要给每一个flavor不同的签名，签名的配置代码参考如下</p>
+<figure class="highlight fsharp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"> <span class="keyword">android</span> &#123;</span><br><span class="line">       <span class="keyword">signingConfigs</span> &#123;</span><br><span class="line">           staging.initWith(signingConfigs.debug)</span><br><span class="line">           <span class="keyword">release</span> &#123;</span><br><span class="line">               storeFile file(<span class="string">&quot;release.keystore&quot;</span>)</span><br><span class="line">               storePassword <span class="string">&quot;secretpassword&quot;</span></span><br><span class="line">               keyAlias <span class="string">&quot;gradleforandroid&quot;</span></span><br><span class="line">               keyPassword <span class="string">&quot;secretpassword&quot;</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在上面的例子里，我们创建了两种不同签名配置</p>
+<p>debug类型的签名配置是由gradle的android插件自动生成的，密码的alias name都是默认的。</p>
+<blockquote>
+<p>Tips：密码建议不要写在build.gradle文件中，可以写在local.properties文件中</p>
+</blockquote>
+<p>加入了签名配置后，就可以使用签名信息了，代码可参考如下</p>
+<p>在buildType中使用</p>
+<figure class="highlight fsharp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"> <span class="keyword">android</span> &#123;</span><br><span class="line">       <span class="keyword">buildTypes</span> &#123;</span><br><span class="line">           <span class="keyword">release</span> &#123;</span><br><span class="line">               signingConfig signingConfigs.release</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在flavors中使用</p>
+<figure class="highlight stylus"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"> android &#123;</span><br><span class="line">       buildTypes &#123;</span><br><span class="line">           release &#123;</span><br><span class="line">               productFlavors<span class="selector-class">.red</span><span class="selector-class">.signingConfig</span> signingConfigs<span class="selector-class">.red</span></span><br><span class="line">               productFlavors<span class="selector-class">.blue</span><span class="selector-class">.signingConfig</span> signingConfigs<span class="selector-class">.blue</span></span><br><span class="line">            &#125; </span><br><span class="line">        &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>由上代码可知，我们不能如下配置</p>
+<figure class="highlight fsharp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"> <span class="keyword">android</span> &#123;</span><br><span class="line">       <span class="keyword">productFlavors</span> &#123;</span><br><span class="line">           <span class="keyword">blue</span> &#123;</span><br><span class="line">               signingConfig signingConfigs.release</span><br><span class="line">            &#125; </span><br><span class="line">        &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>因为在合并build type和flavor时，flavor会覆盖type中的签名</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>在这一部分，主要讨论了build type，produc flavors，和两者的组合以及组合后源码，资源文件的一些细节处理；再就是介绍了签名的配置。</p>
+
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>YamLee
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://yamlee.me/2016/04/17/2016-04-17-Android%20Gradle%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5%E7%B3%BB%E5%88%974/" title="Android Gradle最佳实践系列4：创建Build Variants">http://yamlee.me/2016/04/17/2016-04-17-Android Gradle最佳实践系列4/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/zh-CN" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2016/04/14/2016-04-14-Android%20Gradle%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5%E7%B3%BB%E5%88%973/" rel="prev" title="Android Gradle最佳实践系列3：依赖管理">
+      <i class="fa fa-chevron-left"></i> Android Gradle最佳实践系列3：依赖管理
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2016/04/20/2016-04-20-Android%20Gradle%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5%E7%B3%BB%E5%88%975/" rel="next" title="Android Gradle最佳实践系列5：多模块构建">
+      Android Gradle最佳实践系列5：多模块构建 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Build-types"><span class="nav-number">1.</span> <span class="nav-text">Build types</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%9B%E5%BB%BAbuild-types"><span class="nav-number">1.1.</span> <span class="nav-text">创建build types</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#build-types%E4%BB%A3%E7%A0%81%E7%9B%AE%E5%BD%95%E7%BB%93%E6%9E%84%E8%AE%BE%E7%BD%AE"><span class="nav-number">1.2.</span> <span class="nav-text">build types代码目录结构设置</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BE%9D%E8%B5%96"><span class="nav-number">1.3.</span> <span class="nav-text">依赖</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Product-flavors"><span class="nav-number">2.</span> <span class="nav-text">Product flavors</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%9B%E5%BB%BA-product-flavors"><span class="nav-number">2.1.</span> <span class="nav-text">创建 product flavors</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#product-flavors%E4%BB%A3%E7%A0%81%E7%9B%AE%E5%BD%95%E7%BB%93%E6%9E%84%E8%AE%BE%E7%BD%AE"><span class="nav-number">2.2.</span> <span class="nav-text">product flavors代码目录结构设置</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Multiflavor-variants"><span class="nav-number">2.3.</span> <span class="nav-text">Multiflavor variants</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Build-variants"><span class="nav-number">3.</span> <span class="nav-text">Build variants</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Tasks"><span class="nav-number">4.</span> <span class="nav-text">Tasks</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%A3%E7%A0%81%E7%9B%AE%E5%BD%95%E9%85%8D%E7%BD%AE%EF%BC%88Source-sets%EF%BC%89"><span class="nav-number">5.</span> <span class="nav-text">代码目录配置（Source sets）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%B5%84%E6%BA%90%E6%96%87%E4%BB%B6%E5%92%8Cmanifest%E6%96%87%E4%BB%B6%E7%9A%84%E5%90%88%E5%B9%B6"><span class="nav-number">6.</span> <span class="nav-text">资源文件和manifest文件的合并</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%88%9B%E5%BB%BAbuild-variants"><span class="nav-number">7.</span> <span class="nav-text">创建build variants</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Variant-filters"><span class="nav-number">8.</span> <span class="nav-text">Variant filters</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Signing-Configuration-apk%E7%AD%BE%E5%90%8D%E9%85%8D%E7%BD%AE"><span class="nav-number">9.</span> <span class="nav-text">Signing Configuration(apk签名配置)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">10.</span> <span class="nav-text">总结</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="YamLee"
+      src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">YamLee</p>
+  <div class="site-description" itemprop="description">专注移动开发</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">18</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">9</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/yamlee" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;yamlee" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title"><i class="fa fa-link fa-fw"></i>
+      Links
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="http://yamlee.me/" title="http:&#x2F;&#x2F;yamlee.me&#x2F;">Title</a>
+        </li>
+    </ul>
+  </div>
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">YamLee</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

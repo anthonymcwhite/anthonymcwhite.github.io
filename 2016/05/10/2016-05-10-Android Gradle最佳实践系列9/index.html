@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.1.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/avatar.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/avatar.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.ico">
+  <link rel="mask-icon" href="/images/avatar.png" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="https://fonts.loli.net/css?family=Noto Sans SC:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"yamlee.me","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"default"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="现在我们知道了Gradle如何工作，如何创建自定义任务和插件、如何运行测试、以及如何设置持续集成环境，我们在Gradle已经小有所成。本章包含了我们在前面几章中没有提到的一些优化技巧，这些技巧使我们可以更轻松地使用Gradle构建，开发和部署Android项目。 在本章中，我们将学习到以下主题：  压缩Apk大小 加快Build速度 忽略Lint检查 在Gradle中使用Ant 应用发布的高级技巧">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Android Gradle最佳实践系列9：高级配置">
+<meta property="og:url" content="http://yamlee.me/2016/05/10/2016-05-10-Android%20Gradle%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5%E7%B3%BB%E5%88%979/index.html">
+<meta property="og:site_name" content="Lee Blog">
+<meta property="og:description" content="现在我们知道了Gradle如何工作，如何创建自定义任务和插件、如何运行测试、以及如何设置持续集成环境，我们在Gradle已经小有所成。本章包含了我们在前面几章中没有提到的一些优化技巧，这些技巧使我们可以更轻松地使用Gradle构建，开发和部署Android项目。 在本章中，我们将学习到以下主题：  压缩Apk大小 加快Build速度 忽略Lint检查 在Gradle中使用Ant 应用发布的高级技巧">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://i.loli.net/2021/08/22/raZk6FY3XoBb5zi.jpg">
+<meta property="og:image" content="https://i.loli.net/2021/08/22/BmRLyY94KXOHwkQ.jpg">
+<meta property="article:published_time" content="2016-05-09T16:00:00.000Z">
+<meta property="article:modified_time" content="2022-04-08T04:06:59.662Z">
+<meta property="article:author" content="YamLee">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://i.loli.net/2021/08/22/raZk6FY3XoBb5zi.jpg">
+
+<link rel="canonical" href="http://yamlee.me/2016/05/10/2016-05-10-Android%20Gradle%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5%E7%B3%BB%E5%88%979/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Android Gradle最佳实践系列9：高级配置 | Lee Blog</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-122582412-1"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'UA-122582412-1');
+      }
+    </script>
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Lee Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">专注移动开发</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yamlee.me/2016/05/10/2016-05-10-Android%20Gradle%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5%E7%B3%BB%E5%88%979/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="YamLee">
+      <meta itemprop="description" content="专注移动开发">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Lee Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Android Gradle最佳实践系列9：高级配置
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2016-05-10 00:00:00" itemprop="dateCreated datePublished" datetime="2016-05-10T00:00:00+08:00">2016-05-10</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2022-04-08 12:06:59" itemprop="dateModified" datetime="2022-04-08T12:06:59+08:00">2022-04-08</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Android-Gradle%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5%E7%B3%BB%E5%88%97/" itemprop="url" rel="index"><span itemprop="name">Android Gradle最佳实践系列</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>现在我们知道了Gradle如何工作，如何创建自定义任务和插件、如何运行测试、以及如何设置持续集成环境，我们在Gradle已经小有所成。本章包含了我们在前面几章中没有提到的一些优化技巧，这些技巧使我们可以更轻松地使用Gradle构建，开发和部署Android项目。</p>
+<p>在本章中，我们将学习到以下主题：</p>
+<ul>
+<li>压缩Apk大小</li>
+<li>加快Build速度</li>
+<li>忽略Lint检查</li>
+<li>在Gradle中使用Ant</li>
+<li>应用发布的高级技巧</li>
+</ul>
+<p>首先我们来看下如何减小构建Apk的体积大小。</p>
+<span id="more"></span>
+
+<h2 id="压缩Apk大小"><a href="#压缩Apk大小" class="headerlink" title="压缩Apk大小"></a>压缩Apk大小</h2><p>在过去几年中，Android APK的大小一直在急剧增加。这里有几个主要原因：在项目中引入了更多的第三方公共库;适配更多的屏幕类型;再就是随着需求的增多功能越来越多。</p>
+<p>尽可能的缩小Apk大小在开发过程中非常有必要，因为Google Play本身要求APK文件限制在50MB以内，并且较小的APK可以让用户更快地下载和安装应用程序，占用更少的手机存储空间。</p>
+<p>在这一小节中，我们将看到Gradle构建配置文件中的一些属性，可以通过这些属性来缩小APK文件。</p>
+<h3 id="ProGuard"><a href="#ProGuard" class="headerlink" title="ProGuard"></a>ProGuard</h3><p><strong>ProGuard</strong> 是一个Java工具，它不仅可以缩小程序大小，还可以在编译时对代码进行优化，模糊处理和预校验。 它会遍历应用程序中的所有代码路径，查找出未使用的代码并将其删除。ProGuard还会重命名代码中的类和字段，这个过程就是混淆代码，使代码更难被逆向反编译出来。</p>
+<p>Gradle的Android插件在 <em>buildType</em> 上有一个名为 <strong>minifyEnabled</strong> 的布尔属性，我们需要将其设置为true以启用ProGuard：</p>
+<figure class="highlight reasonml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"> android &#123;</span><br><span class="line">       buildTypes &#123;</span><br><span class="line">           release &#123;</span><br><span class="line">               minifyEnabled <span class="literal">true</span></span><br><span class="line">               proguardFiles get<span class="constructor">DefaultProguardFile(&#x27;<span class="params">proguard</span>-<span class="params">android</span>.<span class="params">txt</span>&#x27;)</span>, &#x27;proguard-rules.pro&#x27;</span><br><span class="line">           &#125;</span><br><span class="line">        &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>当我们将 <strong>minifyEnabled</strong> 设置为true时，Gradle将会执行 <strong>proguardRelease</strong> 任务，并在构建过程中调用ProGuard程序进行混淆。</p>
+<p>在启用ProGuard之后编译出来的Apk需要再次进行测试，因为很可能因为配置问题删除了一些我们还需要的代码，因为这个问题，使得很多开发人员厌倦ProGuard。要解决此问题，我们可以定义ProGuard的规则，以排除某些类被删除或混淆。 <strong>proguardFiles</strong> 属性用于指定包含ProGuard规则的文件。例如，要保留一个类，可以添加如下的简单规则：</p>
+<figure class="highlight angelscript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">-keep <span class="keyword">public</span> <span class="keyword">class</span> &lt;<span class="symbol">MyClass</span>&gt;</span><br></pre></td></tr></table></figure>
+
+<p><strong>getDefaultProguardFile(‘proguard-android.txt’)</strong> 方法从一个名为 <em>proguard-android.txt</em> 的文件中获取默认的ProGuard设置，该文件在Android SDK&#x2F;tools&#x2F;proguard下。默认情况下，Android Studio会将 <strong>proguard-rules.pro</strong> 文件添加到每一个Android模块中，我们可以在该文件中添加特定于该模块的混淆规则。</p>
+<blockquote>
+<p>ProGuard规则对于构建的每个应用程序或Library都是不同的，所以我们在本章节中不会涉及太多细节。如果想了解有关ProGuard和ProGuard规则的更多信息，可以查看官方<a target="_blank" rel="noopener" href="http://developer.android.com/tools/help/proguard.html">Android ProGuard文档</a>。</p>
+</blockquote>
+<p>除了压缩Java代码，缩减使用的资源也是可以很好帮助减小Apk大小，接下来看看如何压缩资源文件。</p>
+<h3 id="压缩Resource文件"><a href="#压缩Resource文件" class="headerlink" title="压缩Resource文件"></a>压缩Resource文件</h3><p>Gradle和Gradle Android Plugin可以在应用程序被打包时删除所有未使用到的资源文件。如果我们有忘记删除的旧资源，这就非常有用。还有一点是当导入具有大量资源文件的第三方库时，但是又只使用了其中的一小部分资源，通过启用缩减资源来解决此问题。当前有两种方式来缩减资源，分为自动或手动的方式。</p>
+<h4 id="自动压缩"><a href="#自动压缩" class="headerlink" title="自动压缩"></a>自动压缩</h4><p>自动压缩的方式很简单，就是在构建中配置 <strong>shrinkResources</strong> 属性。如果将此属性设置为true，Android构建工具将自动检测哪些资源未被使用，并且不会将它们包括在APK中。</p>
+<p>使用此功能有一个要求，必须启用ProGuard。这是因为资源缩减的工作方式，Android构建工具只有在引用这些资源的代码已被删除的情况下才能找出哪些资源未被使用。</p>
+<p>以下代码段显示了如何在某个buildType上配置自动缩减资源：</p>
+<figure class="highlight fsharp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">android</span> &#123;</span><br><span class="line">	<span class="keyword">buildTypes</span> &#123;</span><br><span class="line">      	<span class="keyword">release</span> &#123;</span><br><span class="line">               minifyEnabled <span class="operator">=</span> <span class="literal">true</span></span><br><span class="line">               shrinkResources <span class="operator">=</span> <span class="literal">true</span></span><br><span class="line">        &#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>如果要查看在启用自动缩减资源后APK的确切大小，我们可以运行 <strong>shrinkReleaseResources</strong> 任务。 这个任务打印出它减少了包的大小：</p>
+<figure class="highlight asciidoc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">:app:shrinkReleaseResources</span></span><br><span class="line">Removed unused resources: Binary resource data reduced from 433KB to 354KB: Removed 18%</span><br></pre></td></tr></table></figure>
+
+<p>我们可以通过在build命令中添加–info标志来详细了解从APK中删除的资源：</p>
+<figure class="highlight excel"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ gradlew <span class="built_in">clean</span> assembleRelease --<span class="built_in">info</span></span><br></pre></td></tr></table></figure>
+
+<p>当使用此标志时，Gradle会打印出大量关于构建过程的详细信息，包括最终构建输出中被移除的每个资源。</p>
+<p>自动资源缩减的一个问题是它可能删除太多的资源。特别是动态使用的资源可能被意外地剥离。为了防止这种情况，可以在放置在res&#x2F;raw&#x2F;中的名为 <strong>keep.xml</strong> 的文件中定义异常（不存在需要自己创建）。一个简单的keep.xml文件如下所示：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=<span class="string">&quot;1.0&quot;</span> encoding=<span class="string">&quot;utf-8&quot;</span>?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">resources</span> <span class="attr">xmlns:tools</span>=<span class="string">&quot;http://schemas.android.com/tools&quot;</span></span></span><br><span class="line"><span class="tag"><span class="attr">tools:keep</span>=<span class="string">&quot;@layout/keep_me,@layout/also_used_*&quot;</span>/&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>keep.xml文件本身不会包括在最终的apk中。</p>
+<h4 id="手动压缩"><a href="#手动压缩" class="headerlink" title="手动压缩"></a>手动压缩</h4><p>缩减资源比较温和的方式就是只去除某些分辨率下的某些语言文件或图像。 某些Library（例如Google Play服务）包含许多语言，如果我们的应用只支持一种或两种语言，将最终APK中包含这些库中的所有语言文件都没有意义。可以使用 <strong>resConfigs</strong> 属性配置要保留的资源，然后其余的将被抛出。</p>
+<p>例如：如果只想保留英语，丹麦语和荷兰语字符串，可以使用resConfigs，如下所示：</p>
+<figure class="highlight fsharp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">android</span> &#123;</span><br><span class="line">       <span class="keyword">defaultConfig</span> &#123;</span><br><span class="line">           resConfigs <span class="string">&quot;en&quot;</span>, <span class="string">&quot;da&quot;</span>, <span class="string">&quot;nl&quot;</span></span><br><span class="line">       &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>设置保留指定分辨率资源，可以如下设置：</p>
+<figure class="highlight fsharp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">android</span> &#123;</span><br><span class="line">       <span class="keyword">defaultConfig</span> &#123;</span><br><span class="line">           resConfigs <span class="string">&quot;hdpi&quot;</span>, <span class="string">&quot;xhdpi&quot;</span>, <span class="string">&quot;xxhdpi&quot;</span>, <span class="string">&quot;xxxhdpi&quot;</span></span><br><span class="line">       &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>语言和分辨率资源设置可以同时设置。事实上，每种类型的资源都可以使用此属性进行限制。</p>
+<p>如果很难设置ProGuard，或者只是想要摆脱应用程序不支持的语言或density资源，那么使用resConfigs是一个很好的方法来做资源缩减。</p>
+<h2 id="加快Build速度"><a href="#加快Build速度" class="headerlink" title="加快Build速度"></a>加快Build速度</h2><p>许多使用Gradle的Android开发者都抱怨编译时间过长。其构建可能比使用Ant的时间更长，因为Gradle在构建生命周期中有三个阶段，每次执行任务时都需要经历着三个阶段。这虽然使得整个构建过程在每一个环节都可配置，但也导致了构建非常缓慢。幸运的是，有几种方法可以加快Gradle的构建。</p>
+<h3 id="Gradle优化"><a href="#Gradle优化" class="headerlink" title="Gradle优化"></a>Gradle优化</h3><p>调整Gradle构建速度的一种方法是更改一些默认设置。在<a href="">第5章“管理多模块构建”</a>中并行构建执行中提到过，但还有一些其他设置可以调整。</p>
+<p>简要回顾一下，我们可以通过在gradle中设置parallel属性来启用并行构建。 <strong>properties</strong> 文件放置在项目的根目录中。你需要添加以下行：</p>
+<figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">org.gradle.parallel</span>=<span class="literal">true</span></span><br></pre></td></tr></table></figure>
+
+<p>另一个修改是启用Gradle守护进程，当第一次运行构建时启动后台进程。任何后续构建将随后重用该后台进程，从而减小启动成本。只要使用Gradle，该进程就一直存在，在空闲时间三小时后会终止。当在短时间内使用Gradle多次时，使用守护程序特别有用。我们可以在gradle.properties文件中启用守护程序，如下所示：</p>
+<figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">org.gradle.daemon</span>=<span class="literal">true</span></span><br></pre></td></tr></table></figure>
+
+<p>在Android Studio中，Gradle守护程序默认情况下处于开启状态。这意味着在从IDE内部进行第一次构建之后，下一个构建会更快。但是，如果从命令行界面构建，Gradle守护程序是禁用的，除非你在设置文件中启用它。</p>
+<p>要加快编译速度，还可以调整Java虚拟机（JVM）上的参数。 有一个称为jvmargs的Gradle属性，它允许为JVM的内存分配池设置不同的值。对构建速度有直接影响的两个参数是Xms和Xmx。Xms参数用于设置JVM要使用的初始内存量，而Xmx参数用于设置JVM内存使用的最大值。我们可以在gradle.properties文件中手动设置这些值，如下所示：</p>
+<figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">org.gradle.jvmargs</span>=-Xms256m -Xmx1024m</span><br></pre></td></tr></table></figure>
+
+<p>我们需要设置正确数量和单位，可以是k（千字节），m（兆字节）和g（千兆字节）。默认情况下，最大内存分配（Xmx）设置为256 MB，并且未设置起始内存分配（Xms）。最佳设置取决于计算机的功能。</p>
+<p>最后一个可以配置来加快构建速度的属性是 <strong>org.gradle.configureondemand</strong> 。如果有包含多个模块的复杂项目，此属性特别有用，因为它尝试通过为正在执行的任务跳过不需要的模块来限制在配置阶段花费的时间。如果将此属性设置为true，Gradle将在运行配置阶段之前尝试找出哪些模块具有配置更改，哪些没有配置更改。如果我们的项目中只有一个Android应用程序和一个库，这个功能将不会非常有用。如果你有很多模块松耦合，这个功能可以节省大量的构建时间。</p>
+<blockquote>
+<p><strong>系统级Gradle属性</strong><br>如果要将这些属性应用于所有基于Gradle的项目，你可以在用户录中的 <strong>.gradle</strong> 目录下创建一个 <strong>gradle.properties</strong> 文件。 在Windows上，此目录的完整路径为 <em>％UserProfile％\.gradle</em> ，在Linux和Mac OS X是 <em>〜&#x2F;.gradle</em> 。 在用户目录中设置这些属性，而不是在项目级别做的原因是，CI服务器上需要保证不能太高的内存消耗，相对来说构建时间不太重要，所以在开发PC上设置而不再项目里设置,避免CI服务器也使用优化配置。</p>
+</blockquote>
+<h3 id="Android-Studio设置"><a href="#Android-Studio设置" class="headerlink" title="Android Studio设置"></a>Android Studio设置</h3><p>你可以在Android Studio设置中对Gradle属性进行相应配置来加快编译过程。要查找编译器设置，打开 <strong>Settings</strong> 对话框，然后导航到 <strong>Build</strong> ， <strong>Execution</strong> ， <strong>Deployment</strong> | <strong>Compiler</strong> ,在该项目下，我们可以找到并行构建，JVM选项，按需配置等设置。这些设置只在基于Gradle的Android模块显示。可以参考下面截图：</p>
+<p><img src="https://i.loli.net/2021/08/22/raZk6FY3XoBb5zi.jpg"></p>
+<p>从Android Studio配置比在构建配置文件中手动配置这些设置要更容易，并且设置界面便于查找各个构建属性。</p>
+<h3 id="Build分析"><a href="#Build分析" class="headerlink" title="Build分析"></a>Build分析</h3><p>如果我们想知道构建的哪些部分减慢了构建过程，可以对整个构建过程进行配置。通过在执行Gradle任务时添加 <strong>–profile</strong> 标志来实现。当使用此标志时，Gradle会创建一个概要分析报告，它可以告诉我们构建过程的哪些部分是最耗时的 一旦知道瓶颈在哪里，就可以进行必要的更改。分析报告将作为HTML文件保存在模块的 <em>build&#x2F;reports&#x2F;profile</em> 目录下。</p>
+<p>如下是在多模块项目上执行构建任务后生成的报告：</p>
+<p><img src="https://i.loli.net/2021/08/22/BmRLyY94KXOHwkQ.jpg"></p>
+<p>如上图， <strong>Summary</strong> 栏显示执行任务期间在每个阶段中花费的时间的概览。 <strong>Configuration</strong> 栏显示配置阶段花费了多少时间。 <strong>Dependency Resolution</strong> 部分显示每个模块解析依赖所需的时间。最后， <strong>Task Execution</strong> 部分包含非常详细的任务执行时间，这个部分具有每个任务的执行时序，按执行时间从高到低排序。</p>
+<h3 id="Jack-and-Jill"><a href="#Jack-and-Jill" class="headerlink" title="Jack and Jill"></a>Jack and Jill</h3><p>我们可以启用Jack and Jill来加快构建。Jack（Java Android Compiler Kit）是一个新的Android构建工具包，它将Java源代码直接编译为Android Dalvik可执行文件（dex）格式。它有自己的打包和资源压缩流程并生成 <strong>.jack</strong> 格式的中间库。Jill（Jack Intermediate Library Linker）是一个可以将.aar和.jar文件转换为.jack库的工具。这些工具将减少构建时间和简化Android构建过程。</p>
+<p>要能够使用Jack和Jill，我们需要使用版本21.1.1或更高版本的build tool，以及Gradle版本1.0.0或更高版本的Android插件。 启用Jack和Jill只需要在build.gradle文件的 <strong>defaultConfig</strong> 块中设置一个属性：</p>
+<figure class="highlight nginx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="section">android</span> &#123;</span><br><span class="line">    <span class="attribute">buildToolsRevision</span> <span class="string">&#x27;22.0.1&#x27;</span></span><br><span class="line">    defaultConfig &#123;</span><br><span class="line">        <span class="attribute">useJack</span> = <span class="literal">true</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>还可以在特定build variant上启用Jack和Jill。这样，就可以在特定构建版本上使用jack and jill，别的版本还是走正常构建</p>
+<figure class="highlight fsharp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">android</span> &#123;</span><br><span class="line">    <span class="keyword">productFlavors</span> &#123;</span><br><span class="line">        <span class="keyword">regular</span> &#123;</span><br><span class="line">            useJack <span class="operator">=</span> <span class="literal">false</span></span><br><span class="line">		&#125;</span><br><span class="line">        <span class="keyword">experimental</span> &#123;</span><br><span class="line">            useJack <span class="operator">=</span> <span class="literal">true</span></span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>一旦将useJack设置为true，压缩资源和混淆将不再通过ProGuard，但仍然可以使用ProGuard规则语法来指定某些规则和异常给jack使用。</p>
+<h2 id="忽略Lint检查"><a href="#忽略Lint检查" class="headerlink" title="忽略Lint检查"></a>忽略Lint检查</h2><p>当使用Gradle执行构建时，Android构建任务将会对代码执行Lint检查。Lint是一个静态代码分析工具，用于标记布局和Java代码中的潜在错误。在某些情况下，Lint一旦报错，构建就会停止。如果之前没有在项目中使用Lint，并且我们想迁移到Gradle，Lint可能会出现很多错误。为了使构建工作不会因为Lint检查而中断，你可以配置Gradle来忽略Lint错误，并通过禁用 <strong>abortOnError</strong> 来阻止它们中止构建。这只是一个临时解决方案，因为忽略Lint检查可能会产生像丢失翻译类似这样的潜在错误，这可能会导致应用程序崩溃的问题。为了防止Lint阻塞构建过程，可以像下面这样禁用abortOnError：</p>
+<figure class="highlight fsharp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">android</span> &#123;</span><br><span class="line">       <span class="keyword">lintOptions</span> &#123;</span><br><span class="line">           abortOnError <span class="literal">false</span></span><br><span class="line">       &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>暂时禁用Lint中止可以使现有构建过程更容易迁移到Gradle。</p>
+<h2 id="应用发布的高级技巧"><a href="#应用发布的高级技巧" class="headerlink" title="应用发布的高级技巧"></a>应用发布的高级技巧</h2><p>在<a href="">第4章“创建构建变体”</a>中，你学习到了使用buildType和productFlavor来创建同一个应用程序的多个版本。但是，在某些情况下，使用更具体的技术（如APK拆分）可能更容易。</p>
+<h3 id="Apk拆分"><a href="#Apk拆分" class="headerlink" title="Apk拆分"></a>Apk拆分</h3><p>每一个build variant都可以看作是单独的版本，每个版本可以有自己的代码，资源和manifest文件。另一方面，APK拆分只影响应用程序的打包。 编译，缩小，混淆等仍然是共享的。 此机制允许您基于density或application binary interface（ABI）拆分APK。</p>
+<p>您可以通过在Android配置块中定义splits块来配置apk拆分。要配置density分割，请在splits块中创建一个density块。如果要设置ABI拆分，请使用abi块。</p>
+<figure class="highlight puppet"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">android</span> &#123;</span><br><span class="line">       splits &#123;</span><br><span class="line">           density &#123;</span><br><span class="line">               <span class="literal">enable</span> <span class="keyword">true</span></span><br><span class="line">               <span class="literal">exclude</span> <span class="string">&#x27;ldpi&#x27;</span>, <span class="string">&#x27;mdpi&#x27;</span></span><br><span class="line">               compatibleScreens <span class="string">&#x27;normal&#x27;</span>, <span class="string">&#x27;large&#x27;</span>, <span class="string">&#x27;xlarge&#x27;</span></span><br><span class="line">           &#125;</span><br><span class="line">     &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>如果你的应用只需要支持几个屏幕密度，则可以使用include创建密度白名单。 要使用include，你首先需要使用reset()属性，它将包含的density列表重置为空字符串。</p>
+<p>上述代码段中的<strong>compatibleScreens</strong>属性是可选的，配置后gradle会自动在manifest文件中插入对应的节点。示例中的配置适用于支持常规到超大屏幕的应用，不包括具有小屏幕的设备。</p>
+<p>基于ABI的拆分APK的与根据屏幕密度拆分的工作方式大致相同。ABI拆分与屏幕大小无关，所以没有属性称为compatibleScreens，所以除了compatibleScreens之外，其他属性与密度拆分的属性都相同。</p>
+<p>设置密度拆分后执行构建，Gradle会生成一个通用APK和几个特定屏幕密度的APK。这意味着你会得到一个APK的集合，如下所示：</p>
+<figure class="highlight arduino"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">app-hdpi-release.apk</span><br><span class="line">app-universal-release.apk</span><br><span class="line">app-xhdpi-release.apk</span><br><span class="line">app-xxhdpi-release.apk</span><br><span class="line">app-xxxhdpi-release.apk</span><br></pre></td></tr></table></figure>
+
+<p>使用APK拆分需要注意的一点是，如果你要将多个APK推送到Google Play，需要确保每个APK都有不同的version code。也就是说每个拆分都应该有一个唯一的version code。你可以通过查看applicationVariants属性在Gradle中做到这一点</p>
+<figure class="highlight xl"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">ext.versionCodes = [<span class="string">&#x27;armeabi-v7a&#x27;</span>:<span class="number">1</span>, mips:<span class="number">2</span>, x86:<span class="number">3</span>]</span><br><span class="line">   <span class="keyword">import</span> com.android.build.OutputFile</span><br><span class="line">   <span class="function"><span class="title">android</span>.applicationVariants.all &#123; variant -&gt;</span></span><br><span class="line">       <span class="comment">// assign different version code for each output</span></span><br><span class="line">       <span class="function"><span class="title">variant</span>.outputs.each &#123; output -&gt;</span></span><br><span class="line">           output.versionCodeOverride =  project.ext.versionCodes.get</span><br><span class="line">             (output.getFilter(OutputFile.ABI)) * <span class="number">1000000</span> + android.defaultConfig.versionCode</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>以上代码会检查build variant中使用的ABI，然后对version code做乘法处理，以确保每个变体都有唯一的版本代码。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>阅读本章后，你知道了如何减小构建输出APK的大小，以及如何通过配置Gradle和JVM来加快构建速度。迁移Ant项目对你来说是小意思了。你还学到了一些小技巧，使开发和部署更容易。</p>
+<p>截止到本章，Gradle For Android的内容都介绍完了！现在，你知道Gradle的各个特性，你可以调整和自定义Android项目的构建过程，自动化到你除了执行任务，再也不需要做任何手动工作。你可以配置build variant，管理依赖关系和配置多模块项目。你现在需要做的是在实际项目中应用你的新技能！</p>
+
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>YamLee
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://yamlee.me/2016/05/10/2016-05-10-Android%20Gradle%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5%E7%B3%BB%E5%88%979/" title="Android Gradle最佳实践系列9：高级配置">http://yamlee.me/2016/05/10/2016-05-10-Android Gradle最佳实践系列9/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/zh-CN" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2016/05/02/2016-05-02-Android%20Gradle%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5%E7%B3%BB%E5%88%978/" rel="prev" title="Android Gradle最佳实践系列8：设置CI(集成开发环境)">
+      <i class="fa fa-chevron-left"></i> Android Gradle最佳实践系列8：设置CI(集成开发环境)
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2021/12/25/2015-10-11-hamcrest-guide/" rel="next" title="单元测试中断言框架的使用-hamcrest">
+      单元测试中断言框架的使用-hamcrest <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8E%8B%E7%BC%A9Apk%E5%A4%A7%E5%B0%8F"><span class="nav-number">1.</span> <span class="nav-text">压缩Apk大小</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#ProGuard"><span class="nav-number">1.1.</span> <span class="nav-text">ProGuard</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8E%8B%E7%BC%A9Resource%E6%96%87%E4%BB%B6"><span class="nav-number">1.2.</span> <span class="nav-text">压缩Resource文件</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%87%AA%E5%8A%A8%E5%8E%8B%E7%BC%A9"><span class="nav-number">1.2.1.</span> <span class="nav-text">自动压缩</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%89%8B%E5%8A%A8%E5%8E%8B%E7%BC%A9"><span class="nav-number">1.2.2.</span> <span class="nav-text">手动压缩</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8A%A0%E5%BF%ABBuild%E9%80%9F%E5%BA%A6"><span class="nav-number">2.</span> <span class="nav-text">加快Build速度</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Gradle%E4%BC%98%E5%8C%96"><span class="nav-number">2.1.</span> <span class="nav-text">Gradle优化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Android-Studio%E8%AE%BE%E7%BD%AE"><span class="nav-number">2.2.</span> <span class="nav-text">Android Studio设置</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Build%E5%88%86%E6%9E%90"><span class="nav-number">2.3.</span> <span class="nav-text">Build分析</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Jack-and-Jill"><span class="nav-number">2.4.</span> <span class="nav-text">Jack and Jill</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%BF%BD%E7%95%A5Lint%E6%A3%80%E6%9F%A5"><span class="nav-number">3.</span> <span class="nav-text">忽略Lint检查</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%BA%94%E7%94%A8%E5%8F%91%E5%B8%83%E7%9A%84%E9%AB%98%E7%BA%A7%E6%8A%80%E5%B7%A7"><span class="nav-number">4.</span> <span class="nav-text">应用发布的高级技巧</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Apk%E6%8B%86%E5%88%86"><span class="nav-number">4.1.</span> <span class="nav-text">Apk拆分</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">5.</span> <span class="nav-text">总结</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="YamLee"
+      src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">YamLee</p>
+  <div class="site-description" itemprop="description">专注移动开发</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">18</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">9</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/yamlee" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;yamlee" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title"><i class="fa fa-link fa-fw"></i>
+      Links
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="http://yamlee.me/" title="http:&#x2F;&#x2F;yamlee.me&#x2F;">Title</a>
+        </li>
+    </ul>
+  </div>
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">YamLee</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

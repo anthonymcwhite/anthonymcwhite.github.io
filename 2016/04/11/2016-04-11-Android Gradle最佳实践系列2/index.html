@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.1.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/avatar.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/avatar.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.ico">
+  <link rel="mask-icon" href="/images/avatar.png" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="https://fonts.loli.net/css?family=Noto Sans SC:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"yamlee.me","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"default"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="在上一章节中我们学习了Gradle的用法，以及如何创建Android项目以及如何从Eclipse中将项目转换到Android Studio中。这一章节将介绍构建文件配置的更多细节，以及一些有用的构建任务，并深入Gradle的Android插件。在本章中，我们将讨论以下主题：  理解Gradle的各种配置文件 初识Build Tasks 自定义构建">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Android Gradle最佳实践系列2：自定义Build配置">
+<meta property="og:url" content="http://yamlee.me/2016/04/11/2016-04-11-Android%20Gradle%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5%E7%B3%BB%E5%88%972/index.html">
+<meta property="og:site_name" content="Lee Blog">
+<meta property="og:description" content="在上一章节中我们学习了Gradle的用法，以及如何创建Android项目以及如何从Eclipse中将项目转换到Android Studio中。这一章节将介绍构建文件配置的更多细节，以及一些有用的构建任务，并深入Gradle的Android插件。在本章中，我们将讨论以下主题：  理解Gradle的各种配置文件 初识Build Tasks 自定义构建">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://ww1.sinaimg.cn/large/6b051377jw1f9bgso8ybpj20fz06cgm0.jpg">
+<meta property="og:image" content="http://ww3.sinaimg.cn/large/6b051377jw1f9bhcarkisj20ba0df75a.jpg">
+<meta property="og:image" content="http://ww4.sinaimg.cn/large/6b051377jw1f9bhg1clo4j20ic09dt9q.jpg">
+<meta property="article:published_time" content="2016-04-10T16:00:00.000Z">
+<meta property="article:modified_time" content="2022-04-08T04:06:59.670Z">
+<meta property="article:author" content="YamLee">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://ww1.sinaimg.cn/large/6b051377jw1f9bgso8ybpj20fz06cgm0.jpg">
+
+<link rel="canonical" href="http://yamlee.me/2016/04/11/2016-04-11-Android%20Gradle%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5%E7%B3%BB%E5%88%972/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Android Gradle最佳实践系列2：自定义Build配置 | Lee Blog</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-122582412-1"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'UA-122582412-1');
+      }
+    </script>
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Lee Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">专注移动开发</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yamlee.me/2016/04/11/2016-04-11-Android%20Gradle%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5%E7%B3%BB%E5%88%972/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="YamLee">
+      <meta itemprop="description" content="专注移动开发">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Lee Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Android Gradle最佳实践系列2：自定义Build配置
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2016-04-11 00:00:00" itemprop="dateCreated datePublished" datetime="2016-04-11T00:00:00+08:00">2016-04-11</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2022-04-08 12:06:59" itemprop="dateModified" datetime="2022-04-08T12:06:59+08:00">2022-04-08</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Android-Gradle%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5%E7%B3%BB%E5%88%97/" itemprop="url" rel="index"><span itemprop="name">Android Gradle最佳实践系列</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>在上一章节中我们学习了Gradle的用法，以及如何创建Android项目以及如何从Eclipse中将项目转换到Android Studio中。这一章节将介绍构建文件配置的更多细节，以及一些有用的构建任务，并深入Gradle的Android插件。<br>在本章中，我们将讨论以下主题：</p>
+<ul>
+<li>理解Gradle的各种配置文件</li>
+<li>初识Build Tasks</li>
+<li>自定义构建</li>
+</ul>
+<span id="more"></span>
+
+<h2 id="理解Gradle的各种配置文件"><a href="#理解Gradle的各种配置文件" class="headerlink" title="理解Gradle的各种配置文件"></a>理解Gradle的各种配置文件</h2><p>当使用Android Studio创建新项目时，默认会生成三个Gradle文件。 其中两个文件，<strong>settings.gradle</strong>和<strong>build.gradle</strong>，在项目的根目录。另一个<strong>build.gradle</strong>文件在Android应用程序模块中。 如下图展示了Gradle文件如何放置在项目中：</p>
+<figure class="highlight 1c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">MyApp</span><br><span class="line"><span class="string">|-buid.gradle</span></span><br><span class="line"><span class="string">|-settings.gradle</span></span><br><span class="line"><span class="string">|-app</span></span><br><span class="line">    <span class="string">|-buid.grade</span></span><br></pre></td></tr></table></figure>
+
+<p>这三个文件每个都有其单独的用途，接下来将详细介绍：</p>
+<h3 id="settings-gradle文件"><a href="#settings-gradle文件" class="headerlink" title="settings.gradle文件"></a>settings.gradle文件</h3><p>对于只包含Android应用模块的项目，<strong>settings.gradle</strong>文件内容如下所示</p>
+<figure class="highlight ruby"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">include</span> <span class="string">&#x27;:app&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<p>setting文件在Build初始化阶段执行，定义了哪些模块应改被包含在构建中。 在此示例中，应用程序模块被包含其中。单个模块项目不一定需要setting文件，但是多模块项目必须要包含setting文件；否则，Gradle不知道要将哪些模块包含到构建中。<br>setting文件的幕后运行机制是：Gradle为每个设置文件创建一个Settings对象，并从该对象调用必要的方法。你不需要知道Settings类的具体细节，但是知道有settings对象存在对深入了解gradle是有帮助的。</p>
+<blockquote>
+<p>Settings类的完整解释超出了本文档的范围。 如果你想知道更多，你可以在Gradle<a target="_blank" rel="noopener" href="https://gradle.org/docs/current/dsl/org.gradle.api.initialization.Settings.html">官方文档</a>中找到很多信息。</p>
+</blockquote>
+<h3 id="项目根build-gradle文件"><a href="#项目根build-gradle文件" class="headerlink" title="项目根build.gradle文件"></a>项目根build.gradle文件</h3><p>在项目根目录的build.gradle文件中，你可以配置需要应用于项目中所有模块的选项。它默认包含两个代码块：</p>
+<figure class="highlight gradle"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">buildscript</span> &#123;</span><br><span class="line">    <span class="keyword">repositories</span> &#123;</span><br><span class="line">       	jcenter()</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">dependencies</span> &#123;</span><br><span class="line">        <span class="keyword">classpath</span> <span class="string">&#x27;com.android.tools.build:gradle:1.2.3&#x27;</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">allprojects</span> &#123;</span><br><span class="line">    <span class="keyword">repositories</span> &#123;</span><br><span class="line">		jcenter()</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>buildscript</strong>代码块是配置实际构建的位置。我们在第1章<a href="">Gradle和Android Studio入门</a>中简要讨论了这一点。可以看到我们在**repositories{}**中将JCenter配置为依赖库。依赖库意味着依赖的来源，或者换句话说，一个可下载的第三方库列表，我们可以在我们的应用和库中使用。（JCenter是一个著名的Maven依赖库）</p>
+<p>**dependencies{}**用于为构建过程本身配置依赖。这意味着你不应在顶级构建文件中包含你的应用程序或库所需的依赖关系。当前默认定义了唯一的一个依赖是Gradle的Android插件。Android插件是每个Android模块构建所必须的，因为这个插件定义了Android程序的具体构建流程，包含了可以执行的Android相关任务。</p>
+<p>**allprojects{}**可用于定义需要应用于所有模块的属性。你可以在allprojects{}创建任务，那么这些任务将在所有模块中都可用。</p>
+<blockquote>
+<p>因为allprojects是将其中的配置应用到所有模块中，如果不是公共的通用配置，而是单独于某一个模块中的配置，最好是放在模块中的build文件中。</p>
+</blockquote>
+<h3 id="模块的build-gradle文件"><a href="#模块的build-gradle文件" class="headerlink" title="模块的build.gradle文件"></a>模块的build.gradle文件</h3><p>模块级的build.gradle文件包含仅适用于Android应用程序或库模块的选项。它可以直接覆盖顶级build.gradle文件中的任何配置选项。模块build.gradle文件内容如下所示：</p>
+<figure class="highlight gradle"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">apply plugin: <span class="string">&#x27;com.android.application&#x27;</span></span><br><span class="line">android &#123;</span><br><span class="line">       compileSdkVersion <span class="number">22</span></span><br><span class="line">       buildToolsVersion <span class="string">&quot;22.0.1&quot;</span></span><br><span class="line">       defaultConfig &#123;</span><br><span class="line">           applicationId <span class="string">&quot;com.gradleforandroid.gettingstarted&quot;</span></span><br><span class="line">           minSdkVersion <span class="number">14</span></span><br><span class="line">           targetSdkVersion <span class="number">22</span></span><br><span class="line">           versionCode <span class="number">1</span></span><br><span class="line">           versionName <span class="string">&quot;1.0&quot;</span></span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">  buildTypes &#123;</span><br><span class="line">        release &#123;</span><br><span class="line">            minifyEnabled <span class="keyword">false</span></span><br><span class="line">            proguardFiles getDefaultProguardFile</span><br><span class="line">            (<span class="string">&#x27;proguard-android.txt&#x27;</span>), <span class="string">&#x27;proguard-rules.pro&#x27;</span></span><br><span class="line">        &#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">dependencies</span> &#123;</span><br><span class="line">    <span class="keyword">compile</span> <span class="keyword">fileTree</span>(dir: <span class="string">&#x27;libs&#x27;</span>, <span class="keyword">include</span>: [<span class="string">&#x27;*.jar&#x27;</span>])</span><br><span class="line">    <span class="keyword">compile</span> <span class="string">&#x27;com.android.support:appcompat-v7:22.2.0&#x27;</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>接下来详细介绍各个配置</p>
+<h4 id="Plugin"><a href="#Plugin" class="headerlink" title="Plugin"></a>Plugin</h4><p>第一行代码应用Android应用程序插件，在前面我们介绍过，Android插件被项目根构建文件配置为build过程的依赖。Android插件提供构建，测试和打包Android应用程序和库所需的所有任务,现由Google Android Tools Team编写和维护。</p>
+<h4 id="Android"><a href="#Android" class="headerlink" title="Android"></a>Android</h4><p>构建文件的最大部分是android块。 此块包含整个Android特定的构建配置。<br>android配置块中至少需要配置属性是compileSdkVersion和buildToolsVersion：</p>
+<ul>
+<li><strong>compileSdkVersion</strong>:编译Android程序的sdk版本</li>
+<li><strong>buildToolsVersion</strong>：编译过程中使用的android构建工具的版本</li>
+</ul>
+<p>构建工具包含各种命令行程序，例如aapt，zipalign，dx和renderscript; 它们用于生成构成应用程序的各种中间件。你可以通过SDK Manager下载这些构建工具（默认sdk会有一个版本的构建工具）。</p>
+<p><strong>defaultConfig</strong>配置了应用程序的核心属性。此块中的属性将覆盖AndroidManifest.xml文件中的相应条目：</p>
+<figure class="highlight jboss-cli"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"> defaultConfig &#123;</span><br><span class="line">       applicationId <span class="string">&quot;com.gradleforandroid.gettingstarted&quot;</span></span><br><span class="line">       minSdkVersion 14</span><br><span class="line">       targetSdkVersion 22</span><br><span class="line">       <span class="keyword">version</span>Code 1</span><br><span class="line">       <span class="keyword">version</span>Name <span class="string">&quot;1.0&quot;</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>此块中的第一个属性是applicationId。这将覆盖manifest文件中的包名称，但applicationId和应用包名之间有一些差异。在Gradle用作默认Android构建系统之前，AndroidManifest.xml中的包名称有两个目的：一是用作应用程序的唯一标识符，再就是用作R资源类中包的名称。假设有如下场景：你要发布一款app，有一个免费版本和付费版本。并且这两个版本需要具有单独的标识符，因为它们在Google Play商店中需要显示为不同的应用，并且可以同时安装。然而，在未使用Gradle构建之前，源代码和生成的R类必须始终保持相同的包名称，因此，在创建不同的版本时，所有的源文件将需要更改。在使用Gradle之后applicationId和包名区分开了，这样你可以随意更改项目的应用Id而不必更改源码的包名。manifest文件中定义的程序包名继续在源代码和R类中使用，而设备和Google Play使用applicationId作为唯一标识符。</p>
+<p>defaultConfig中接下来的两个属性是<strong>minSdkVersion</strong>和<strong>targetSdkVersion</strong>。这两个应该看起来很熟悉，因为它们在manifest文件中被定义为<uses-sdk>元素的一部分。 minSdkVersion设置用于配置运行应用程序所需的最低API级别。 targetSdkVersion设置通知系统该应用程序在特定版本的Android上测试，并且操作系统不需要启用任何向前兼容性行为。这与我们之前看到的compileSdkVersion无关。</p>
+<p>versionCode和versionName也具有与manifest文件中相同的功能，并为您的应用定义版本号和用户友好的版本名称。</p>
+<p>构建文件中的所有值都将覆盖清单文件中的值。因此，如果在build.gradle中定义它们，则不需要在清单文件中定义它们。如果构建文件不包含值，则使用manifest文件中定义的值。</p>
+<p>buildTypes块是你定义如何构建和打包应用程序的不同构建类型(Debug或者Release)的地方。我们将在<a href="">第4章:创建构建变体</a>中详细讨论构建<strong>Build Variant</strong>。</p>
+<h4 id="Dependencies"><a href="#Dependencies" class="headerlink" title="Dependencies"></a>Dependencies</h4><p>依赖块是标准Gradle配置的一部分（这也是为什么它放在了android块之外），并定义了应用模块或库模块的所有依赖关系。默认情况下，新的Android应用程序依赖于libs目录中的所有JAR文件和相应的support包下的库。 我们将在<a href="">第3章 管理依赖关系</a>中讨论依赖关系。</p>
+<h2 id="初识Gradle-Task"><a href="#初识Gradle-Task" class="headerlink" title="初识Gradle Task"></a>初识Gradle Task</h2><p>要知道项目中有哪些任务可用，可以运行<em>gradlew tasks</em>，这将打印出所有可用任务的列表。 在新创建的Android项目中，这包括Android Tasks，Build Tasks，Build Setup Task,Help Task,Install Task,Verification Task和和其他任务。 如果你不仅要看到任务，还要看到它们的依赖，你可以运行<em>gradlew tasks –all</em>。 可以执行dry运行任务，打印特定任务时执行的所有步骤。这个dry运行实际上不会执行任何这些步骤，因此它是一个安全的方式来查看当运行某个任务时是否按照你所期待的那样运行。你可以通过添加参数*-m<em>或</em>–dry-run*来进行dry运行。</p>
+<h3 id="基础任务（Base-tasks）"><a href="#基础任务（Base-tasks）" class="headerlink" title="基础任务（Base tasks）"></a>基础任务（Base tasks）</h3><p>Gradle的Android插件使用Java基本插件，同时也使用Android基本插件。这些基本插件添加了标准生命周期任务和一些常见的约定属性。Android基本插件定义了assemble任务和clean任务，Java基本插件定义了check任务和clean任务。这些任务并不在基本插件中实现，并且不执行任何操作; 基本插件只是用于定义插件的约定，用于添实际任务加执行工作的规范。</p>
+<p>这些任务的约定是：</p>
+<ul>
+<li><strong>assemble</strong> 将项目集成构建并输出</li>
+<li><strong>clean</strong> 将项目输入完全清除</li>
+<li><strong>check</strong> 运行所有检查，通常包括单元测试和功能测试</li>
+<li><strong>build</strong> 运行assemble任务和check任务</li>
+</ul>
+<p>Java基础插件也添加了soruce set的概念。 Android插件基于这些约定，有经验的Gradle用户根据任务名称就能一眼分辨出该任务是什么类型的。除了这些基本任务之外，Android插件还添加了许多Android特定的任务。</p>
+<h3 id="Android任务"><a href="#Android任务" class="headerlink" title="Android任务"></a>Android任务</h3><p>Android插件扩展了基本任务并实现了它们的行为。如下为各个任务在Android环境中对应的作用：</p>
+<ul>
+<li><strong>assemble</strong> 为每一种构建类型创建APK</li>
+<li><strong>clean</strong> 移除构建产生的各类文件，如：apk</li>
+<li><strong>check</strong> lint检查，如果lint检查失败就会中断构建</li>
+<li><strong>build</strong> 运行assemble和check</li>
+</ul>
+<p>assemble任务默认情况下依赖于assembleDebug和assembleRelease，如果添加更多build type，则会依赖更多需要更多build type的assemble任务。这意味着运行assemble将触发一个构建的每一个你有的build type。</p>
+<p>除了扩展这些任务，Android插件还添加了一些新的。这些是最重要的新任务：</p>
+<ul>
+<li><strong>connectedCheck</strong> 在模拟器或真机上运行UI测试</li>
+<li><strong>deviceCheck</strong>  其他插件在远程设备上运行测试的占位任务</li>
+<li><strong>installDebug&#x2F;installRelease</strong> 给连接上的模拟器或真机上安装指定版本Apk</li>
+<li>所有<strong>install</strong>任务都有对应的uninstall任务</li>
+</ul>
+<p>build任务取决于check任务，但不包括connectedCheck或deviceCheck。这是为了确保常规检查不需要连接真机设备或运行模拟器。运行check任务将生成一个包含所有警告和错误列表的Lint报告，以及详细说明和指向相关文档的链接。此报告可以在<strong>app&#x2F;build&#x2F;outputs</strong>中找到，名为<strong>lint-results.html</strong>。它看起来像这样：</p>
+<p><img src="http://ww1.sinaimg.cn/large/6b051377jw1f9bgso8ybpj20fz06cgm0.jpg"></p>
+<p>当你assemble一个版本，Lint会检查一些可能会导致应用程序崩溃的严重错误问题。一旦发现问题，它将中止构建并将错误打印到命令行界面。Lint还将在app&#x2F;build&#x2F;outputs中生成一个名为lint-results-release-fatal.html的报告。如果构建发现有多个问题，通过HTML报告会比在命令行界面中的展示效果更好，每个问题提供的链接也非常有用，因为上面会带有详细解释问题。</p>
+<h3 id="Android-Studio集成"><a href="#Android-Studio集成" class="headerlink" title="Android Studio集成"></a>Android Studio集成</h3><p>你不用总是从命令行界面运行Gradle任务。Android Studio有一个工具窗口，其中包含所有可用任务的列表。 这个工具窗口称为Gradle，如下所示：</p>
+<p><img src="http://ww3.sinaimg.cn/large/6b051377jw1f9bhcarkisj20ba0df75a.jpg"></p>
+<p>从此工具窗口中，可以通过双击其名称来运行任务。你可以在<strong>Gradle Console</strong>工具窗口中跟踪任何正在运行的任务的进度。如果找不到这些工具窗口，可以在<strong>Tool Window</strong>下的<strong>View</strong>菜单中打开它们。 这就是Gradle Console工具窗口的样子：</p>
+<p><img src="http://ww4.sinaimg.cn/large/6b051377jw1f9bhg1clo4j20ic09dt9q.jpg"></p>
+<p>你还可以从Android Studio中的命令行界面运行任务，以便你可以根据需要在IDE中执行所有与应用相关的工作。要运行该命令，需要打开终端工具窗口。这是一个完整的终端，所以可以运行任何命令。 你可能需要首先导航到项目的根目录，以便使用gradlew命令。</p>
+<blockquote>
+<p>更改Android Studio终端<br>可以将Android Studio中的终端配置为使用不同的shell。 例如，在Windows上，终端默认为命令提示符。 如果你喜欢使用Git Bash（或任何其他shell），打开Android Studio设置（在文件和设置下），并寻找终端。 在那里你可以改变shell路径。 对于Windows上的Git Bash，它看起来像这样：C\Program Files（x86)\Git\bin\sh.exe –login -i。</p>
+</blockquote>
+<h2 id="自定义构建"><a href="#自定义构建" class="headerlink" title="自定义构建"></a>自定义构建</h2><p>有很多方法来自定义构建过程，当你在Android Studio中编辑build.gradle文件时，建议始终将项目与Gradle文件同步，无论你要自定义什么。这在添加依赖项或BuildConfig字段时变得尤为重要，我们将在稍后讨论。</p>
+<p>一旦您编辑settings，gradle或build.gradle文件时，Android Studio就会在编辑器中显示一条消息，提示需要sync项目。你可以通过导航到<strong>Tools | Android | Sync Project with Gradle</strong>或工具栏中的相应<strong>sync按钮</strong>来手动同步。</p>
+<p>Sync操作原理：Android Studio Sync实际上会基于构建文件中的配置运行generateDebugSources任务来生成所有必需的类。</p>
+<h3 id="Manifest属性操作"><a href="#Manifest属性操作" class="headerlink" title="Manifest属性操作"></a>Manifest属性操作</h3><p>我们已经看到，可以直接从构建文件而不是在清单文件中配置applicationId，minSdkVersion，targetSdkVersion，versionCode和versionName。 这里还有一些其他属性可以操作：</p>
+<ul>
+<li><strong>testApplicationId</strong> 测试Apk的applicationId</li>
+<li><strong>testInstrumentationRunner</strong> 应用运城JUnit测试的测试Runner名称</li>
+<li><strong>signingConfig</strong> 打包签名配置</li>
+<li><strong>proguardFile&#x2F;proguardFiles</strong> 混淆配置</li>
+</ul>
+<h3 id="BuildConfig和Resources"><a href="#BuildConfig和Resources" class="headerlink" title="BuildConfig和Resources"></a>BuildConfig和Resources</h3><p>从SDK tool revision 17开始，构建工具会生成一个名为BuildConfig的类，其中包含根据Build Type设置的DEBUG常数(BuildType是Debug时，DEBUG为true，反之为false)。如果你希望只有在调试状态时运行指定的代码（例如日志记录），这将非常有用。它可以通过Gradle扩展该文件，以便可以在Debug和Release中包含不同值的常量。</p>
+<p>这些常数可用于切换功能或设置服务器URL，例如：</p>
+<figure class="highlight mipsasm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">android </span>&#123;</span><br><span class="line">    <span class="keyword">buildTypes </span>&#123;</span><br><span class="line">        <span class="built_in">debug</span> &#123;</span><br><span class="line">            <span class="keyword">buildConfigField </span><span class="string">&quot;String&quot;</span>, <span class="string">&quot;API_URL&quot;</span>, <span class="string">&quot;\&quot;http://test.example.com/api\&quot;&quot;</span></span><br><span class="line">            <span class="keyword">buildConfigField </span><span class="string">&quot;boolean&quot;</span>, <span class="string">&quot;LOG_HTTP_CALLS&quot;</span>, <span class="string">&quot;true&quot;</span></span><br><span class="line">			&#125;</span><br><span class="line"></span><br><span class="line">        release &#123;</span><br><span class="line">            <span class="keyword">buildConfigField </span><span class="string">&quot;String&quot;</span>, <span class="string">&quot;API_URL&quot;</span>, <span class="string">&quot;\&quot;http://example.com/api\&quot;&quot;</span></span><br><span class="line">            <span class="keyword">buildConfigField </span><span class="string">&quot;boolean&quot;</span>, <span class="string">&quot;LOG_HTTP_CALLS&quot;</span>, <span class="string">&quot;false&quot;</span></span><br><span class="line">    	&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>API_URL为了生成为实际字符串值,在引用是必须在双引号上加上转义符。添加buildConfigField行后，可以在实际的Java代码中使用BuildConfig.API_URL和BuildConfig.LOG_HTTP_CALLS常量。</p>
+<p>Android Tools Team还增加了以类似方式配置资源：</p>
+<figure class="highlight fsharp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">android</span> &#123;</span><br><span class="line">    <span class="keyword">buildTypes</span> &#123;</span><br><span class="line">        <span class="keyword">debug</span> &#123;</span><br><span class="line">               resValue <span class="string">&quot;string&quot;</span>, <span class="string">&quot;app_name&quot;</span>, <span class="string">&quot;Example DEBUG&quot;</span></span><br><span class="line">			&#125;</span><br><span class="line">        <span class="keyword">release</span> &#123;</span><br><span class="line">               resValue <span class="string">&quot;string&quot;</span>, <span class="string">&quot;app_name&quot;</span>, <span class="string">&quot;Example&quot;</span></span><br><span class="line">           &#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在这里不需要转义的双引号，因为资源值在默认情况下总是用**value &#x3D;””**形式存在的。</p>
+<h3 id="Project设置"><a href="#Project设置" class="headerlink" title="Project设置"></a>Project设置</h3><p>如果在一个项目中有多个Android模块，则可以将settings应用于所有模块，而无需手动更改每个模块的构建文件。我们已经看到了如何在生成的顶级构建文件中使用allprojects块来定义依赖库，我们也可以使用相同的策略来应用Android特定的设置：</p>
+<figure class="highlight nginx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="section">allprojects</span> &#123;</span><br><span class="line">       <span class="attribute">apply</span> plugin: <span class="string">&#x27;com.android.application&#x27;</span></span><br><span class="line">       android &#123;</span><br><span class="line">           <span class="attribute">compileSdkVersion</span> <span class="number">22</span></span><br><span class="line">           buildToolsVersion <span class="string">&quot;22.0.1&quot;</span></span><br><span class="line">		&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>上面的代码中，如果项目所有的模块都是Android应用程序模块，代码才会生效，因为你需要应用Android插件来访问Android应用程序特定的设置。全局引用更好的实践模式是在项目根构建文件中定义值，然后在各个模块中引用它们。 在Gradle中可以在Project对象上添加额外的特别属性。这意味着任何build.gradle文件都可以在ext块定义额外的属性。</p>
+<p>你可以将具有自定义属性的ext块添加到项目根构建文件中：</p>
+<figure class="highlight abnf"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">ext &#123;</span><br><span class="line">       compileSdkVersion <span class="operator">=</span> <span class="number">22</span></span><br><span class="line">       buildToolsVersion <span class="operator">=</span> <span class="string">&quot;22.0.1&quot;</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这使得可以使用rootProject在模块级构建文件中使用属性：</p>
+<figure class="highlight mipsasm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">android </span>&#123;</span><br><span class="line">    compileSdkVersion rootProject.<span class="keyword">ext.compileSdkVersion</span></span><br><span class="line"><span class="keyword"></span>    <span class="keyword">buildToolsVersion </span>rootProject.<span class="keyword">ext.buildToolsVersion</span></span><br><span class="line"><span class="keyword"></span>&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="项目属性"><a href="#项目属性" class="headerlink" title="项目属性"></a>项目属性</h3><p>前面示例中的ext块是定义额外属性的一种方法。 你也可以使用属性来自定义构建过程，我们将在<a href="">第7章“创建任务和插件”</a>中编写自定义任务时使用它们。有几种方法来定义属性，但我们现在先了解三个最常用的方法：</p>
+<ul>
+<li>ext代码块</li>
+<li>gradle.properties文件</li>
+<li>命令行的 -P参数</li>
+</ul>
+<p>下面是一个build.gradle文件的示例，它包含了添加额外属性的三种方式：</p>
+<figure class="highlight gradle"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">ext &#123;</span><br><span class="line">     local = <span class="string">&#x27;Hello from build.gradle&#x27;</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">task</span> printProperties &lt;&lt; &#123;</span><br><span class="line">    <span class="keyword">println</span> local        <span class="comment">// Local extra property</span></span><br><span class="line">    <span class="keyword">println</span> propertiesFile        <span class="comment">// Property from file</span></span><br><span class="line">    <span class="keyword">if</span> (<span class="keyword">project</span>.hasProperty(<span class="string">&#x27;cmd&#x27;</span>)) &#123;</span><br><span class="line">       <span class="keyword">println</span> cmd        <span class="comment">// Command line property</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这是对应的gradle.properties文件内容（在同一文件夹中）：</p>
+<figure class="highlight abnf"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="attribute">propertiesFile</span> <span class="operator">=</span> Hello from gradle.properties</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>在示例中，我们创建一个新任务。 我们将在<a href="">第7章“创建任务和插件”</a>中讨论任务和解释相关语法。</p>
+</blockquote>
+<p>如果使用命令行运行<strong>printProperties</strong>任务，输出将如下所示：</p>
+<figure class="highlight livecodeserver"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">$ gradlew printProperties -P cmd=<span class="string">&#x27;Hello from the command line&#x27;</span></span><br><span class="line">:printProperties</span><br><span class="line">Hello <span class="built_in">from</span> build.gradle</span><br><span class="line">Hello <span class="built_in">from</span> gradle.properties</span><br><span class="line">Hello <span class="built_in">from</span> <span class="keyword">the</span> <span class="keyword">command</span> <span class="title">line</span></span><br></pre></td></tr></table></figure>
+
+<p>自定义属性使得更改构建的配置与更改单个属性一样简单，甚至只需添加命令行参数即可（命令行-P方式）。</p>
+<blockquote>
+<p>可以在项目根目录构建文件和模块构建文件中都定义属性。 果模块定义了顶级文件中已存在的属性，那么它将覆盖根目录构建文件中定义的。</p>
+</blockquote>
+<h3 id="默认任务"><a href="#默认任务" class="headerlink" title="默认任务"></a>默认任务</h3><p>如果你运行Gradle而不指定任务，它会默认运行help任务，打印一些关于如何使用Gradle的信息。 这是因为帮助任务设置为默认任务。你可以用一个你的常用任务或多个任务覆盖默认任务。每次执行Gradle，不用明确指定任务就可执行（相当于是一个热键）。</p>
+<p>要指定默认任务，请将此行添加到项目根build.gradle文件中：</p>
+<figure class="highlight nginx"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="attribute">defaultTasks</span> <span class="string">&#x27;clean&#x27;</span>, <span class="string">&#x27;assembleDebug&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<p>现在，当你运行没有任何参数的Gradlew命令时，它将运行clean和assembleDebug任务。通过运行<strong>tasks</strong>任务并过滤输出，很容易看到哪些任务被设置为默认任务。</p>
+<figure class="highlight gradle"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ gradlew tasks | <span class="keyword">grep</span> <span class="string">&quot;Default tasks&quot;</span></span><br><span class="line"><span class="keyword">Default</span> tasks: clean, assembleDebug</span><br></pre></td></tr></table></figure>
+
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>在本章中，我们详细介绍了Android Studio创建新项目时自动生成的不同Gradle文件。 你现在可以自己创建build.gradle文件，并添加所有必需的配置属性。</p>
+<p>我们开始了基本的构建任务，并了解Android插件如何基于基本插件来构建项目，以及如何扩展新的Android任务。 我们还看到了如何从命令行界面和从Android Studio内部运行构建任务。</p>
+<p>在过去几年中，Android开发人员生态系统已经发展得非常迅速，许多有趣的第三方库已经可供大家使用。 在下一章中，我们将介绍几种向项目添加依赖项的方法。</p>
+
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>YamLee
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://yamlee.me/2016/04/11/2016-04-11-Android%20Gradle%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5%E7%B3%BB%E5%88%972/" title="Android Gradle最佳实践系列2：自定义Build配置">http://yamlee.me/2016/04/11/2016-04-11-Android Gradle最佳实践系列2/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/zh-CN" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2016/04/08/2016-04-08-Android%20Gradle%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5%E7%B3%BB%E5%88%971/" rel="prev" title="Android Gradle最佳实践系列1：Gradle快速入门及AndroidStudio介绍">
+      <i class="fa fa-chevron-left"></i> Android Gradle最佳实践系列1：Gradle快速入门及AndroidStudio介绍
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2016/04/14/2016-04-14-Android%20Gradle%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5%E7%B3%BB%E5%88%973/" rel="next" title="Android Gradle最佳实践系列3：依赖管理">
+      Android Gradle最佳实践系列3：依赖管理 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%90%86%E8%A7%A3Gradle%E7%9A%84%E5%90%84%E7%A7%8D%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6"><span class="nav-number">1.</span> <span class="nav-text">理解Gradle的各种配置文件</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#settings-gradle%E6%96%87%E4%BB%B6"><span class="nav-number">1.1.</span> <span class="nav-text">settings.gradle文件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%A1%B9%E7%9B%AE%E6%A0%B9build-gradle%E6%96%87%E4%BB%B6"><span class="nav-number">1.2.</span> <span class="nav-text">项目根build.gradle文件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A8%A1%E5%9D%97%E7%9A%84build-gradle%E6%96%87%E4%BB%B6"><span class="nav-number">1.3.</span> <span class="nav-text">模块的build.gradle文件</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Plugin"><span class="nav-number">1.3.1.</span> <span class="nav-text">Plugin</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Android"><span class="nav-number">1.3.2.</span> <span class="nav-text">Android</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Dependencies"><span class="nav-number">1.3.3.</span> <span class="nav-text">Dependencies</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%88%9D%E8%AF%86Gradle-Task"><span class="nav-number">2.</span> <span class="nav-text">初识Gradle Task</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9F%BA%E7%A1%80%E4%BB%BB%E5%8A%A1%EF%BC%88Base-tasks%EF%BC%89"><span class="nav-number">2.1.</span> <span class="nav-text">基础任务（Base tasks）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Android%E4%BB%BB%E5%8A%A1"><span class="nav-number">2.2.</span> <span class="nav-text">Android任务</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Android-Studio%E9%9B%86%E6%88%90"><span class="nav-number">2.3.</span> <span class="nav-text">Android Studio集成</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%87%AA%E5%AE%9A%E4%B9%89%E6%9E%84%E5%BB%BA"><span class="nav-number">3.</span> <span class="nav-text">自定义构建</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Manifest%E5%B1%9E%E6%80%A7%E6%93%8D%E4%BD%9C"><span class="nav-number">3.1.</span> <span class="nav-text">Manifest属性操作</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#BuildConfig%E5%92%8CResources"><span class="nav-number">3.2.</span> <span class="nav-text">BuildConfig和Resources</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Project%E8%AE%BE%E7%BD%AE"><span class="nav-number">3.3.</span> <span class="nav-text">Project设置</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%A1%B9%E7%9B%AE%E5%B1%9E%E6%80%A7"><span class="nav-number">3.4.</span> <span class="nav-text">项目属性</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%BB%98%E8%AE%A4%E4%BB%BB%E5%8A%A1"><span class="nav-number">3.5.</span> <span class="nav-text">默认任务</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">4.</span> <span class="nav-text">总结</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="YamLee"
+      src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">YamLee</p>
+  <div class="site-description" itemprop="description">专注移动开发</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">18</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">9</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/yamlee" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;yamlee" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title"><i class="fa fa-link fa-fw"></i>
+      Links
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="http://yamlee.me/" title="http:&#x2F;&#x2F;yamlee.me&#x2F;">Title</a>
+        </li>
+    </ul>
+  </div>
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">YamLee</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

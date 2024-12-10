@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.1.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/avatar.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/avatar.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.ico">
+  <link rel="mask-icon" href="/images/avatar.png" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="https://fonts.loli.net/css?family=Noto Sans SC:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"yamlee.me","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"default"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="Android Coroutine开发实践背景在Android应用的开发中，我们最常见到的一个应用场景是请求网络数据接口然后显示在UI界面上，如下面代码所示 12val user &#x3D; fetchUserData()textView.text &#x3D; user.name  但是当你运行上面的代码时就会发发现程序报错，抛出了 NetworkOnMainThreadException 的异常，这是因为And">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Android Coroutine开发实践">
+<meta property="og:url" content="http://yamlee.me/2021/12/25/2020-03-06-Android%20Coroutine%E5%BC%80%E5%8F%91%E5%AE%9E%E8%B7%B5/index.html">
+<meta property="og:site_name" content="Lee Blog">
+<meta property="og:description" content="Android Coroutine开发实践背景在Android应用的开发中，我们最常见到的一个应用场景是请求网络数据接口然后显示在UI界面上，如下面代码所示 12val user &#x3D; fetchUserData()textView.text &#x3D; user.name  但是当你运行上面的代码时就会发发现程序报错，抛出了 NetworkOnMainThreadException 的异常，这是因为And">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-12-25T00:45:55.085Z">
+<meta property="article:modified_time" content="2022-04-08T04:17:02.653Z">
+<meta property="article:author" content="YamLee">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://yamlee.me/2021/12/25/2020-03-06-Android%20Coroutine%E5%BC%80%E5%8F%91%E5%AE%9E%E8%B7%B5/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Android Coroutine开发实践 | Lee Blog</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-122582412-1"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'UA-122582412-1');
+      }
+    </script>
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Lee Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">专注移动开发</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yamlee.me/2021/12/25/2020-03-06-Android%20Coroutine%E5%BC%80%E5%8F%91%E5%AE%9E%E8%B7%B5/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="YamLee">
+      <meta itemprop="description" content="专注移动开发">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Lee Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Android Coroutine开发实践
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2021-12-25 08:45:55" itemprop="dateCreated datePublished" datetime="2021-12-25T08:45:55+08:00">2021-12-25</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2022-04-08 12:17:02" itemprop="dateModified" datetime="2022-04-08T12:17:02+08:00">2022-04-08</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%88%90%E4%B8%BAKotlin%E9%AB%98%E6%89%8B/" itemprop="url" rel="index"><span itemprop="name">成为Kotlin高手</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="Android-Coroutine开发实践"><a href="#Android-Coroutine开发实践" class="headerlink" title="Android Coroutine开发实践"></a>Android Coroutine开发实践</h2><h3 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h3><p>在Android应用的开发中，我们最常见到的一个应用场景是请求网络数据接口然后显示在UI界面上，如下面代码所示</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> user = fetchUserData()</span><br><span class="line">textView.text = user.name</span><br></pre></td></tr></table></figure>
+
+<p>但是当你运行上面的代码时就会发发现程序报错，抛出了 <strong>NetworkOnMainThreadException</strong> 的异常，这是因为Android不允许在主线程（也就是UI线程）中进行网络操作。这时，我们需要加上后台线程去处理网络请求</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">workerThread&#123;</span><br><span class="line">    <span class="keyword">val</span> user = fetchUserData()</span><br><span class="line">    textView.text = user.name</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<span id="more"></span>
+<p>但是运行后又报错出现了新的异常<strong>CalledFromWrongThreadException</strong> ，这是因为更新UI组件的内容必须是在主线程去操作，上面的代码中textView.text的更新也是在工作线程，所以出现了错误，而解决这个问题最常规的方式就是将网络请求放在工作线程中执行，当获取到结果后，通过回调监听的方式在主线程更新UI，如下面的代码所示</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">fetchUserData &#123; user -&gt;  <span class="comment">//callback</span></span><br><span class="line">    textView.text = user.name</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>通过callback的方式解决了异步请求及UI更新的问题，但是又会产生新的问题，callback如果不及时释放就会造成内存泄露，从而产生<strong>OOM（Out of Memory）</strong>,所以需要及时释放callback,我们的解决方案是在Activity销毁取消网络请求，释放callback</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> subscription = fetchUserData &#123; user -&gt;</span><br><span class="line">    textView.text = user.name</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">onDestroy</span><span class="params">()</span></span>&#123;</span><br><span class="line">    subscription.cancel()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>或者通过第三方框架<a target="_blank" rel="noopener" href="https://github.com/ReactiveX/RxJava">RxJava</a>可以更好的解决这个问题</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">fetchUser</span><span class="params">()</span></span>: Observable&lt;User&gt; = ...</span><br><span class="line"></span><br><span class="line">fetchUser()</span><br><span class="line">    .<span class="keyword">as</span>(autoDisposable(AndroidLifecycleScopeProvider.from(<span class="keyword">this</span>)))</span><br><span class="line">    .subscribe &#123; user -&gt;</span><br><span class="line">        textView.text = user.name</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>所以，通过RxJava或者其他框架可以解决异步请求回调的问题了，那为什么我们还要去使用用coroutine呢？</p>
+<h3 id="Why-Coroutine"><a href="#Why-Coroutine" class="headerlink" title="Why Coroutine?"></a>Why Coroutine?</h3><p>为什么我们要去学着使用Coroutine? 作为开发者，我们想要在Android中更简单，更直接，更容易实现并发操作，总结一些，就是如下集点要求：简单易上手，良好的扩展性已经非常棒的稳定性。但是不管是RxJava还是JetPack中的LiveData，都有着一定问题，现在我们可以做如下对比：</p>
+<p><strong>LiveData：</strong>只是一个数据封装的容器，没有完整的并发操作集,没有线程切换，只运行在UI线程</p>
+<p><strong>RxJava：</strong> 非常强大，有丰富的操作符，也就是因为强大的功能，加重了学习成本，开发者对操作符的理解不够透彻，容易误用操作符。再加上RxJava第第三方框架，Google官方对此投入的支持不是很多</p>
+<p>**Coroutine:**刚刚出来没有多久，大多数人觉得还不够稳定，学习曲线比较陡峭，但是得到kotlin语言层面的支持，<a href="">2019 Google I&#x2F;O</a>更是提出在JetPack中将coroutine作为Android并发的首要方案支持</p>
+<p>综合上述，我们提前学习和了解coroutine是有必要的。</p>
+<h3 id="Coroutine基础"><a href="#Coroutine基础" class="headerlink" title="Coroutine基础"></a>Coroutine基础</h3><h4 id="快速开始"><a href="#快速开始" class="headerlink" title="快速开始"></a>快速开始</h4><h5 id="添加coroutine-Gradle依赖"><a href="#添加coroutine-Gradle依赖" class="headerlink" title="添加coroutine Gradle依赖"></a>添加coroutine Gradle依赖</h5><figure class="highlight gradle"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">implementation <span class="string">&#x27;org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.2&#x27;</span></span><br><span class="line">implementation <span class="string">&#x27;org.jetbrains.kotlinx:kotlinx-coroutines-android:1.3.2&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<h5 id="使用coroutine"><a href="#使用coroutine" class="headerlink" title="使用coroutine"></a>使用coroutine</h5><p>我们通过一个小的网络请求Demo,来演示coroutine的使用。<a target="_blank" rel="noopener" href="https://square.github.io/retrofit/">Retrofit</a>是一个REST Api网络请求框架，下面的代码中，我们通过retrofit来获取一个网络接口数据，然后将数据显示在UI界面上</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">mTvUserName = findViewById(R.id.tv_user_name)</span><br><span class="line"><span class="keyword">val</span> retrofit = Retrofit.Builder()</span><br><span class="line">    .baseUrl(<span class="string">&quot;https://jsonplaceholder.typicode.com&quot;</span>)</span><br><span class="line">    .addConverterFactory(GsonConverterFactory.create())</span><br><span class="line">    .build()</span><br><span class="line">mApiService = retrofit.create(MyRequestService::<span class="keyword">class</span>.java)</span><br><span class="line"></span><br><span class="line">mApiService.getUser().enqueue(<span class="keyword">object</span> : Callback&lt;UserEntity&gt; &#123;</span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onFailure</span><span class="params">(call: <span class="type">Call</span>&lt;<span class="type">UserEntity</span>&gt;, t: <span class="type">Throwable</span>)</span></span> &#123;</span><br><span class="line">        <span class="comment">//handle error</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onResponse</span><span class="params">(call: <span class="type">Call</span>&lt;<span class="type">UserEntity</span>&gt;, response: <span class="type">Response</span>&lt;<span class="type">UserEntity</span>&gt;)</span></span> &#123;</span><br><span class="line">        <span class="comment">//handle result</span></span><br><span class="line">        mTvUserName.text = response.body()?.title</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
+
+<p>以往的做法如上面代码所示，我们现在就通过coroutine来实现</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">GlobalScope.launch(Dispatchers.Main) &#123;</span><br><span class="line">            log(<span class="string">&quot;launch start&quot;</span>)</span><br><span class="line">            <span class="keyword">val</span> user: UserEntity? = getUser()</span><br><span class="line">            mTvUserName.text = <span class="string">&quot;用户信息：<span class="variable">$user</span>&quot;</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">suspend</span> <span class="function"><span class="keyword">fun</span> <span class="title">getUser</span><span class="params">()</span></span> = withContext(Dispatchers.IO) &#123;</span><br><span class="line">        log(<span class="string">&quot;getUser method&quot;</span>)</span><br><span class="line">        <span class="keyword">val</span> body = mApiService.getUser().execute().body()</span><br><span class="line">        log(<span class="string">&quot;getUser method result: <span class="variable">$body</span>&quot;</span>)</span><br><span class="line">        body</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>可以通过上面代码看到，使用coroutine方式实现的异步请求跟使用callback实现有很大的不同，代码整体上得到了简化，更直接明了。</p>
+<h5 id="coroutine基础"><a href="#coroutine基础" class="headerlink" title="coroutine基础"></a>coroutine基础</h5><h6 id="suspend关键字"><a href="#suspend关键字" class="headerlink" title="suspend关键字"></a>suspend关键字</h6><p>suspend这个关键字是kotlin专门用来支持coroutine而新增的关键字，这个关键字只能用来修饰方法，并且suspend方法只能被其他suspend方法调用或者在coroutine构建方法中调用。</p>
+<blockquote>
+<p>为了方便，suspend方法后面我们就统一称为挂起函数</p>
+</blockquote>
+<p>我们可以这么理解，每一个独立的挂起函数都可以设置自己的上下文环境，包括线程运行环境等，每一个挂起函数的起始位置我们可以称之为挂起点，挂起函数之间可以相互调用，最后通过kotlin编译器组合起所有的挂起函数，在各个挂起点暂停和恢复挂起函数的运行调用，也就是说coroutine内部的挂起和恢复机制跟原始的callback方案其实是类似的，只是其内部由kotlin编译器帮我们去实现了而不需要我们再去写哪些“冗余代码”。</p>
+<h6 id="Dispatchers"><a href="#Dispatchers" class="headerlink" title="Dispatchers"></a>Dispatchers</h6><p>coroutine默认提供了三种线程环境，Default,io和Main这三种线程环境可以针对不同的使用场景。</p>
+<p><strong>Dispatchers.Default：</strong>主要是cpu运算型线程环境，如当存在成千上万的数量运算，文本比较，差分算法等case时，建议使用此线程环境。</p>
+<p><strong>Dispatchers.IO：</strong>主要是网络或硬盘读写类型的线程环境，如常见的Api网络接口请求，读写手机sdcard的操作都建议使用此线程。</p>
+<p><strong>Dispatchers.Main：</strong>主线程，在Android中对应的是UI线程，通常情况下，Android组件的更新必须要在此线程环境中运行，同时一个coroutine启动建议放在主线程中。</p>
+<h6 id="withContext设置coroutine上下文环境"><a href="#withContext设置coroutine上下文环境" class="headerlink" title="withContext设置coroutine上下文环境"></a>withContext设置coroutine上下文环境</h6><p>在网络请求的Coroutine Demo中有几个点需要注意，第一个是我们通过GlobalScope.launch构建方法来初始化启动UI更新coroutine,通过在launch方法中传入Dispatchers.Main参数，将其设置在UI线程中运行；第二个是getUser()这个suspend方法中，通过witchContext构建方法将网络请求coroutine的线程环境切换到io线程。</p>
+<h3 id="Coroutine-In-Android"><a href="#Coroutine-In-Android" class="headerlink" title="Coroutine In Android"></a>Coroutine In Android</h3><p>在AndroidX组件中，大部分组件现在已经对coroutine有非常好的支持,如workmanager,liveData等，包括一些第三方的框架，如Retrofit现在都已经支持coroutine挂起函数。</p>
+<h4 id="WorkManager中使用coroutine"><a href="#WorkManager中使用coroutine" class="headerlink" title="WorkManager中使用coroutine"></a>WorkManager中使用coroutine</h4><p>WorkManager在<strong>work-runtime-ktx:2.0.0</strong>版本开始支持coroutine,我们可以像下面示例代码中一样通过继承CoroutineWorker来实现挂起doWork方法</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">UploadNoteWorker</span></span>(...): CoroutineWorker(...)&#123;</span><br><span class="line">    <span class="keyword">override</span> <span class="keyword">suspend</span> <span class="function"><span class="keyword">fun</span> <span class="title">doWork</span><span class="params">()</span></span>:Result&#123;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>那WorkerManager使用coroutine到底带来了什么优势呢，我们可以看到如下未使用挂起函数的代码示例</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">UploadNoteWorker</span></span>(...): Worker(...)&#123;</span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">doWork</span><span class="params">()</span></span>:Result&#123;</span><br><span class="line">        <span class="keyword">val</span> newNotes = db.queryNewNotes()</span><br><span class="line">        <span class="keyword">if</span>(!isStopped()) <span class="keyword">return</span> Result.failure()</span><br><span class="line">        noteService.uploadNotes(newNotes)</span><br><span class="line">        <span class="keyword">if</span>(!isStopped()) <span class="keyword">return</span> Result.failure()</span><br><span class="line">        db.markAsSynced(newNotes)</span><br><span class="line">        <span class="keyword">return</span> Result.success()</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在上面的代码中，是一个常见的数据同步的场景，用户将本地的笔记数据同步到云端，其基本流程大致是查询本地数据 -&gt; 上传数据 -&gt;<br>标记本地已上传的数据。但是在workerManager的工作过程中，有可能用户会主动停止任务或者相关条件不允许（如网络关闭，电量过低等）时取消任务，这就需要在doWork方法中加上是否任务已被取消的判断逻辑，但是这样一来，代码就会变得很不好看。但通过CoroutineWorker会使得代码变得简洁，如下代码所示</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">UploadNoteWorker</span></span>(...): CoroutineWorker(...)&#123;</span><br><span class="line">    <span class="keyword">suspend</span> <span class="function"><span class="keyword">fun</span> <span class="title">doWork</span><span class="params">()</span></span>:Result&#123;</span><br><span class="line">        <span class="keyword">val</span> newNotes = db.queryNewNotes()</span><br><span class="line">        noteService.uploadNotes(newNotes)</span><br><span class="line">        db.markAsSynced(newNotes)</span><br><span class="line">        <span class="keyword">return</span> Result.success()</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>使用CoroutineWorker不需要加各种停止的判断条件，当取消worker任务时doWork()挂起函数会逐一的将其内部调用的各个挂起函数都取消，数据库操作使用Room,网络接口请求使用Retrofit。</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//Room数据库操作</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">NoteDao</span></span>&#123;</span><br><span class="line">    <span class="meta">@Query(<span class="string">&quot;SELECT * FROM notes WHERE synced = 0&quot;</span>)</span></span><br><span class="line">    <span class="keyword">suspend</span> <span class="function"><span class="keyword">fun</span> <span class="title">queryNewNotes</span><span class="params">()</span></span>: List&lt;Note&gt;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//Retrofit网络请求</span></span><br><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">NoteService</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Post(<span class="string">&quot;/notes/new&quot;</span>)</span></span><br><span class="line">    <span class="keyword">suspend</span> <span class="function"><span class="keyword">fun</span> <span class="title">uploadNote</span><span class="params">(<span class="meta">@Body</span> note: <span class="type">Note</span>)</span></span>: ResponseBody</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>Room和Retrofit都支持了suspend函数,Room可以保证线程安全,确保query操作在后台线程中执行，而Retrofit同样也能达到这个效果，至此，通过更加简洁的代码保证了并发操作的安全执行以及统一取消。</p>
+<h4 id="LiveData和Coroutine"><a href="#LiveData和Coroutine" class="headerlink" title="LiveData和Coroutine"></a>LiveData和Coroutine</h4><p>在前面的部分我们提到LiveData是用来更新主线程UI的数据容器，在<strong>LiveData: 2.2.0-alpha01</strong>之后的版本将提供liveData{}的coroutine构建器</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> user: LiveData&lt;User&gt; = liveData &#123;</span><br><span class="line">    emit(database.load(userId))</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Query(<span class="string">&quot;SELECT * FROM User WHERE id = :userId&quot;</span>)</span></span><br><span class="line"><span class="keyword">suspend</span> <span class="function"><span class="keyword">fun</span> <span class="title">loadUser</span><span class="params">(userId : <span class="type">String</span>)</span></span>: User</span><br></pre></td></tr></table></figure>
+
+<p>在上面的代码中liveData{}跟coroutine中的sequence有点类似，在这个liveData的方法块里面可以通过emit()方法发射一个或者多个数据，同事emit方法可以通过类型推导出发射的数据类型，所以上面的代码可以变成这样</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> user = liveData&#123;</span><br><span class="line">    emit(database.load(userId))</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>我们可以稍微看一下liveData{ }的实现：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> <span class="type">&lt;T&gt;</span> <span class="title">liveData</span><span class="params">(</span></span></span><br><span class="line"><span class="params"><span class="function">        context: <span class="type">CoroutineContext</span> = EmptyCoroutineContext,</span></span></span><br><span class="line"><span class="params"><span class="function">        timeoutInMs: <span class="type">Long</span> = DEFAULT_TIMEOUT,</span></span></span><br><span class="line"><span class="params"><span class="function">        <span class="meta">@BuilderInference</span> block: <span class="type">suspend</span> <span class="type">LiveDataScope</span>&lt;<span class="type">T</span>&gt;.() -&gt; <span class="type">Unit</span></span></span></span><br><span class="line"><span class="params"><span class="function">        )</span></span>: LiveData&lt;T&gt;</span><br></pre></td></tr></table></figure>
+
+<p>上面的代码中，liveData有三个参数：</p>
+<p><strong>context</strong><br>context参数主要作用是用来做线程环境切换，liveData这个方法块默认是在主线程执行的，通过设置不同的Dispatcher可以将其放到后台线程中执行</p>
+<p><strong>timeoutInMs</strong><br>方法块内方法体执行的超时时间，为什么要设置超时时间呢?这里有一个应用场景，就是旋转屏幕，我们都知道，屏幕旋转时，Activity会先onDestroy然后再onRestart，这里就涉及到liveData{}方法块中数据的释放回收问题，因为当屏幕旋转Activity的生命周期会迅速的onDestroy然后马上onRestart,如果liveData回收然后马上重新创建无意是增加无用的资源消耗，所以这里增加一个超时时间，当activity destroy后过了这个超时时间liveData才会取消coroutine。</p>
+<p><strong>block</strong><br>执行的方法体</p>
+<h5 id="emitSource"><a href="#emitSource" class="headerlink" title="emitSource()"></a>emitSource()</h5><p>liveData{}构建器中，除了emit方法外，还有一个叫emitSource的方法,如下代码中描述的场景，我们从数据库中获取的本地的用户信息，但是需要跟云端的用户信息同步，所以我们从接口中抓取新的用户信息，然后保存到数据库中，再发射到liveData</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MyRepository</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">loadUser</span><span class="params">(userId : <span class="type">String</span>)</span></span> = liveData &#123;</span><br><span class="line">        emit(database.load(userId))</span><br><span class="line">        <span class="keyword">val</span> user = webService.fetch(userId)</span><br><span class="line">        database.insert(user)</span><br><span class="line">        emit(database.load(userId))</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>我们知道Room可以直接返回liveData，所以当query返回的数据就是LiveData时，我们就可以用emitSource,然后emitSource中返回的LiveData就会自动更新新的数据</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Query(<span class="string">&quot;SELECT * FROM User WHERE id = :userId&quot;</span>)</span></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">loadUser</span><span class="params">(userId : <span class="type">String</span>)</span></span> : LiveData&lt;User&gt;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MyRepository</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">loadUser</span><span class="params">(userId : <span class="type">String</span>)</span></span> = liveData &#123;</span><br><span class="line">        emitSource(database.load(userId))</span><br><span class="line">        <span class="keyword">val</span> user = webService.fetch(userId)</span><br><span class="line">        database.insert(user)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<h4 id="ViewModel和Coroutine"><a href="#ViewModel和Coroutine" class="headerlink" title="ViewModel和Coroutine"></a>ViewModel和Coroutine</h4><h5 id="Coroutine泄露"><a href="#Coroutine泄露" class="headerlink" title="Coroutine泄露"></a>Coroutine泄露</h5><p>就像内存泄露一样，Coroutine也存在泄露的问题，在Android中如果我们通过Coroutine进行网络请求，这时候点击返回Activity销毁,但是Coroutine没有释放，Coroutine又持有了Activity,这样就会造成coroutine的泄露。</p>
+<p>为了解决这类问题，coroutine退出了scope的概念，coroutine只能运行在一个scope内，当scope的生命周期结束时，不管scope内部的coroutine是否还在执行，都需要结束，在Scope中的coroutine抛出的异常都可以被scope捕获，通过scope的方式可以避免泄露的问题。</p>
+<h5 id="viewModelScope"><a href="#viewModelScope" class="headerlink" title="viewModelScope"></a>viewModelScope</h5><p>顾名思义，viewModelScope是跟ViewModel生命周期一样的coroutine scope</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">viewModelScope.launch &#123;</span><br><span class="line">    <span class="keyword">while</span>(<span class="literal">true</span>) &#123;</span><br><span class="line">        delay(<span class="number">1_000</span>)</span><br><span class="line">        writeFile()</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>如上例子所示，我们在viewModelScope中启动了一个coroutine,这个任务是个无线循环，每隔一秒中会去写文件，这是一个相当费资源和耗时的操作，当用户离开当前屏幕时，ViewModel收到onCleared()回调的同时就会取消掉viewModelScope中的所有coroutine。</p>
+<h5 id="lifecycleScope"><a href="#lifecycleScope" class="headerlink" title="lifecycleScope"></a>lifecycleScope</h5><p>跟viewModelScope一样，lifecycleScope是跟随Lifecycle组件生命周期的coroutine scope。我们都知道android中的Activity和Fragment都有生命周期，lifecycleScope有如下几种启动方式</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">activity.lifecycleScope.launch &#123;&#125;</span><br><span class="line">fragment.lifecycleScope.launch &#123;&#125;</span><br><span class="line">fragment.viewLifecycleOwner.launch &#123;&#125;</span><br></pre></td></tr></table></figure>
+
+<p>因为fragment的隐藏和显示不一定跟随lifecycle所以增加了一种viewLifecycleOwner的scope用来标示fragment的可见和不可见。</p>
+<p>在一些需求开发中，常见的应用场景如下代码所示：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">mainHandler.postDelayed(Runnable &#123;</span><br><span class="line">    showFullHint()</span><br><span class="line">    mainHandler.postDelayed(Runnable&#123;</span><br><span class="line">        showSmallHint()</span><br><span class="line">    &#125;)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>我们通过UI线程的Handler来做一些延迟UI显示的逻辑，然后还有可能嵌套着使用，这种Runnable内部类的写法就会导致Activity context泄露的问题，而通过coroutine的lifeCycleScope就可以很好的解决这类问题</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">lifecycleScope.launch &#123;</span><br><span class="line">    delay(DELAY_TIME)</span><br><span class="line">    showFullHint()</span><br><span class="line">    delay(DELAY_TIME)</span><br><span class="line">    showSmallHint()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>通过lifecycleScope方式启动corotuine实现延时显示的需求不仅能使代码看上去更简洁，同时当lifecycle onDestroy时可以使lifecycleScope中启动的coroutine都取消，从而不会引起内存泄露。</p>
+<blockquote>
+<p>lifecycleScope需要比较注意的一点是当Activity configuration改变时生命周期会重走，这时候lifecycleScope中的coroutine也会重新走，所以大部分情况建议使用viewModelScope</p>
+</blockquote>
+<h5 id="launchWhenStarted"><a href="#launchWhenStarted" class="headerlink" title="launchWhenStarted"></a>launchWhenStarted</h5><p>当我们操作Fragment，使用commit操作显示fragment时，有时会出现<strong>IlleagleStateException</strong>的异常信息，这是因为，界面还没有完全显示就进行了fragment的commit操作，通过launchWhenStarted方法可以保证当其方法会在Activity的started或者resumed状态之后才会操作。</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">lifecycleScope.launchWhenStarted&#123;</span><br><span class="line">    <span class="keyword">val</span> note = userViewModel.loadNote()</span><br><span class="line">    fragmentManager.beginTransaction()...commit()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<h3 id="Coroutine单元测试"><a href="#Coroutine单元测试" class="headerlink" title="Coroutine单元测试"></a>Coroutine单元测试</h3><p>关于Coroutine的测试，我们可以使用corotuine新推出的测试库<a target="_blank" rel="noopener" href="https://kotlin.github.io/kotlinx.coroutines/kotlinx-coroutines-test/">kotlinx-coroutines-test</a></p>
+<p>例如我们现有如下代码通过一个liveData构建起发射数字1然后延迟1秒在发数字2，我们如何去写这个测试代码呢</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Repository</span> </span>&#123;</span><br><span class="line">    <span class="keyword">val</span> liveData = liveData &#123;</span><br><span class="line">        emit(<span class="number">1</span>)</span><br><span class="line">        delay(<span class="number">1_000</span>)</span><br><span class="line">        emit(<span class="number">2</span>)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>首先，我们需要定义TestCoroutineDispatcher，这个类用来保证coroutine在测试线程中运行，在就是TestCoroutineScope，用来保证测试方法运行结束后能及时的清理释放couroutine资源。在测试方法运行的开始（setup方法）和结束（tearDown方法）分别初始化测试线程和释放资源。</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> testDispatcher = TestCoroutineDispatcher()</span><br><span class="line"><span class="keyword">val</span> testScope = TestCoroutineScope(testDispatcher)</span><br><span class="line"></span><br><span class="line"><span class="meta">@Before</span></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">setup</span><span class="params">()</span></span> &#123;</span><br><span class="line">    Dispatchers.setMain(testDispatcher)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">@After</span></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">tearDown</span><span class="params">()</span></span> &#123;</span><br><span class="line">    Dispatchers.resetMain()</span><br><span class="line">    testScope.cleanupTestCoroutines()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>上面代码中的这种模式几乎是一个固定的样式，熟悉Junit的知道我们可以将这种固定代码定义成一个Test Rule,如下所示</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@get:Rule</span></span><br><span class="line"><span class="keyword">val</span> testCoroutineRule = TestCoroutineRule()</span><br><span class="line"></span><br><span class="line"><span class="meta">@Test</span></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">testLiveData</span><span class="params">()</span></span> = testCoroutineRule.runBlockingTest &#123;</span><br><span class="line">    <span class="keyword">val</span> subject = repository.liveData</span><br><span class="line">    subject.observeForTesting &#123;</span><br><span class="line">        subject.value shouldEqual <span class="number">1</span></span><br><span class="line">        advanceTimeBy(<span class="number">1_000</span>)</span><br><span class="line">        subject.value shouldEqual <span class="number">2</span></span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p>这个TestCoroutineRule coroutine的测试库中没有提供，我们可以在项目中自行创建一个TestRule。关于<strong>observeForTesting</strong>方法是LiveData的一个扩展工具方法，主要用来在测试方法中一直监测liveData的数据改变。</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> <span class="type">&lt;T&gt;</span> LiveData<span class="type">&lt;T&gt;</span>.<span class="title">observeForTesting</span><span class="params">(</span></span></span><br><span class="line"><span class="params"><span class="function">        block: () -&gt; <span class="type">Unit</span>)</span></span>&#123;</span><br><span class="line">        <span class="keyword">val</span> observer = Observer&lt;T&gt; &#123; <span class="built_in">Unit</span> &#125;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            observeForever(observer)</span><br><span class="line">            block()</span><br><span class="line">        &#125;<span class="keyword">finally</span>&#123;</span><br><span class="line">            removeObserver(observer)</span><br><span class="line">        &#125;    </span><br></pre></td></tr></table></figure>
+
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>所有内容我们可以通过如下一张表来整理</p>
+<table>
+<thead>
+<tr>
+<th>主题</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>WorkManager</td>
+<td>使用CoroutineWorker</td>
+</tr>
+<tr>
+<td>Retrofit</td>
+<td>支持suspend fun</td>
+</tr>
+<tr>
+<td>Room</td>
+<td>支持suspend fun</td>
+</tr>
+<tr>
+<td>liveData{}</td>
+<td>LiveData支持coroutines</td>
+</tr>
+<tr>
+<td>viewModelScope</td>
+<td>Launch in ViewModel</td>
+</tr>
+<tr>
+<td>lifecycleScope</td>
+<td>coroutine运行在UI生命周期内</td>
+</tr>
+<tr>
+<td>launchWhenStarted</td>
+<td>coroutines启动在Fragment所允许的State</td>
+</tr>
+<tr>
+<td>kotlinx-coroutines-test</td>
+<td>Testing coroutines</td>
+</tr>
+</tbody></table>
+
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>YamLee
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://yamlee.me/2021/12/25/2020-03-06-Android%20Coroutine%E5%BC%80%E5%8F%91%E5%AE%9E%E8%B7%B5/" title="Android Coroutine开发实践">http://yamlee.me/2021/12/25/2020-03-06-Android Coroutine开发实践/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/zh-CN" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2021/12/25/2020-03-11-%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3RxJava%E4%B8%8ERxKotlin/" rel="prev" title="深入理解RxJava与RxKotlin">
+      <i class="fa fa-chevron-left"></i> 深入理解RxJava与RxKotlin
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2023/02/20/2023-02-20-Android%E5%8D%95%E5%85%83%E6%B5%8B%E8%AF%95%E5%AE%9E%E8%B7%B5/" rel="next" title="Android单元测试实践">
+      Android单元测试实践 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Android-Coroutine%E5%BC%80%E5%8F%91%E5%AE%9E%E8%B7%B5"><span class="nav-number">1.</span> <span class="nav-text">Android Coroutine开发实践</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%83%8C%E6%99%AF"><span class="nav-number">1.1.</span> <span class="nav-text">背景</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Why-Coroutine"><span class="nav-number">1.2.</span> <span class="nav-text">Why Coroutine?</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Coroutine%E5%9F%BA%E7%A1%80"><span class="nav-number">1.3.</span> <span class="nav-text">Coroutine基础</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%BF%AB%E9%80%9F%E5%BC%80%E5%A7%8B"><span class="nav-number">1.3.1.</span> <span class="nav-text">快速开始</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%B7%BB%E5%8A%A0coroutine-Gradle%E4%BE%9D%E8%B5%96"><span class="nav-number">1.3.1.1.</span> <span class="nav-text">添加coroutine Gradle依赖</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8coroutine"><span class="nav-number">1.3.1.2.</span> <span class="nav-text">使用coroutine</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#coroutine%E5%9F%BA%E7%A1%80"><span class="nav-number">1.3.1.3.</span> <span class="nav-text">coroutine基础</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#suspend%E5%85%B3%E9%94%AE%E5%AD%97"><span class="nav-number">1.3.1.3.1.</span> <span class="nav-text">suspend关键字</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#Dispatchers"><span class="nav-number">1.3.1.3.2.</span> <span class="nav-text">Dispatchers</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#withContext%E8%AE%BE%E7%BD%AEcoroutine%E4%B8%8A%E4%B8%8B%E6%96%87%E7%8E%AF%E5%A2%83"><span class="nav-number">1.3.1.3.3.</span> <span class="nav-text">withContext设置coroutine上下文环境</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Coroutine-In-Android"><span class="nav-number">1.4.</span> <span class="nav-text">Coroutine In Android</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#WorkManager%E4%B8%AD%E4%BD%BF%E7%94%A8coroutine"><span class="nav-number">1.4.1.</span> <span class="nav-text">WorkManager中使用coroutine</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#LiveData%E5%92%8CCoroutine"><span class="nav-number">1.4.2.</span> <span class="nav-text">LiveData和Coroutine</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#emitSource"><span class="nav-number">1.4.2.1.</span> <span class="nav-text">emitSource()</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#ViewModel%E5%92%8CCoroutine"><span class="nav-number">1.4.3.</span> <span class="nav-text">ViewModel和Coroutine</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#Coroutine%E6%B3%84%E9%9C%B2"><span class="nav-number">1.4.3.1.</span> <span class="nav-text">Coroutine泄露</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#viewModelScope"><span class="nav-number">1.4.3.2.</span> <span class="nav-text">viewModelScope</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#lifecycleScope"><span class="nav-number">1.4.3.3.</span> <span class="nav-text">lifecycleScope</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#launchWhenStarted"><span class="nav-number">1.4.3.4.</span> <span class="nav-text">launchWhenStarted</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Coroutine%E5%8D%95%E5%85%83%E6%B5%8B%E8%AF%95"><span class="nav-number">1.5.</span> <span class="nav-text">Coroutine单元测试</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">1.6.</span> <span class="nav-text">总结</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="YamLee"
+      src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">YamLee</p>
+  <div class="site-description" itemprop="description">专注移动开发</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">18</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">9</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/yamlee" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;yamlee" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title"><i class="fa fa-link fa-fw"></i>
+      Links
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="http://yamlee.me/" title="http:&#x2F;&#x2F;yamlee.me&#x2F;">Title</a>
+        </li>
+    </ul>
+  </div>
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">YamLee</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
