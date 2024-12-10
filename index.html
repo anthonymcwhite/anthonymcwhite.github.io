@@ -123,17 +123,17 @@
   <ul id="menu" class="main-menu menu">
         <li class="menu-item menu-item-home">
 
-    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>front-page</a>
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>home</a>
 
   </li>
         <li class="menu-item menu-item-archives">
 
-    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>archive</a>
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i> project archive</a>
 
   </li>
         <li class="menu-item menu-item-categories">
 
-    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>classification</a>
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>ethical hacking</a>
 
   </li>
       <li class="menu-item menu-item-search">
@@ -191,16 +191,16 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en-US">
-    <link itemprop="mainEntityOfPage" href="http://yamlee.me/2023/02/20/2023-02-20-Android%E5%8D%95%E5%85%83%E6%B5%8B%E8%AF%95%E5%AE%9E%E8%B7%B5/">
+    <link itemprop="mainEntityOfPage" href="http://anthonymcwhite.github.io/2023/02/20/2023-02-20-Android%E5%8D%95%E5%85%83%E6%B5%8B%E8%AF%95%E5%AE%9E%E8%B7%B5/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.png">
-      <meta itemprop="name" content="YamLee">
+      <meta itemprop="name" content="A.M.">
       <meta itemprop="description" content="Focus on Data & Security">
     </span>
 
     <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Lee Blog">
+      <meta itemprop="name" content="A.M. Blog">
     </span>
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
@@ -257,7 +257,7 @@
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/2023/02/20/2023-02-20-Android%E5%8D%95%E5%85%83%E6%B5%8B%E8%AF%95%E5%AE%9E%E8%B7%B5/#more" rel="contents">
-                阅读全文 &raquo;
+                Read more &raquo;
               </a>
             </div>
           <!--/noindex-->
@@ -284,7 +284,7 @@
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.png">
-      <meta itemprop="name" content="YamLee">
+      <meta itemprop="name" content="A.M.">
       <meta itemprop="description" content="Focus on mobile development">
     </span>
 
@@ -294,7 +294,7 @@
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
           
-            <a href="/2021/12/25/2020-03-06-Android%20Coroutine%E5%BC%80%E5%8F%91%E5%AE%9E%E8%B7%B5/" class="post-title-link" itemprop="url">Android Coroutine开发实践</a>
+            <a href="/2021/12/25/2020-03-06-Android%20Coroutine%E5%BC%80%E5%8F%91%E5%AE%9E%E8%B7%B5/" class="post-title-link" itemprop="url">Android Coroutine Development Practice</a>
         </h2>
 
         <div class="post-meta">
@@ -302,7 +302,7 @@
               <span class="post-meta-item-icon">
                 <i class="far fa-calendar"></i>
               </span>
-              <span class="post-meta-item-text">post-in</span>
+              <span class="post-meta-item-text">post in</span>
 
               <time title="Research：2021-12-25 08:45:55" itemprop="dateCreated datePublished" datetime="2021-12-25T08:45:55+08:00">2021-12-25</time>
             </span>
@@ -317,9 +317,9 @@
               <span class="post-meta-item-icon">
                 <i class="far fa-folder"></i>
               </span>
-              <span class="post-meta-item-text">分类于</span>
+              <span class="post-meta-item-text">classified under</span>
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E6%88%90%E4%B8%BAKotlin%E9%AB%98%E6%89%8B/" itemprop="url" rel="index"><span itemprop="name">成为Kotlin高手</span></a>
+                  <a href="/categories/%E6%88%90%E4%B8%BAKotlin%E9%AB%98%E6%89%8B/" itemprop="url" rel="index"><span itemprop="name">Become a Kotlin master</span></a>
                 </span>
             </span>
 
@@ -334,7 +334,7 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          <h2 id="Android-Coroutine开发实践"><a href="#Android-Coroutine开发实践" class="headerlink" title="Android Coroutine开发实践"></a>Android Coroutine开发实践</h2><h3 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h3><p>In the development of Android applications, one of the most common application scenarios we see is to request the network data interface and then display it on the UI interface, as shown in the following code</p>
+          <h2 id="Android-Coroutine development practice"><a href="#Android-Coroutine开发实践" class="headerlink" title="Android Coroutine开发实践"></a>Android Coroutine Development Practice</h2><h3 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h3><p>In the development of Android applications, one of the most common application scenarios we see is to request the network data interface and then display it on the UI interface, as shown in the following code</p>
 <figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> user = fetchUserData()</span><br><span class="line">textView.text = user.name</span><br></pre></td></tr></table></figure>
 
 <p>But when you run the above code, you will find that the program reports an error and throws <strong>NetworkOnMainThreadException</strong> Exception, this is because Android does not allow network operations in the main thread (that is, the UI thread). At this time, we need to add a background thread to handle network requests</p>
@@ -342,7 +342,7 @@
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/2021/12/25/2020-03-06-Android%20Coroutine%E5%BC%80%E5%8F%91%E5%AE%9E%E8%B7%B5/#more" rel="contents">
-                阅读全文 &raquo;
+                read more &raquo;
               </a>
             </div>
           <!--/noindex-->
@@ -370,16 +370,16 @@
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.png">
       <meta itemprop="name" content="YamLee">
-      <meta itemprop="description" content="专注移动开发">
+      <meta itemprop="description" content="Focus on mobile development">
     </span>
 
     <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Lee Blog">
+      <meta itemprop="name" content="A.M.">
     </span>
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
           
-            <a href="/2021/12/25/2020-03-11-%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3RxJava%E4%B8%8ERxKotlin/" class="post-title-link" itemprop="url">深入理解RxJava与RxKotlin</a>
+            <a href="/2021/12/25/2020-03-11-%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3RxJava%E4%B8%8ERxKotlin/" class="post-title-link" itemprop="url">In-depth understanding of RxJava and RxKotlin</a>
         </h2>
 
         <div class="post-meta">
@@ -387,7 +387,7 @@
               <span class="post-meta-item-icon">
                 <i class="far fa-calendar"></i>
               </span>
-              <span class="post-meta-item-text">发表于</span>
+              <span class="post-meta-item-text">Posted in</span>
 
               <time title="创建时间：2021-12-25 08:45:55" itemprop="dateCreated datePublished" datetime="2021-12-25T08:45:55+08:00">2021-12-25</time>
             </span>
@@ -419,7 +419,7 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          <h2 id="What-is-Rx"><a href="#What-is-Rx" class="headerlink" title="What is Rx?"></a>What is Rx?</h2><h3 id="基本概念"><a href="#基本概念" class="headerlink" title="Research"></a>Testing</h3><blockquote>
+          <h2 id="What-is-Rx"><a href="#What-is-Rx" class="headerlink" title="What is Rx?"></a>What is Rx?</h2><h3 id="Basic concepts"><a href="#Basic concepts" class="headerlink" title="Research"></a>Testing</h3><blockquote>
 <p>RxJava – Reactive Extensions for the JVM – a library for composing asynchronous and event-based programs using observable sequences for the Java VM.</p>
 </blockquote>
 <p>According to the official introduction, RxJava is a reactive coding library initiated by Netflix that uses Observable sequences to process asynchronous tasks on the JVM platform.</p>
@@ -455,7 +455,7 @@
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.png">
       <meta itemprop="name" content="YamLee">
-      <meta itemprop="description" content="专注移动开发">
+      <meta itemprop="description" content="Research & Testing">
     </span>
 
     <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
@@ -489,7 +489,7 @@
               </span>
               <span class="post-meta-item-text">posted-in</span>
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Android%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/" itemprop="url" rel="index"><span itemprop="name">Android性能优化</span></a>
+                  <a href="/categories/Android%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/" itemprop="url" rel="index"><span itemprop="name">Android performance optimization</span></a>
                 </span>
             </span>
 
@@ -508,7 +508,7 @@
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/2021/12/25/2021-07-15-%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3Java%E5%92%8CAndroid%E4%B8%AD%E7%9A%84%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%EF%BC%88%E4%B8%80%EF%BC%89%EF%BC%9A%E8%99%9A%E6%8B%9F%E6%9C%BA/#more" rel="contents">
-                阅读全文 &raquo;
+               Read more &raquo;
               </a>
             </div>
           <!--/noindex-->
@@ -535,12 +535,12 @@
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.png">
-      <meta itemprop="name" content="YamLee">
-      <meta itemprop="description" content="专注移动开发">
+      <meta itemprop="name" content="A.M.">
+      <meta itemprop="description" content="Research & Testing">
     </span>
 
     <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Lee Blog">
+      <meta itemprop="name" content="A.M. Blog">
     </span>
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
@@ -570,7 +570,7 @@
               </span>
               <span class="post-meta-item-text">posted-in</span>
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Android-Jetpack%E5%89%96%E6%9E%90/" itemprop="url" rel="index"><span itemprop="name">Android Jetpack剖析</span></a>
+                  <a href="/categories/Android-Jetpack%E5%89%96%E6%9E%90/" itemprop="url" rel="index"><span itemprop="name">Anatomy of Android Jetpack</span></a>
                 </span>
             </span>
 
@@ -586,13 +586,13 @@
 
       
           <blockquote>
-<p>本篇文章翻译自官方介绍文档（<a target="_blank" rel="noopener" href="https://developer.android.com/topic/libraries/data-binding/index.html">原文</a>）</p>
+<p>This article is translated from the official introduction document（<a target="_blank" rel="noopener" href="https://developer.android.com/topic/libraries/data-binding/index.html">original</a>）</p>
 </blockquote>
-<p>本篇文章介绍了如何在Android开发中使用Android的Data Binding库来减少开发中的胶水代码（组织布局和业务逻辑的代码）。<br>Data Binding库支持在Android 2.1(API level 7)及以上版本中使用。<br>To use Data Binding, Gradle's Android plug-in requires version 1.5.0-alpha1 and above. For specific configuration, please refer to <a target="_blank" rel="noopener" href="https://developer.android.com/studio/releases/gradle-plugin.html#updating-plugin">How to update the Gradle Android plug-in?</a></p>
+<p>Introduction to this article. Learn how to use Android's Data Binding library in Android development to reduce glue code in development (code that organizes layout and business logic) <br>The Data Binding library supports use in Android 2.1 (API level 7) and above. <br>To use Data Binding, Gradle's Android plug-in requires version 1.5.0-alpha1 and above. For specific configuration, please refer to <a target="_blank" rel="noopener" href="https://developer.android.com/studio/releases/gradle-plugin.html#updating-plugin">How to update the Gradle Android plug-in?</a></p>
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/2021/12/25/2016-10-25-%E6%B7%B1%E5%85%A5Android%20Data%20Binding%EF%BC%88%E4%B8%80%EF%BC%89%EF%BC%9A%E4%BD%BF%E7%94%A8%E8%AF%A6%E8%A7%A3/#more" rel="contents">
-                阅读全文 &raquo;
+                Read more&raquo;
               </a>
             </div>
           <!--/noindex-->
@@ -619,7 +619,7 @@
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.png">
-      <meta itemprop="name" content="YamLee">
+      <meta itemprop="name" content="A.M.">
       <meta itemprop="description" content="Research & Development">
     </span>
 
@@ -629,7 +629,7 @@
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
           
-            <a href="/2021/12/25/2019-02-08-Android%20Themes%E4%B8%8EStyles%E5%AE%9E%E8%B7%B5/" class="post-title-link" itemprop="url">Android Themes与Styles实践</a>
+            <a href="/2021/12/25/2019-02-08-Android%20Themes%E4%B8%8EStyles%E5%AE%9E%E8%B7%B5/" class="post-title-link" itemprop="url">Android Themes and Styles Practice</a>
         </h2>
 
         <div class="post-meta">
@@ -645,7 +645,7 @@
                 <span class="post-meta-item-icon">
                   <i class="far fa-calendar-check"></i>
                 </span>
-                <span class="post-meta-item-text">更新于</span>
+                <span class="post-meta-item-text">updated on</span>
                 <time title="Testing：2022-04-08 12:19:37" itemprop="dateModified" datetime="2022-04-08T12:19:37+08:00">2022-04-08</time>
               </span>
             <span class="post-meta-item">
@@ -669,8 +669,8 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          <h2 id="分清Style和Theme"><a href="#分清Style和Theme" class="headerlink" title="分清Style和Theme"></a>分清Style和Theme</h2><p>首先我们需要知道的是Theme和Style都是定义在<em><strong>res&#x2F;values&#x2F;styles.xml</strong></em>的文件下，做个类比的话，style和theme就类似于web前端中的CSS样式表，用来定义控件的显示样式。</p>
-<h3 id="Style"><a href="#Style" class="headerlink" title="Style"></a>Style</h3><p>style是只针对单个View的属性集合，例如对TextView定义颜色，字体大小等</p>
+          <h2 id="Distinguish between Style and Theme"><a href="#Distinguish between Style and Theme" class="headerlink" title="Distinguish between Style and Theme"></a>Distinguish between Style and Theme</h2><p>First of all, what we need to know is that Theme and Style are both defined in<em><strong>res&#x2F;values&#x2F;styles.xml</strong></em>file, as an analogy, style and theme are similar to the CSS style sheet in the web front-end, used to define the display style of the control. </p>
+<h3 id="Style"><a href="#Style" class="headerlink" title="Style"></a>Style</h3><p>Style is a collection of attributes only for a single View, such as defining color, font size, etc. for TextView</p>
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/2021/12/25/2019-02-08-Android%20Themes%E4%B8%8EStyles%E5%AE%9E%E8%B7%B5/#more" rel="contents">
@@ -701,7 +701,7 @@
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.png">
-      <meta itemprop="name" content="YamLee">
+      <meta itemprop="name" content="A.M.">
       <meta itemprop="description" content="Research & Testing">
     </span>
 
@@ -711,7 +711,7 @@
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
           
-            <a href="/2021/12/25/2019-10-11-Android%20ConstraintLayout%E4%BD%BF%E7%94%A8%E5%AE%9E%E8%B7%B5/" class="post-title-link" itemprop="url">Android ConstraintLayout使用实践</a>
+            <a href="/2021/12/25/2019-10-11-Android%20ConstraintLayout%E4%BD%BF%E7%94%A8%E5%AE%9E%E8%B7%B5/" class="post-title-link" itemprop="url">Android ConstraintLayout usage practice</a>
         </h2>
 
         <div class="post-meta">
@@ -734,9 +734,9 @@
               <span class="post-meta-item-icon">
                 <i class="far fa-folder"></i>
               </span>
-              <span class="post-meta-item-text">分类于</span>
+              <span class="post-meta-item-text">Classified under</span>
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Android-Jetpack%E5%89%96%E6%9E%90/" itemprop="url" rel="index"><span itemprop="name">Android Jetpack剖析</span></a>
+                  <a href="/categories/Android-Jetpack%E5%89%96%E6%9E%90/" itemprop="url" rel="index"><span itemprop="name">AAnatomy of ndroid Jetpack</span></a>
                 </span>
             </span>
 
@@ -751,12 +751,12 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          <h2 id="ConstraintLayout使用实践"><a href="#ConstraintLayout使用实践" class="headerlink" title="ConstraintLayout使用实践"></a>ConstraintLayout使用实践</h2><p>ConstraintLayout是2017年Google IO上推出的一种新的布局方式，相较于其他几种布局（LinearLayout,RelativeLayout等），ConstraintLayout设计用于构造扁平的布局层级，减少layout的嵌套，从而提升界面绘制的速度，在布局中使用ConstraintLayout性能比其他几种布局会提升很多，后面我们会详细介绍到。</p>
+          <h2 id="ConstraintLayout usage practice"><a href="#ConstraintLayout usage practice" class="headerlink" title="ConstraintLayout usage practice"></a>ConstraintLayout使用实践</h2><p>ConstraintLayout是2017年Google IO上推出的一种新的布局方式，相较于其他几种布局（LinearLayout,RelativeLayout等），ConstraintLayout设计用于构造扁平的布局层级，减少layout的嵌套，从而提升界面绘制的速度，在布局中使用ConstraintLayout性能比其他几种布局会提升很多，后面我们会详细介绍到。</p>
 <h3 id="Why-ConstraintLayout"><a href="#Why-ConstraintLayout" class="headerlink" title="Why ConstraintLayout?"></a>Why ConstraintLayout?</h3>
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/2021/12/25/2019-10-11-Android%20ConstraintLayout%E4%BD%BF%E7%94%A8%E5%AE%9E%E8%B7%B5/#more" rel="contents">
-                阅读全文 &raquo;
+               Read more &raquo;
               </a>
             </div>
           <!--/noindex-->
@@ -783,17 +783,17 @@
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.png">
-      <meta itemprop="name" content="YamLee">
-      <meta itemprop="description" content="专注移动开发">
+      <meta itemprop="name" content="A.M.">
+      <meta itemprop="description" content="Focus on mobile development">
     </span>
 
     <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Lee Blog">
+      <meta itemprop="name" content="A.M. Blog">
     </span>
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
           
-            <a href="/2021/12/25/2015-10-04-AndroidStudio-Develop-Guide/" class="post-title-link" itemprop="url">AndroidStudio高效插件</a>
+            <a href="/2021/12/25/2015-10-04-AndroidStudio-Develop-Guide/" class="post-title-link" itemprop="url">AndroidStudio efficient plug-in</a>
         </h2>
 
         <div class="post-meta">
@@ -801,7 +801,7 @@
               <span class="post-meta-item-icon">
                 <i class="far fa-calendar"></i>
               </span>
-              <span class="post-meta-item-text">发表于</span>
+              <span class="post-meta-item-text">Posted in</span>
 
               <time title="research：2021-12-25 08:45:55" itemprop="dateCreated datePublished" datetime="2021-12-25T08:45:55+08:00">2021-12-25</time>
             </span>
@@ -809,14 +809,14 @@
                 <span class="post-meta-item-icon">
                   <i class="far fa-calendar-check"></i>
                 </span>
-                <span class="post-meta-item-text">更新于</span>
+                <span class="post-meta-item-text">updated on</span>
                 <time title="testing：2022-04-08 13:00:22" itemprop="dateModified" datetime="2022-04-08T13:00:22+08:00">2022-04-08</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
                 <i class="far fa-folder"></i>
               </span>
-              <span class="post-meta-item-text">分类于</span>
+              <span class="post-meta-item-text">Classified under</span>
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
                   <a href="/categories/Android%E6%95%88%E7%8E%87%E5%B7%A5%E7%A8%8B/" itemprop="url" rel="index"><span itemprop="name">Android效率工程</span></a>
                 </span>
@@ -862,16 +862,16 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en-US>
-    <link itemprop="mainEntityOfPage" href="http://yamlee.me/2021/12/25/2015-10-11-hamcrest-guide/">
+    <link itemprop="mainEntityOfPage" href="http://anthonymcwhite.github.io/2021/12/25/2015-10-11-hamcrest-guide/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.png">
-      <meta itemprop="name" content="YamLee">
+      <meta itemprop="name" content="A.M.">
       <meta itemprop="description" content="Research">
     </span>
 
     <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="A.M.">
+      <meta itemprop="name" content="A.M. blog">
     </span>
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
@@ -922,7 +922,7 @@
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/2021/12/25/2015-10-11-hamcrest-guide/#more" rel="contents">
-                阅读全文 &raquo;
+                Read more &raquo;
               </a>
             </div>
           <!--/noindex-->
@@ -945,21 +945,21 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en-US">
-    <link itemprop="mainEntityOfPage" href="http://yamlee.me/2016/05/10/2016-05-10-Android%20Gradle%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5%E7%B3%BB%E5%88%979/">
+    <link itemprop="mainEntityOfPage" href="http://anthonymcwhite.guthub.io/2016/05/10/2016-05-10-Android%20Gradle%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5%E7%B3%BB%E5%88%979/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.png">
-      <meta itemprop="name" content="YamLee">
-      <meta itemprop="description" content="专注移动开发">
+      <meta itemprop="name" content="A.M.">
+      <meta itemprop="description" content="Research & Testing">
     </span>
 
     <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Lee Blog">
+      <meta itemprop="name" content="A.M. Blog">
     </span>
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
           
-            <a href="/2016/05/10/2016-05-10-Android%20Gradle%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5%E7%B3%BB%E5%88%979/" class="post-title-link" itemprop="url">Android Gradle最佳实践系列9：高级配置</a>
+            <a href="/2016/05/10/2016-05-10-Android%20Gradle%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5%E7%B3%BB%E5%88%979/" class="post-title-link" itemprop="url">Android Gradle Best Practices Series 9: Advanced Configuration</a>
         </h2>
 
         <div class="post-meta">
@@ -967,22 +967,22 @@
               <span class="post-meta-item-icon">
                 <i class="far fa-calendar"></i>
               </span>
-              <span class="post-meta-item-text">发表于</span>
+              <span class="post-meta-item-text">Posted in</span>
 
-              <time title="创建时间：2016-05-10 00:00:00" itemprop="dateCreated datePublished" datetime="2016-05-10T00:00:00+08:00">2016-05-10</time>
+              <time title="Research&Testing：2016-05-10 00:00:00" itemprop="dateCreated datePublished" datetime="2016-05-10T00:00:00+08:00">2016-05-10</time>
             </span>
               <span class="post-meta-item">
                 <span class="post-meta-item-icon">
                   <i class="far fa-calendar-check"></i>
                 </span>
-                <span class="post-meta-item-text">更新于</span>
+                <span class="post-meta-item-text">Posted in</span>
                 <time title="修改时间：2022-04-08 12:06:59" itemprop="dateModified" datetime="2022-04-08T12:06:59+08:00">2022-04-08</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
                 <i class="far fa-folder"></i>
               </span>
-              <span class="post-meta-item-text">分类于</span>
+              <span class="post-meta-item-text">Posted in</span>
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
                   <a href="/categories/Android-Gradle%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5%E7%B3%BB%E5%88%97/" itemprop="url" rel="index"><span itemprop="name">Android Gradle最佳实践系列</span></a>
                 </span>
@@ -1002,17 +1002,17 @@
           <p>Now that we know how Gradle works, how to create custom tasks and plug-ins, how to run tests, and how to set up a continuous integration environment, we have made some progress in Gradle. This chapter contains some optimization tips that we have not mentioned in the previous chapters, which make it easier for us to use Gradle to build, develop and deploy Android projects.</p>
 <p>In this chapter we will learn about the following topics：</p>
 <ul>
-<li>压缩Apk大小</li>
-<li>加快Build速度</li>
-<li>忽略Lint检查</li>
-<li>在Gradle中使用Ant</li>
-<li>应用发布的高级技巧</li>
+<li>Compressed Apk Size</li>
+<li>Speed ​​up the build</li>
+<li>Ignore Lint checks</li>
+<li>Using Ant with Gradle</li>
+<li>Advanced tips for app publishing</li>
 </ul>
 <p>First, let’s take a look at how to reduce the size of the built Apk</p>
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/2016/05/10/2016-05-10-Android%20Gradle%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5%E7%B3%BB%E5%88%979/#more" rel="contents">
-                阅读全文 &raquo;
+               Read more &raquo;
               </a>
             </div>
           <!--/noindex-->
@@ -1034,7 +1034,7 @@
 
   
   <nav class="pagination">
-    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="extend next" rel="next" href="/page/2/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
+    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="extend next" rel="next" href="/page/2/"><i class="fa fa-angle-right" aria-label="Next page"></i></a>
   </nav>
 
 
@@ -1078,10 +1078,10 @@
 
       <ul class="sidebar-nav motion-element">
         <li class="sidebar-nav-toc">
-          文章目录
+          Article directory
         </li>
         <li class="sidebar-nav-overview">
-          站点概览
+          Site overview
         </li>
       </ul>
 
@@ -1092,7 +1092,7 @@
 
       <div class="site-overview-wrap sidebar-panel">
         <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
-    <img class="site-author-image" itemprop="image" alt="YamLee"
+    <img class="site-author-image" itemprop="image" alt="A.M."
       src="/images/avatar.png">
   <p class="site-author-name" itemprop="name">A.M.</p>
   <div class="site-description" itemprop="description">Research</div>
@@ -1116,7 +1116,7 @@
 </div>
   <div class="links-of-author motion-element">
       <span class="links-of-author-item">
-        <a href="https://github.com/yamlee" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;yamlee" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+        <a href="https://github.com/anthonymcwhite" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;anthonymcwhite" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
       </span>
   </div>
 
@@ -1127,7 +1127,7 @@
     </div>
     <ul class="links-of-blogroll-list">
         <li class="links-of-blogroll-item">
-          <a href="http://yamlee.me/" title="http:&#x2F;&#x2F;yamlee.me&#x2F;">Title</a>
+          <a href="https://anthonymcwhite.github.io/" title="http:&#x2F;&#x2F;anthonymcwhite.github.io&#x2F;">Title</a>
         </li>
     </ul>
   </div>
@@ -1155,9 +1155,9 @@
   <span class="with-love">
     <i class="fa fa-heart"></i>
   </span>
-  <span class="author" itemprop="copyrightHolder">YamLee</span>
+  <span class="author" itemprop="copyrightHolder">A.M.</span>
 </div>
-  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  <div class="powered-by">Depend on<a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> Powerful drive
   </div>
 
         
