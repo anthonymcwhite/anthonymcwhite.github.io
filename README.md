@@ -1,0 +1,6 @@
+![IMG_20240417_190606_032](https://github.com/user-attachments/assets/50f45c65-8782-47d6-bfae-77d6a56f82e7)
+![64eacc4d357612683858fc47885e41cde7a029d2-24_Glitch](https://github.com/user-attachments/assets/e32dbd53-aa37-495e-bbf1-66db46336215)
+![IMG_20230224_181127_310](https://github.com/user-attachments/assets/a2d56a4b-d44f-4e03-89e9-f365767cdceb)
+![Screenshot_2024-12-31_18-41-16](https://github.com/user-attachments/assets/06d82c8b-88cb-427a-89c2-788aae6ca5d8)
+![BANNED](https://github.com/user-attachments/assets/4eeead57-be49-478a-9f87-8d1c8fdf3058)
+![tracelabs](https://github.com/user-attachments/assets/b3cb903e-39cc-43d5-8fab-6b6e258ff08a)
