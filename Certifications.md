@@ -14,7 +14,6 @@ description: a list of current professional certifications that I have earned
 | Scrum Master | Scrum Alliance |
 | Systems Analyst | Code Differently |
 | Alteryx Foundational | Alteryx Micro Credential |
-<br>
 
 ### Badges 
 
@@ -23,7 +22,7 @@ description: a list of current professional certifications that I have earned
 | Confluence Fundamentals | Atlassian |
 | Diagramming Foundations | Lucid Software |
 | Professional Hacker | Hack The Box |
-<br>
+
 <hr noshade>
 
 ### Analysts Comments;
