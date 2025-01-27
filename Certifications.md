@@ -1,6 +1,6 @@
 ---
 layout: page
-title: Certifications & Badges 
+title: 乇ᗪㄩ匚卂ㄒ丨ㄖ几
 description: a list of current professional certifications that I have earned 
 ---
 
