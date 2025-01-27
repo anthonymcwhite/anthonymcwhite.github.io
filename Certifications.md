@@ -15,6 +15,7 @@ description: a list of current professional certifications that I have earned
 | Systems Analyst | Code Differently |
 | Alteryx Foundational | Alteryx Micro Credential |
 <br>
+
 ### Badges 
 
 | Trello | Configuring Workspace |
