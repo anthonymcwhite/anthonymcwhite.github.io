@@ -1,6 +1,6 @@
 ---
 layout: page
-title: Professional Level Certifications, Accomplishments & Badges 
+title: Certifications & Badges 
 description: a list of current professional certifications that I have earned 
 ---
 
@@ -14,7 +14,7 @@ description: a list of current professional certifications that I have earned
 | Scrum Master | Scrum Alliance |
 | Systems Analyst | Code Differently |
 | Alteryx Foundational | Alteryx Micro Credential |
-
+<br>
 ### Badges 
 
 | Trello | Configuring Workspace |
