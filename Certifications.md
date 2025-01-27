@@ -13,7 +13,7 @@ description: a list of current professional certifications that I have earned
 | AI Essentials | Google Professional | 
 | Scrum Master | Scrum Alliance |
 | Systems Analyst | Code Differently |
-| Alteryx Foundational | Alteryx Micro Credential |
+| Alteryx Foundational | Alteryx Micro Credential |<br>
 
 ### Badges 
 
@@ -22,8 +22,6 @@ description: a list of current professional certifications that I have earned
 | Confluence Fundamentals | Atlassian |
 | Diagramming Foundations | Lucid Software |
 | Professional Hacker | Hack The Box |
-
-<hr noshade>
 
 ### Analysts Comments;
 <tt>The Majority of my training has been fueled by a genuine love for systems and analytics. Up until the the last year or so (as of 2025) I have been primarily 
