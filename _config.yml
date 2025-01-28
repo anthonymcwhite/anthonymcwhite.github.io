@@ -1,1 +1,3 @@
 theme: minima
+url: 'https://anthonymcwhite.github.io/' # your main domain
+baseurl: 'anthonymcwhite/anthonymcwhite.github.io' # if you're using custom domain keep this blank example
