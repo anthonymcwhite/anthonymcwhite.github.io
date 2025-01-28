@@ -9,7 +9,7 @@
 <tt>Or contact me through one of my socials listed below.</tt><br>
 <hr noshade>
 
-### ㄚㄖㄩ  匚卂几  卂ㄥ丂ㄖ  千丨几ᗪ  爪乇  卄乇尺乇...
+### YӨЦ ᄃΛП ΛlŞӨ FIПD MΣ ΉΣЯΣ;
 [![LinkedIn](https://img.shields.io/badge/linkedin-%230077B5.svg?style=for-the-badge&logo=linkedin&logoColor=white)](https://linkedin.com/comm/mynetwork/discovery-see-all?usecase=PEOPLE_FOLLOWS&followMember=anthony-mcwhite-4a01511a0) [![Medium](https://img.shields.io/badge/Medium-12100E?style=for-the-badge&logo=medium&logoColor=white)](https://medium.com/@TerribleTone) ![Discord](https://img.shields.io/badge/Discord-%235865F2.svg?style=for-the-badge&logo=discord&logoColor=white) ![Instagram](https://img.shields.io/badge/Instagram-%23E4405F.svg?style=for-the-badge&logo=Instagram&logoColor=white) ![Mastodon](https://img.shields.io/badge/-MASTODON-%232B90D9?style=for-the-badge&logo=mastodon&logoColor=white) [![YouTube](https://img.shields.io/badge/YouTube-%23FF0000.svg?style=for-the-badge&logo=YouTube&logoColor=white)](https://www.youtube.com/@terrible_tone)
 <br>
 <hr noshade>
