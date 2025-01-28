@@ -1,5 +1,5 @@
 ---
-title: ЩΉΛƬ IM ЩӨЯKIПG ӨП..
+title: Getting Started With OpenBullet2
 date: 2025-01-27
 ---
 
