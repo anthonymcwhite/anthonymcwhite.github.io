@@ -1,9 +1,9 @@
 ---
-title: Getting Started With OpenBullet2
+title: OpenBullet2
 date: 2025-01-27
 ---
 
-### OpenBullet2 
+### Getting Started With OpenBullet2
 <no shade> 
 <br> 
 <tt>OB2 is a popular tool used by threat actors and ethical testers/researchers alike. Initially I struggled in working with the necessary Dotnet configuration, got confused easily and gave up on the tool rather quickly because I did'nt have an immediate need for it. After reading an article recently that had to do with some recent attacks and how the tool was used for credential stuffing I decided to give it a try and see for myself what made this particular tool such a valuable weapon for cyber criminals.</tt><br>
