@@ -21,5 +21,5 @@
 <tt>under posts you can see</tt><br>
 ЩΉΛƬ IM ЩӨЯKIПG ӨП...
 
-[![OB2](https://github.com/anthonymcwhite/anthonymcwhite.github.io/blob/main/assets/ob2.png)]
+
 
