@@ -70,30 +70,38 @@ permalink: /
       </div>
     </div>
 
-    <!-- FEATURED WORK (clickable cards) -->
+    <!-- FEATURED WORK (clickable tiles) -->
     <div id="work" class="card">
       <div class="kicker">Featured work</div>
 
-      <div class="card-grid" style="margin-top:10px;">
-        <a class="card third clickable" href="{{ "/projects/" | relative_url }}">
+      <div class="pills" style="margin-top:10px;">
+        <a class="pill" href="{{ "/projects/" | relative_url }}">All</a>
+        <a class="pill" href="{{ "/projects/" | relative_url }}">Impact</a>
+        <a class="pill" href="{{ "/projects/" | relative_url }}">Governance</a>
+        <a class="pill" href="{{ "/projects/" | relative_url }}">Automation</a>
+        <a class="pill" href="{{ "/projects/" | relative_url }}">Security</a>
+      </div>
+
+      <div class="card-grid" style="margin-top:12px;">
+        <a class="tile third" href="{{ "/projects/" | relative_url }}">
           <p><strong>Workforce pipeline analytics</strong><br>
             <span class="small-muted">Milestones, retention, employer outcomes.</span>
           </p>
-          <p class="small-muted">View →</p>
+          <p class="small-muted">Open →</p>
         </a>
 
-        <a class="card third clickable" href="{{ "/projects/" | relative_url }}">
+        <a class="tile third" href="{{ "/projects/" | relative_url }}">
           <p><strong>Data governance & admin systems</strong><br>
             <span class="small-muted">Validation, deduplication, configuration standards.</span>
           </p>
-          <p class="small-muted">View →</p>
+          <p class="small-muted">Open →</p>
         </a>
 
-        <a class="card third clickable" href="{{ "/projects/" | relative_url }}">
+        <a class="tile third" href="{{ "/projects/" | relative_url }}">
           <p><strong>Automation & reporting workflows</strong><br>
             <span class="small-muted">Repeatable pipelines, less manual work.</span>
           </p>
-          <p class="small-muted">View →</p>
+          <p class="small-muted">Open →</p>
         </a>
       </div>
     </div>
