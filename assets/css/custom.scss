@@ -266,3 +266,36 @@ blockquote {
   color: var(--muted);
   font-size: 13px;
 }
+
+.quicknav {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding: 10px 0;
+  margin-bottom: 10px;
+  background: linear-gradient(to bottom, rgba(11,15,20,0.92), rgba(11,15,20,0.40));
+  backdrop-filter: blur(6px);
+}
+
+.quicknav a {
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,0.04);
+  color: var(--muted);
+  border-radius: 999px;
+  padding: 6px 10px;
+  font-size: 12px;
+  text-decoration: none;
+}
+
+.quicknav a:hover {
+  border-color: rgba(122,162,255,0.30);
+  color: var(--text);
+}
+
+a.card.clickable {
+  text-decoration: none;
+  color: inherit;
+}
