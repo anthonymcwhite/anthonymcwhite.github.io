@@ -4,27 +4,27 @@ title: ""
 permalink: /
 ---
 
-<!-- Sticky quick-nav -->
-<div class="quicknav">
-  <a href="#top">Top</a>
-  <a href="#work">Work</a>
-  <a href="#writing">Writing</a>
+<div class="quicknav dossier-tabs">
+  <a href="#top">Brief</a>
+  <a href="#casefiles">Case Files</a>
+  <a href="#writing">Field Notes</a>
   <a href="{{ "/credentials/" | relative_url }}">Credentials</a>
   <a href="{{ "/contact/" | relative_url }}">Contact</a>
 </div>
 
-<div id="top" class="hero">
+<div id="top" class="hero dossier-hero">
+  <div class="dossier-seal">
+    <img src="{{ "/assets/img/brand/seal.png" | relative_url }}" alt="Seal">
+  </div>
+
   <div class="card-grid">
 
-    <!-- HERO SPLASH -->
-    <div class="card half hero-splash">
-      <div class="kicker">Data • Systems • Security-minded analytics</div>
-
-      <!-- Role-first headline (no name) -->
-      <h1>Analytics + operations systems that hold up under pressure.</h1>
+    <div class="card half hero-splash dossier-brief">
+      <div class="kicker">Operator Brief</div>
+      <h1>Analytics systems that stay reliable when things get messy.</h1>
 
       <p>
-        I build durable reporting systems, automate messy workflows, and translate complex data into decisions people can act on.
+        I build durable reporting systems, automate workflow friction, and translate complex data into decisions people can act on.
         My work sits at the intersection of impact measurement, operations, and practical security.
       </p>
 
@@ -37,67 +37,77 @@ permalink: /
       </div>
 
       <div class="cta-row">
-        <a class="cta" href="#work">Explore work ↓</a>
-        <a class="cta" href="{{ "/projects/" | relative_url }}">Projects →</a>
+        <a class="cta" href="#casefiles">Open case files ↓</a>
+        <a class="cta" href="{{ "/projects/" | relative_url }}">All projects →</a>
         <a class="cta" href="{{ "/writing/" | relative_url }}">Writing →</a>
-        <a class="cta" href="{{ "/contact/" | relative_url }}">Contact →</a>
       </div>
 
-      <p class="small-muted" style="margin-top:10px;">
-        Professional portfolio here • deeper builds and experiments live on <span style="color:var(--text);">civint.tech</span>
-      </p>
+      <div class="dossier-meta">
+        <div><span class="tag">Status</span> Active</div>
+        <div><span class="tag">Focus</span> Systems • Measurement • Automation</div>
+      </div>
     </div>
 
-    <!-- PROFILE -->
-    <div class="card half">
+    <div class="card half dossier-profile">
       <div class="kicker">Profile</div>
 
-      <div style="display:flex; gap:16px; align-items:flex-start; flex-wrap:wrap;">
+      <div class="profile-row">
         <img class="headshot" src="{{ "/assets/img/headshot.jpg" | relative_url }}" alt="Headshot">
-        <div style="min-width:240px; flex:1;">
-          <p style="margin:0 0 8px 0;"><strong>What I’m known for</strong></p>
+
+        <div class="profile-text">
+          <p style="margin:0 0 8px 0;"><strong>What teams rely on me for</strong></p>
           <ul class="mini-list">
-            <li>Turning messy data into reliable metrics</li>
-            <li>Building repeatable reporting + governance</li>
-            <li>Automation that reduces manual effort</li>
+            <li>Turning messy data into stable metrics</li>
+            <li>Governance + validation that prevents reporting drift</li>
+            <li>Automation that reduces manual effort and error</li>
           </ul>
 
           <div class="cta-row" style="margin-top:12px;">
             <a class="cta" href="{{ "/credentials/" | relative_url }}">Credentials</a>
             <a class="cta" href="{{ "/contact/" | relative_url }}">Contact</a>
           </div>
+
+          <p class="small-muted" style="margin-top:10px;">
+            Delaware • open to analytics, operations, and systems-focused roles.
+          </p>
         </div>
       </div>
     </div>
 
-    <!-- FEATURED WORK (clickable tiles) -->
-    <div id="work" class="card">
-      <div class="kicker">Featured work</div>
-
-      <div class="pills" style="margin-top:10px;">
-        <a class="pill" href="{{ "/projects/" | relative_url }}">All</a>
-        <a class="pill" href="{{ "/projects/" | relative_url }}">Impact</a>
-        <a class="pill" href="{{ "/projects/" | relative_url }}">Governance</a>
-        <a class="pill" href="{{ "/projects/" | relative_url }}">Automation</a>
-        <a class="pill" href="{{ "/projects/" | relative_url }}">Security</a>
-      </div>
+    <div id="casefiles" class="card">
+      <div class="kicker">Case Files</div>
+      <p class="small-muted" style="margin-top:8px;">
+        Selected work themes—each becomes a case study as I publish more.
+      </p>
 
       <div class="card-grid" style="margin-top:12px;">
-        <a class="tile third" href="{{ "/projects/" | relative_url }}">
+        <a class="tile third dossier-tile" href="{{ "/projects/" | relative_url }}">
+          <div class="tile-top">
+            <span class="tile-code">CASE 01</span>
+            <span class="tile-chip">Impact</span>
+          </div>
           <p><strong>Workforce pipeline analytics</strong><br>
             <span class="small-muted">Milestones, retention, employer outcomes.</span>
           </p>
           <p class="small-muted">Open →</p>
         </a>
 
-        <a class="tile third" href="{{ "/projects/" | relative_url }}">
+        <a class="tile third dossier-tile" href="{{ "/projects/" | relative_url }}">
+          <div class="tile-top">
+            <span class="tile-code">CASE 02</span>
+            <span class="tile-chip">Governance</span>
+          </div>
           <p><strong>Data governance & admin systems</strong><br>
             <span class="small-muted">Validation, deduplication, configuration standards.</span>
           </p>
           <p class="small-muted">Open →</p>
         </a>
 
-        <a class="tile third" href="{{ "/projects/" | relative_url }}">
+        <a class="tile third dossier-tile" href="{{ "/projects/" | relative_url }}">
+          <div class="tile-top">
+            <span class="tile-code">CASE 03</span>
+            <span class="tile-chip">Automation</span>
+          </div>
           <p><strong>Automation & reporting workflows</strong><br>
             <span class="small-muted">Repeatable pipelines, less manual work.</span>
           </p>
@@ -106,9 +116,8 @@ permalink: /
       </div>
     </div>
 
-    <!-- LATEST WRITING (dynamic) -->
     <div id="writing" class="card half">
-      <div class="kicker">Latest writing</div>
+      <div class="kicker">Field Notes</div>
 
       {% assign recent = site.posts | slice: 0, 3 %}
       {% if recent.size > 0 %}
@@ -125,17 +134,16 @@ permalink: /
             </div>
           {% endfor %}
         </div>
-        <p style="margin-top:12px;"><a href="{{ "/writing/" | relative_url }}">Browse all writing →</a></p>
+        <p style="margin-top:12px;"><a href="{{ "/writing/" | relative_url }}">Browse all notes →</a></p>
       {% else %}
         <p class="small-muted" style="margin-top:10px;">Posts will appear here once you publish them.</p>
       {% endif %}
     </div>
 
-    <!-- CREDENTIALS PREVIEW -->
     <div class="card half">
-      <div class="kicker">Credentials</div>
+      <div class="kicker">Credentials Preview</div>
       <p class="small-muted" style="margin-top:10px;">
-        Selected certifications and badges — built for credibility, not clutter.
+        Selected certifications and badges.
       </p>
 
       <div style="display:flex; flex-wrap:wrap; gap:10px; margin-top:10px;">
