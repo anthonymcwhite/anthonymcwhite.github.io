@@ -2,7 +2,10 @@
 # Front matter required so Jekyll processes this as SCSS
 ---
 
-/* ---- Modern dark override for Minima ---- */
+/* =========================================================
+   Modern dark override for Minima + "dashboard" navigation
+   File: assets/css/custom.scss
+   ========================================================= */
 
 :root {
   --bg: #0b0f14;
@@ -14,29 +17,27 @@
   --accent2: #2dd4bf;
 }
 
+/* Base */
 html, body {
   background: var(--bg);
   color: var(--text);
 }
 
+* { box-sizing: border-box; }
+
+a, a:visited { color: var(--accent); }
+a:hover { color: var(--accent2); }
+
+img { max-width: 100%; height: auto; }
+
+/* Layout width */
+.page-content, .post-content { max-width: 980px; }
+.wrapper { max-width: 980px; }
+
+/* Header / Footer */
 .site-header, .site-footer {
   border-color: var(--border);
-}
-
-a, a:visited {
-  color: var(--accent);
-}
-
-a:hover {
-  color: var(--accent2);
-}
-
-.page-content, .post-content {
-  max-width: 980px;
-}
-
-.wrapper {
-  max-width: 980px;
+  background: transparent;
 }
 
 .site-title, .site-title:visited {
@@ -44,32 +45,40 @@ a:hover {
   letter-spacing: 0.2px;
 }
 
-.site-nav .page-link {
-  color: var(--muted);
-}
-.site-nav .page-link:hover {
-  color: var(--text);
-}
-
-.post-title, .page-heading, h1, h2, h3 {
-  color: var(--text);
-}
+.site-nav .page-link { color: var(--muted); }
+.site-nav .page-link:hover { color: var(--text); }
 
 hr {
   border: 0;
   border-top: 1px solid var(--border);
+  margin: 22px 0;
 }
 
-blockquote {
-  color: var(--muted);
-  border-left: 3px solid var(--border);
-}
+/* Typography */
+.post-title, .page-heading, h1, h2, h3 { color: var(--text); }
+p { line-height: 1.6; }
 
+/* Code blocks */
 code, pre {
   background: rgba(255,255,255,0.06);
   border: 1px solid var(--border);
   color: var(--text);
 }
+pre {
+  padding: 12px 14px;
+  border-radius: 12px;
+  overflow: auto;
+}
+
+/* Blockquotes */
+blockquote {
+  color: var(--muted);
+  border-left: 3px solid var(--border);
+}
+
+/* =========================================================
+   Dashboard components
+   ========================================================= */
 
 .card-grid {
   display: grid;
@@ -83,6 +92,14 @@ code, pre {
   border: 1px solid var(--border);
   border-radius: 14px;
   padding: 18px;
+  box-shadow: 0 10px 24px rgba(0,0,0,0.18);
+  transition: transform 140ms ease, border-color 140ms ease, background 140ms ease;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(122,162,255,0.22);
+  background: rgba(15,22,32,0.95);
 }
 
 @media (min-width: 840px) {
@@ -113,6 +130,7 @@ code, pre {
   max-width: 72ch;
 }
 
+/* Pills */
 .pills {
   display: flex;
   flex-wrap: wrap;
@@ -129,6 +147,7 @@ code, pre {
   font-size: 12px;
 }
 
+/* Headshot */
 .headshot {
   width: 120px;
   height: 120px;
@@ -137,16 +156,16 @@ code, pre {
   border: 1px solid var(--border);
 }
 
+/* Badge grid */
 .badge-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px;
+  margin-top: 10px;
 }
 
 @media (min-width: 840px) {
-  .badge-grid {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-  }
+  .badge-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 }
 
 .badge {
@@ -168,4 +187,82 @@ code, pre {
 .badge .label {
   color: var(--muted);
   font-size: 12px;
+}
+
+/* =========================================================
+   Hero wallpaper "wire splash"
+   Requires: assets/img/hero/wires-wallpaper.jpg
+   ========================================================= */
+
+.hero-splash {
+  position: relative;
+  overflow: hidden;
+  border-radius: 18px;
+}
+
+.hero-splash::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  /* IMPORTANT: update filename if yours differs */
+  background-image: url('{{ "/assets/img/hero/wires-wallpaper.jpg" | relative_url }}');
+  background-size: cover;
+  background-position: center;
+  opacity: 0.18; /* subtle */
+  filter: saturate(1.05) contrast(1.05);
+  pointer-events: none;
+}
+
+.hero-splash::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(60% 60% at 30% 20%, rgba(122,162,255,0.22), transparent 60%),
+    radial-gradient(60% 60% at 70% 70%, rgba(45,212,191,0.16), transparent 60%),
+    linear-gradient(to bottom, rgba(11,15,20,0.20), rgba(11,15,20,0.85));
+  pointer-events: none;
+}
+
+.hero-splash > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* CTA buttons */
+.cta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,0.04);
+  color: var(--text);
+  border-radius: 999px;
+  padding: 8px 12px;
+  font-size: 13px;
+  text-decoration: none;
+}
+
+.cta:hover {
+  border-color: rgba(122,162,255,0.35);
+  background: rgba(255,255,255,0.06);
+}
+
+/* Lists and small text helpers */
+.mini-list {
+  margin: 10px 0 0 0;
+  padding-left: 18px;
+  color: var(--muted);
+}
+
+.small-muted {
+  color: var(--muted);
+  font-size: 13px;
 }
