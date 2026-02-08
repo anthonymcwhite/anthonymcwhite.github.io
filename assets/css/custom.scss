@@ -328,3 +328,16 @@ blockquote {
   border-color: rgba(122,162,255,0.22);
   background: rgba(15,22,32,0.95);
 }
+
+/* Hide Minima's nav toggle checkbox (it should never be visible) */
+.site-nav .nav-trigger {
+  position: absolute;
+  left: -9999px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Keep Minima menu icon clickable without showing the checkbox */
+.site-nav .menu-icon {
+  cursor: pointer;
+}
