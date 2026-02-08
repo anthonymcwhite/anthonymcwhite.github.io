@@ -1,0 +1,171 @@
+---
+# Front matter required so Jekyll processes this as SCSS
+---
+
+/* ---- Modern dark override for Minima ---- */
+
+:root {
+  --bg: #0b0f14;
+  --panel: #0f1620;
+  --text: #e6edf3;
+  --muted: #9aa7b2;
+  --border: rgba(230, 237, 243, 0.10);
+  --accent: #7aa2ff;
+  --accent2: #2dd4bf;
+}
+
+html, body {
+  background: var(--bg);
+  color: var(--text);
+}
+
+.site-header, .site-footer {
+  border-color: var(--border);
+}
+
+a, a:visited {
+  color: var(--accent);
+}
+
+a:hover {
+  color: var(--accent2);
+}
+
+.page-content, .post-content {
+  max-width: 980px;
+}
+
+.wrapper {
+  max-width: 980px;
+}
+
+.site-title, .site-title:visited {
+  color: var(--text);
+  letter-spacing: 0.2px;
+}
+
+.site-nav .page-link {
+  color: var(--muted);
+}
+.site-nav .page-link:hover {
+  color: var(--text);
+}
+
+.post-title, .page-heading, h1, h2, h3 {
+  color: var(--text);
+}
+
+hr {
+  border: 0;
+  border-top: 1px solid var(--border);
+}
+
+blockquote {
+  color: var(--muted);
+  border-left: 3px solid var(--border);
+}
+
+code, pre {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid var(--border);
+  color: var(--text);
+}
+
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 16px;
+}
+
+.card {
+  grid-column: span 12;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 18px;
+}
+
+@media (min-width: 840px) {
+  .card.half { grid-column: span 6; }
+  .card.third { grid-column: span 4; }
+}
+
+.kicker {
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-size: 12px;
+}
+
+.hero {
+  padding: 22px 0 10px 0;
+}
+
+.hero h1 {
+  font-size: 40px;
+  line-height: 1.1;
+  margin: 6px 0 10px 0;
+}
+
+.hero p {
+  color: var(--muted);
+  font-size: 16px;
+  max-width: 72ch;
+}
+
+.pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.pill {
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,0.04);
+  color: var(--muted);
+  border-radius: 999px;
+  padding: 6px 10px;
+  font-size: 12px;
+}
+
+.headshot {
+  width: 120px;
+  height: 120px;
+  border-radius: 18px;
+  object-fit: cover;
+  border: 1px solid var(--border);
+}
+
+.badge-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+@media (min-width: 840px) {
+  .badge-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.badge {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 10px;
+  text-align: center;
+}
+
+.badge img {
+  max-width: 100%;
+  height: 64px;
+  object-fit: contain;
+  display: block;
+  margin: 0 auto 8px auto;
+}
+
+.badge .label {
+  color: var(--muted);
+  font-size: 12px;
+}
