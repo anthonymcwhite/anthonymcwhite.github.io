@@ -1,18 +1,19 @@
 ---
-title: OpenBullet2
+title: "ℜ𝔢𝔰𝔢𝔞𝔯𝔠𝔥 𝔑𝔬𝔱𝔢𝔰: Understanding OpenBullet2 in the Context of Credential Abuse"
 date: 2025-01-27
 ---
 
-### Getting Started With OpenBullet2
-<no shade> 
-<br> 
-<tt>OB2 is a popular tool used by threat actors and ethical testers/researchers alike. Initially I struggled in working with the necessary Dotnet configuration, got confused easily and gave up on the tool rather quickly because I did'nt have an immediate need for it. After reading an article recently that had to do with some recent attacks and how the tool was used for credential stuffing I decided to give it a try and see for myself what made this particular tool such a valuable weapon for cyber criminals.</tt><br>
-<br>
-<tt>After a little bit of troubleshooting and reading some of the official documentation found in the projects repository, I was up and running. And so the testing begins. Today was primarily focused towards making sure that I had a solid grasp on how the tool uses proxies, which proxies are most sucessful and how to use them within the tool.</tt><br>
-<br>
-<tt>I noticed that there were'nt many clear cut tutorials on youtube. Most were vague or misleading and had no audio. Once I feel adept, I plan to create a user guide and video series thats more of a "OB2 for dummies" style instructional with clear and concise breakdowns of the tool</tt><br>
-<hr noshade>
+I revisited OpenBullet2 to better understand how credential abuse tooling is discussed in incident reports and how defenders can recognize the patterns it produces.
 
+My focus in this pass was not operational use, but **environment setup, terminology, and threat-model context**—enough to interpret real-world reporting and to communicate risk clearly to non-technical stakeholders.
 
+### What I worked on
+- Establishing a stable local environment so I could review the project structure and documentation
+- Mapping common concepts (inputs, configurations, execution flow) to the way credential abuse is described in threat reports
+- Identifying the kinds of signals defenders and platform teams can monitor (rate patterns, failed auth bursts, proxy-like distribution)
 
+### Why it matters
+Tools like this show up in writeups because they lower the barrier for automated credential testing. Understanding the *shape* of the activity helps with detection conversations, alert tuning, and explaining impact.
 
+### Next steps
+If I publish a guide, it will be **defensive and educational**: how to interpret reports, what indicators to look for, and how to reduce risk (MFA, rate limiting, anomaly detection, and user safety).
