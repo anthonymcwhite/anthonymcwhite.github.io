@@ -1,154 +1,330 @@
 ---
-layout: page
-title: ""
-permalink: /
+# Front matter required so Jekyll processes this as SCSS
 ---
 
-<!-- Sticky quick-nav -->
-<div class="quicknav">
-  <a href="#top">Top</a>
-  <a href="#work">Work</a>
-  <a href="#writing">Writing</a>
-  <a href="{{ "/credentials/" | relative_url }}">Credentials</a>
-  <a href="{{ "/contact/" | relative_url }}">Contact</a>
-</div>
+/* =========================================================
+   Modern dark override for Minima + "dashboard" navigation
+   File: assets/css/custom.scss
+   ========================================================= */
 
-<div id="top" class="hero">
-  <div class="card-grid">
+:root {
+  --bg: #0b0f14;
+  --panel: #0f1620;
+  --text: #e6edf3;
+  --muted: #9aa7b2;
+  --border: rgba(230, 237, 243, 0.10);
+  --accent: #7aa2ff;
+  --accent2: #2dd4bf;
+}
 
-    <!-- HERO SPLASH -->
-    <div class="card half hero-splash">
-      <div class="kicker">Data • Systems • Security-minded analytics</div>
+/* Base */
+html, body {
+  background: var(--bg);
+  color: var(--text);
+}
 
-      <!-- Role-first headline (no name) -->
-      <h1>Analytics + operations systems that hold up under pressure.</h1>
+* { box-sizing: border-box; }
 
-      <p>
-        I build durable reporting systems, automate messy workflows, and translate complex data into decisions people can act on.
-        My work sits at the intersection of impact measurement, operations, and practical security.
-      </p>
+a, a:visited { color: var(--accent); }
+a:hover { color: var(--accent2); }
 
-      <div class="pills">
-        <div class="pill">Impact & Reporting</div>
-        <div class="pill">CRM / Data Governance</div>
-        <div class="pill">Automation</div>
-        <div class="pill">Dashboards</div>
-        <div class="pill">Security fundamentals</div>
-      </div>
+img { max-width: 100%; height: auto; display: block; }
 
-      <div class="cta-row">
-        <a class="cta" href="#work">Explore work ↓</a>
-        <a class="cta" href="{{ "/projects/" | relative_url }}">Projects →</a>
-        <a class="cta" href="{{ "/writing/" | relative_url }}">Writing →</a>
-        <a class="cta" href="{{ "/contact/" | relative_url }}">Contact →</a>
-      </div>
+/* Layout width */
+.page-content, .post-content { max-width: 980px; }
+.wrapper { max-width: 980px; }
 
-      <p class="small-muted" style="margin-top:10px;">
-        Professional portfolio here • deeper builds and experiments live on <span style="color:var(--text);">civint.tech</span>
-      </p>
-    </div>
+/* Header / Footer */
+.site-header, .site-footer {
+  border-color: var(--border);
+  background: transparent;
+}
 
-    <!-- PROFILE -->
-    <div class="card half">
-      <div class="kicker">Profile</div>
+.site-title, .site-title:visited {
+  color: var(--text);
+  letter-spacing: 0.2px;
+}
 
-      <div style="display:flex; gap:16px; align-items:flex-start; flex-wrap:wrap;">
-        <img class="headshot" src="{{ "/assets/img/headshot.jpg" | relative_url }}" alt="Headshot">
-        <div style="min-width:240px; flex:1;">
-          <p style="margin:0 0 8px 0;"><strong>What I’m known for</strong></p>
-          <ul class="mini-list">
-            <li>Turning messy data into reliable metrics</li>
-            <li>Building repeatable reporting + governance</li>
-            <li>Automation that reduces manual effort</li>
-          </ul>
+.site-nav .page-link { color: var(--muted); }
+.site-nav .page-link:hover { color: var(--text); }
 
-          <div class="cta-row" style="margin-top:12px;">
-            <a class="cta" href="{{ "/credentials/" | relative_url }}">Credentials</a>
-            <a class="cta" href="{{ "/contact/" | relative_url }}">Contact</a>
-          </div>
-        </div>
-      </div>
-    </div>
+hr {
+  border: 0;
+  border-top: 1px solid var(--border);
+  margin: 22px 0;
+}
 
-    <!-- FEATURED WORK (clickable tiles) -->
-    <div id="work" class="card">
-      <div class="kicker">Featured work</div>
+/* Typography */
+.post-title, .page-heading, h1, h2, h3 { color: var(--text); }
+p { line-height: 1.6; }
+ul, ol { line-height: 1.6; }
 
-      <div class="pills" style="margin-top:10px;">
-        <a class="pill" href="{{ "/projects/" | relative_url }}">All</a>
-        <a class="pill" href="{{ "/projects/" | relative_url }}">Impact</a>
-        <a class="pill" href="{{ "/projects/" | relative_url }}">Governance</a>
-        <a class="pill" href="{{ "/projects/" | relative_url }}">Automation</a>
-        <a class="pill" href="{{ "/projects/" | relative_url }}">Security</a>
-      </div>
+/* Code blocks */
+code, pre {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid var(--border);
+  color: var(--text);
+}
+pre {
+  padding: 12px 14px;
+  border-radius: 12px;
+  overflow: auto;
+}
 
-      <div class="card-grid" style="margin-top:12px;">
-        <a class="tile third" href="{{ "/projects/" | relative_url }}">
-          <p><strong>Workforce pipeline analytics</strong><br>
-            <span class="small-muted">Milestones, retention, employer outcomes.</span>
-          </p>
-          <p class="small-muted">Open →</p>
-        </a>
+/* Blockquotes */
+blockquote {
+  color: var(--muted);
+  border-left: 3px solid var(--border);
+}
 
-        <a class="tile third" href="{{ "/projects/" | relative_url }}">
-          <p><strong>Data governance & admin systems</strong><br>
-            <span class="small-muted">Validation, deduplication, configuration standards.</span>
-          </p>
-          <p class="small-muted">Open →</p>
-        </a>
+/* =========================================================
+   Dashboard components
+   ========================================================= */
 
-        <a class="tile third" href="{{ "/projects/" | relative_url }}">
-          <p><strong>Automation & reporting workflows</strong><br>
-            <span class="small-muted">Repeatable pipelines, less manual work.</span>
-          </p>
-          <p class="small-muted">Open →</p>
-        </a>
-      </div>
-    </div>
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 16px;
+}
 
-    <!-- LATEST WRITING (dynamic) -->
-    <div id="writing" class="card half">
-      <div class="kicker">Latest writing</div>
+.card {
+  grid-column: span 12;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 18px;
+  box-shadow: 0 10px 24px rgba(0,0,0,0.18);
+  transition: transform 140ms ease, border-color 140ms ease, background 140ms ease;
+}
 
-      {% assign recent = site.posts | slice: 0, 3 %}
-      {% if recent.size > 0 %}
-        <div style="margin-top:10px;">
-          {% for post in recent %}
-            <div style="padding:12px 0; border-top: 1px solid var(--border);">
-              <div style="display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap;">
-                <a href="{{ post.url | relative_url }}"><strong>{{ post.title }}</strong></a>
-                <span class="small-muted">{{ post.date | date: "%b %d, %Y" }}</span>
-              </div>
-              {% if post.excerpt %}
-                <div class="small-muted" style="margin-top:6px;">{{ post.excerpt | strip_html | truncate: 140 }}</div>
-              {% endif %}
-            </div>
-          {% endfor %}
-        </div>
-        <p style="margin-top:12px;"><a href="{{ "/writing/" | relative_url }}">Browse all writing →</a></p>
-      {% else %}
-        <p class="small-muted" style="margin-top:10px;">Posts will appear here once you publish them.</p>
-      {% endif %}
-    </div>
+.card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(122,162,255,0.22);
+  background: rgba(15,22,32,0.95);
+}
 
-    <!-- CREDENTIALS PREVIEW -->
-    <div class="card half">
-      <div class="kicker">Credentials</div>
-      <p class="small-muted" style="margin-top:10px;">
-        Selected certifications and badges — built for credibility, not clutter.
-      </p>
+@media (min-width: 840px) {
+  .card.half { grid-column: span 6; }
+  .card.third { grid-column: span 4; }
+}
 
-      <div style="display:flex; flex-wrap:wrap; gap:10px; margin-top:10px;">
-        <img style="height:44px; width:auto;" src="{{ "/assets/img/badges/comptia-data-plus-256.png" | relative_url }}" alt="CompTIA Data+">
-        <img style="height:44px; width:auto;" src="{{ "/assets/img/badges/comptia-project-plus-256.png" | relative_url }}" alt="CompTIA Project+">
-        <img style="height:44px; width:auto;" src="{{ "/assets/img/badges/google-cybersecurity-256.png" | relative_url }}" alt="Google Cybersecurity">
-        <img style="height:44px; width:auto;" src="{{ "/assets/img/badges/bonterra-apricot-certified-admin-256.png" | relative_url }}" alt="Apricot Admin">
-      </div>
+.kicker {
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-size: 12px;
+}
 
-      <p style="margin-top:12px;">
-        <a href="{{ "/credentials/" | relative_url }}">View credentials →</a>
-      </p>
-    </div>
+.hero {
+  padding: 22px 0 10px 0;
+}
 
-  </div>
-</div>
+.hero h1 {
+  font-size: 40px;
+  line-height: 1.1;
+  margin: 6px 0 10px 0;
+}
+
+.hero p {
+  color: var(--muted);
+  font-size: 16px;
+  max-width: 72ch;
+}
+
+/* Pills */
+.pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.pill {
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,0.04);
+  color: var(--muted);
+  border-radius: 999px;
+  padding: 6px 10px;
+  font-size: 12px;
+  text-decoration: none; /* allow pill links */
+  display: inline-flex;
+  align-items: center;
+}
+
+.pill:hover {
+  border-color: rgba(122,162,255,0.30);
+  color: var(--text);
+}
+
+/* Headshot */
+.headshot {
+  width: 120px;
+  height: 120px;
+  border-radius: 18px;
+  object-fit: cover;
+  border: 1px solid var(--border);
+}
+
+/* Badge grid */
+.badge-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 10px;
+}
+
+@media (min-width: 840px) {
+  .badge-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+
+.badge {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 10px;
+  text-align: center;
+}
+
+.badge img {
+  max-width: 100%;
+  height: 64px;
+  object-fit: contain;
+  display: block;
+  margin: 0 auto 8px auto;
+}
+
+.badge .label {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+/* =========================================================
+   Hero wallpaper "wire splash"
+   Requires: assets/img/hero/wires-wallpaper.png
+   ========================================================= */
+
+.hero-splash {
+  position: relative;
+  overflow: hidden;
+  border-radius: 18px;
+}
+
+.hero-splash::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: url('{{ "/assets/img/hero/wires-wallpaper.png" | relative_url }}');
+  background-size: cover;
+  background-position: center;
+  opacity: 0.18;
+  filter: saturate(1.05) contrast(1.05);
+  pointer-events: none;
+}
+
+.hero-splash::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(60% 60% at 30% 20%, rgba(122,162,255,0.22), transparent 60%),
+    radial-gradient(60% 60% at 70% 70%, rgba(45,212,191,0.16), transparent 60%),
+    linear-gradient(to bottom, rgba(11,15,20,0.20), rgba(11,15,20,0.85));
+  pointer-events: none;
+}
+
+.hero-splash > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* CTA buttons */
+.cta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,0.04);
+  color: var(--text);
+  border-radius: 999px;
+  padding: 8px 12px;
+  font-size: 13px;
+  text-decoration: none;
+}
+
+.cta:hover {
+  border-color: rgba(122,162,255,0.35);
+  background: rgba(255,255,255,0.06);
+}
+
+/* Lists and small text helpers */
+.mini-list {
+  margin: 10px 0 0 0;
+  padding-left: 18px;
+  color: var(--muted);
+}
+
+.small-muted {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+/* =========================================================
+   Sticky quick navigation
+   ========================================================= */
+
+.quicknav {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding: 10px 0;
+  margin-bottom: 10px;
+  background: linear-gradient(to bottom, rgba(11,15,20,0.92), rgba(11,15,20,0.40));
+  backdrop-filter: blur(6px);
+}
+
+.quicknav a {
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,0.04);
+  color: var(--muted);
+  border-radius: 999px;
+  padding: 6px 10px;
+  font-size: 12px;
+  text-decoration: none;
+}
+
+.quicknav a:hover {
+  border-color: rgba(122,162,255,0.30);
+  color: var(--text);
+}
+
+/* =========================================================
+   Clickable tiles (use on <a class="tile">)
+   ========================================================= */
+
+.tile {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 18px;
+  box-shadow: 0 10px 24px rgba(0,0,0,0.18);
+  transition: transform 140ms ease, border-color 140ms ease, background 140ms ease;
+}
+
+.tile:hover {
+  transform: translateY(-2px);
+  border-color: rgba(122,162,255,0.22);
+  background: rgba(15,22,32,0.95);
+}
