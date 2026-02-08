@@ -1,1 +1,22 @@
 theme: minima
+
+title: "Anthony McWhite"
+description: "Data & Impact | Systems | Security-Minded Analytics"
+author: "Anthony McWhite"
+
+# If my repo is "my-name".github.io, baseurl (below) should be empty. Nothing in -->  "".
+baseurl: ""
+url: "https://anthonymcwhite.github.io"
+
+minima:
+  skin: dark
+
+header_pages:
+  - about.md
+  - credentials.md
+  - projects.md
+  - writing.md
+  - contact.md
+
+plugins:
+  - jekyll-feed
