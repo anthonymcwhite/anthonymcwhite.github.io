@@ -15,10 +15,10 @@ permalink: /
       </p>
 
       <div class="home-actions">
-        <a class="btn primary" href="{{ "/projects/" | relative_url }}">Projects</a>
-        <a class="btn" href="{{ "/credentials/" | relative_url }}">Credentials</a>
-        <a class="btn" href="{{ "/writing/" | relative_url }}">Writing</a>
-        <a class="btn" href="{{ "/contact/" | relative_url }}">Contact</a>
+        <a class="btn primary" href="/projects/">Projects</a>
+        <a class="btn" href="/credentials/">Credentials</a>
+        <a class="btn" href="/writing/">Writing</a>
+        <a class="btn" href="/contact/">Contact</a>
       </div>
 
       <div class="pills">
@@ -30,7 +30,7 @@ permalink: /
     </div>
 
     <div class="home-hero-right">
-      <img class="avatar" src="{{ "/assets/img/avatar-circle-512.png" | relative_url }}" alt="Portrait">
+      <img class="avatar" src="/assets/img/avatar-circle-512.png" alt="Portrait">
       <div class="home-hero-meta">
         <div class="meta-row">
           <div class="meta-label">Focus</div>
@@ -52,57 +52,51 @@ permalink: /
 <section class="home-section">
   <div class="section-head">
     <h2>Featured work</h2>
-    <a class="section-link" href="{{ "/projects/" | relative_url }}">View all →</a>
+    <a class="section-link" href="/projects/">View all →</a>
   </div>
 
   <div class="feature-tiles">
-    <a class="feature-tile" href="{{ "/projects/" | relative_url }}">
+    <a class="feature-tile" href="/projects/">
       <div class="feature-title">Workforce pipeline analytics</div>
       <div class="feature-desc">Milestones, retention, and outcome reporting with operational dashboards.</div>
-      <div class="feature-foot">Case study →</div>
+      <div class="feature-foot">Read more →</div>
     </a>
 
-    <a class="feature-tile" href="{{ "/projects/" | relative_url }}">
+    <a class="feature-tile" href="/projects/">
       <div class="feature-title">Data governance & admin systems</div>
       <div class="feature-desc">Validation, deduplication, standards, and documentation that prevents drift.</div>
-      <div class="feature-foot">Case study →</div>
+      <div class="feature-foot">Read more →</div>
     </a>
 
-    <a class="feature-tile" href="{{ "/projects/" | relative_url }}">
+    <a class="feature-tile" href="/projects/">
       <div class="feature-title">Automation & reporting workflows</div>
       <div class="feature-desc">Repeatable pipelines that reduce manual effort, errors, and cycle time.</div>
-      <div class="feature-foot">Case study →</div>
+      <div class="feature-foot">Read more →</div>
     </a>
   </div>
 </section>
 
 <section class="home-section">
   <div class="section-head">
-    <h2>Latest writing</h2>
-    <a class="section-link" href="{{ "/writing/" | relative_url }}">Browse all →</a>
+    <h2>Writing</h2>
+    <a class="section-link" href="/writing/">Browse all →</a>
   </div>
 
-  {% assign recent = site.posts | slice: 0, 4 %}
-  {% if recent.size > 0 %}
-    <div class="post-list">
-      {% for post in recent %}
-        <a class="post-row" href="{{ post.url | relative_url }}">
-          <div class="post-row-title">{{ post.title }}</div>
-          <div class="post-row-date">{{ post.date | date: "%b %d, %Y" }}</div>
-        </a>
-      {% endfor %}
-    </div>
-  {% else %}
-    <p class="muted">Posts will appear here once you publish them.</p>
-  {% endif %}
+  <p class="muted">
+    Latest posts appear on the Writing page.
+  </p>
 </section>
 
 <section class="home-section">
   <div class="section-head">
     <h2>Credentials</h2>
-    <a class="section-link" href="{{ "/credentials/" | relative_url }}">See details →</a>
+    <a class="section-link" href="/credentials/">See details →</a>
   </div>
 
   <div class="badge-strip">
-    <img src="{{ "/assets/img/badges/comptia-data-plus-256.png" | relative_url }}" alt="CompTIA Data+">
-    <img src="{{ "/assets/img/badges/comptia-project-p
+    <img src="/assets/img/badges/comptia-data-plus-256.png" alt="CompTIA Data+">
+    <img src="/assets/img/badges/comptia-project-plus-256.png" alt="CompTIA Project+">
+    <img src="/assets/img/badges/google-cybersecurity-256.png" alt="Google Cybersecurity">
+    <img src="/assets/img/badges/bonterra-apricot-certified-admin-256.png" alt="Apricot Admin">
+  </div>
+</section>
