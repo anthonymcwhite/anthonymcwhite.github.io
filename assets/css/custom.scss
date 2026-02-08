@@ -1,11 +1,5 @@
 ---
-# Front matter required so Jekyll processes this as SCSS
 ---
-
-/* =========================================================
-   Modern dark override for Minima + "dashboard" navigation
-   File: assets/css/custom.scss
-   ========================================================= */
 
 :root {
   --bg: #0b0f14;
@@ -18,46 +12,38 @@
 }
 
 /* Base */
-html, body {
-  background: var(--bg);
-  color: var(--text);
-}
-
+html, body { background: var(--bg); color: var(--text); }
 * { box-sizing: border-box; }
+img { max-width: 100%; height: auto; }
 
 a, a:visited { color: var(--accent); }
 a:hover { color: var(--accent2); }
 
-img { max-width: 100%; height: auto; display: block; }
+hr { border: 0; border-top: 1px solid var(--border); margin: 22px 0; }
 
 /* Layout width */
 .page-content, .post-content { max-width: 980px; }
 .wrapper { max-width: 980px; }
 
 /* Header / Footer */
-.site-header, .site-footer {
-  border-color: var(--border);
-  background: transparent;
-}
-
-.site-title, .site-title:visited {
-  color: var(--text);
-  letter-spacing: 0.2px;
-}
-
+.site-header, .site-footer { border-color: var(--border); background: transparent; }
+.site-title, .site-title:visited { color: var(--text); letter-spacing: 0.2px; }
 .site-nav .page-link { color: var(--muted); }
 .site-nav .page-link:hover { color: var(--text); }
 
-hr {
-  border: 0;
-  border-top: 1px solid var(--border);
-  margin: 22px 0;
+/* Hide Minima nav checkbox if it appears */
+.site-nav .nav-trigger,
+.site-header input[type="checkbox"] {
+  position: absolute;
+  left: -9999px;
+  opacity: 0;
+  pointer-events: none;
 }
 
 /* Typography */
 .post-title, .page-heading, h1, h2, h3 { color: var(--text); }
-p { line-height: 1.6; }
-ul, ol { line-height: 1.6; }
+p, li { line-height: 1.6; }
+.muted { color: var(--muted); }
 
 /* Code blocks */
 code, pre {
@@ -65,49 +51,9 @@ code, pre {
   border: 1px solid var(--border);
   color: var(--text);
 }
-pre {
-  padding: 12px 14px;
-  border-radius: 12px;
-  overflow: auto;
-}
+pre { padding: 12px 14px; border-radius: 12px; overflow: auto; }
 
-/* Blockquotes */
-blockquote {
-  color: var(--muted);
-  border-left: 3px solid var(--border);
-}
-
-/* =========================================================
-   Dashboard components
-   ========================================================= */
-
-.card-grid {
-  display: grid;
-  grid-template-columns: repeat(12, 1fr);
-  gap: 16px;
-}
-
-.card {
-  grid-column: span 12;
-  background: var(--panel);
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  padding: 18px;
-  box-shadow: 0 10px 24px rgba(0,0,0,0.18);
-  transition: transform 140ms ease, border-color 140ms ease, background 140ms ease;
-}
-
-.card:hover {
-  transform: translateY(-2px);
-  border-color: rgba(122,162,255,0.22);
-  background: rgba(15,22,32,0.95);
-}
-
-@media (min-width: 840px) {
-  .card.half { grid-column: span 6; }
-  .card.third { grid-column: span 4; }
-}
-
+/* Shared UI */
 .kicker {
   color: var(--muted);
   text-transform: uppercase;
@@ -115,28 +61,11 @@ blockquote {
   font-size: 12px;
 }
 
-.hero {
-  padding: 22px 0 10px 0;
-}
-
-.hero h1 {
-  font-size: 40px;
-  line-height: 1.1;
-  margin: 6px 0 10px 0;
-}
-
-.hero p {
-  color: var(--muted);
-  font-size: 16px;
-  max-width: 72ch;
-}
-
-/* Pills */
 .pills {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-  margin-top: 12px;
+  margin-top: 14px;
 }
 
 .pill {
@@ -146,67 +75,15 @@ blockquote {
   border-radius: 999px;
   padding: 6px 10px;
   font-size: 12px;
-  text-decoration: none; /* allow pill links */
-  display: inline-flex;
-  align-items: center;
 }
 
-.pill:hover {
-  border-color: rgba(122,162,255,0.30);
-  color: var(--text);
-}
-
-/* Headshot */
-.headshot {
-  width: 120px;
-  height: 120px;
-  border-radius: 18px;
-  object-fit: cover;
-  border: 1px solid var(--border);
-}
-
-/* Badge grid */
-.badge-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
-  margin-top: 10px;
-}
-
-@media (min-width: 840px) {
-  .badge-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
-}
-
-.badge {
-  background: rgba(255,255,255,0.04);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 10px;
-  text-align: center;
-}
-
-.badge img {
-  max-width: 100%;
-  height: 64px;
-  object-fit: contain;
-  display: block;
-  margin: 0 auto 8px auto;
-}
-
-.badge .label {
-  color: var(--muted);
-  font-size: 12px;
-}
-
-/* =========================================================
-   Hero wallpaper "wire splash"
-   Requires: assets/img/hero/wires-wallpaper.png
-   ========================================================= */
-
+/* Hero wallpaper background */
 .hero-splash {
   position: relative;
   overflow: hidden;
   border-radius: 18px;
+  border: 1px solid var(--border);
+  background: var(--panel);
 }
 
 .hero-splash::before {
@@ -226,178 +103,171 @@ blockquote {
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(60% 60% at 30% 20%, rgba(122,162,255,0.22), transparent 60%),
-    radial-gradient(60% 60% at 70% 70%, rgba(45,212,191,0.16), transparent 60%),
-    linear-gradient(to bottom, rgba(11,15,20,0.20), rgba(11,15,20,0.85));
+    radial-gradient(60% 60% at 30% 20%, rgba(122,162,255,0.20), transparent 60%),
+    radial-gradient(60% 60% at 70% 70%, rgba(45,212,191,0.14), transparent 60%),
+    linear-gradient(to bottom, rgba(11,15,20,0.20), rgba(11,15,20,0.88));
   pointer-events: none;
 }
 
-.hero-splash > * {
-  position: relative;
-  z-index: 1;
-}
+.hero-splash > * { position: relative; z-index: 1; }
 
-/* CTA buttons */
-.cta-row {
+/* Buttons */
+.home-actions {
   display: flex;
-  flex-wrap: wrap;
   gap: 10px;
+  flex-wrap: wrap;
   margin-top: 14px;
 }
 
-.cta {
+.btn {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  justify-content: center;
   border: 1px solid var(--border);
   background: rgba(255,255,255,0.04);
   color: var(--text);
-  border-radius: 999px;
-  padding: 8px 12px;
-  font-size: 13px;
   text-decoration: none;
-}
-
-.cta:hover {
-  border-color: rgba(122,162,255,0.35);
-  background: rgba(255,255,255,0.06);
-}
-
-/* Lists and small text helpers */
-.mini-list {
-  margin: 10px 0 0 0;
-  padding-left: 18px;
-  color: var(--muted);
-}
-
-.small-muted {
-  color: var(--muted);
+  border-radius: 999px;
+  padding: 9px 14px;
   font-size: 13px;
 }
 
-/* =========================================================
-   Sticky quick navigation
-   ========================================================= */
+.btn:hover { border-color: rgba(122,162,255,0.35); background: rgba(255,255,255,0.06); }
 
-.quicknav {
-  position: sticky;
-  top: 0;
-  z-index: 20;
+.btn.primary {
+  border-color: rgba(122,162,255,0.45);
+  background: rgba(122,162,255,0.10);
+}
+
+/* Homepage layout */
+.home-hero { padding: 18px; margin: 18px 0 22px 0; }
+.home-hero-inner {
+  display: grid;
+  grid-template-columns: 1.35fr 0.65fr;
+  gap: 18px;
+  align-items: start;
+}
+
+@media (max-width: 900px) {
+  .home-hero-inner { grid-template-columns: 1fr; }
+}
+
+.home-hero-left h1 {
+  font-size: 42px;
+  line-height: 1.12;
+  margin: 8px 0 10px 0;
+}
+
+.home-hero-left p { color: var(--muted); font-size: 16px; max-width: 72ch; }
+
+.home-hero-right {
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: rgba(255,255,255,0.03);
+  padding: 14px;
+}
+
+.avatar {
+  width: 120px;
+  height: 120px;
+  border-radius: 999px;
+  object-fit: cover;
+  border: 1px solid var(--border);
+  margin: 2px 0 12px 0;
+}
+
+.home-hero-meta { display: grid; gap: 10px; }
+.meta-row { display: grid; gap: 2px; }
+.meta-label { color: var(--muted); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; }
+.meta-value { color: var(--text); font-size: 13px; }
+
+/* Sections */
+.home-section { margin: 22px 0; }
+.section-head {
   display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-  padding: 10px 0;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
   margin-bottom: 10px;
-  background: linear-gradient(to bottom, rgba(11,15,20,0.92), rgba(11,15,20,0.40));
-  backdrop-filter: blur(6px);
+}
+.section-head h2 { margin: 0; font-size: 18px; }
+.section-link { text-decoration: none; font-size: 13px; color: var(--muted); }
+.section-link:hover { color: var(--text); }
+
+/* Featured tiles (not staggered squares) */
+.feature-tiles {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
 }
 
-.quicknav a {
-  border: 1px solid var(--border);
-  background: rgba(255,255,255,0.04);
-  color: var(--muted);
-  border-radius: 999px;
-  padding: 6px 10px;
-  font-size: 12px;
-  text-decoration: none;
+@media (min-width: 900px) {
+  .feature-tiles { grid-template-columns: 1fr 1fr 1fr; }
 }
 
-.quicknav a:hover {
-  border-color: rgba(122,162,255,0.30);
-  color: var(--text);
-}
-
-/* =========================================================
-   Clickable tiles (use on <a class="tile">)
-   ========================================================= */
-
-.tile {
+.feature-tile {
   display: block;
   text-decoration: none;
   color: inherit;
   background: var(--panel);
   border: 1px solid var(--border);
-  border-radius: 14px;
-  padding: 18px;
-  box-shadow: 0 10px 24px rgba(0,0,0,0.18);
+  border-radius: 16px;
+  padding: 16px;
   transition: transform 140ms ease, border-color 140ms ease, background 140ms ease;
 }
 
-.tile:hover {
+.feature-tile:hover {
   transform: translateY(-2px);
   border-color: rgba(122,162,255,0.22);
   background: rgba(15,22,32,0.95);
 }
 
-/* Hide Minima's nav toggle checkbox (it should never be visible) */
-.site-nav .nav-trigger {
-  position: absolute;
-  left: -9999px;
-  opacity: 0;
-  pointer-events: none;
+.feature-title { font-weight: 700; margin-bottom: 6px; }
+.feature-desc { color: var(--muted); font-size: 14px; }
+.feature-foot { margin-top: 10px; color: var(--muted); font-size: 13px; }
+
+/* Writing list */
+.post-list {
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  overflow: hidden;
+  background: rgba(255,255,255,0.02);
 }
 
-/* Keep Minima menu icon clickable without showing the checkbox */
-.site-nav .menu-icon {
-  cursor: pointer;
-}
-
-/* Dossier identity */
-.dossier-hero { position: relative; }
-.dossier-seal {
-  position: absolute;
-  right: 10px;
-  top: 18px;
-  width: 92px;
-  opacity: 0.22;
-  filter: saturate(1.1) contrast(1.05);
-  pointer-events: none;
-}
-
-.dossier-seal img { width: 100%; height: auto; }
-
-.dossier-meta {
-  margin-top: 14px;
+.post-row {
   display: grid;
-  gap: 8px;
-  color: var(--muted);
-  font-size: 13px;
+  grid-template-columns: 1fr auto;
+  gap: 12px;
+  padding: 12px 14px;
+  text-decoration: none;
+  color: inherit;
+  border-top: 1px solid var(--border);
 }
 
-.tag {
-  display: inline-block;
-  margin-right: 8px;
-  padding: 2px 8px;
-  border-radius: 999px;
-  border: 1px solid var(--border);
+.post-row:first-child { border-top: 0; }
+
+.post-row:hover {
   background: rgba(255,255,255,0.04);
-  color: var(--text);
-  font-size: 12px;
 }
 
-.profile-row { display:flex; gap:16px; align-items:flex-start; flex-wrap:wrap; }
-.profile-text { min-width:240px; flex:1; }
+.post-row-title { font-weight: 600; }
+.post-row-date { color: var(--muted); font-size: 13px; }
 
-.dossier-tabs a { letter-spacing: 0.02em; }
-
-.dossier-tile .tile-top {
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  margin-bottom: 10px;
+/* Badge strip */
+.badge-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  padding: 10px 0;
 }
 
-.tile-code {
-  font-size: 12px;
-  color: var(--muted);
-  letter-spacing: 0.14em;
-}
-
-.tile-chip {
-  font-size: 12px;
-  padding: 3px 10px;
-  border-radius: 999px;
+.badge-strip img {
+  height: 44px;
+  width: auto;
+  object-fit: contain;
   border: 1px solid var(--border);
-  background: rgba(255,255,255,0.04);
-  color: var(--text);
+  border-radius: 12px;
+  background: rgba(255,255,255,0.03);
+  padding: 6px;
 }
