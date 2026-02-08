@@ -6,7 +6,9 @@ permalink: /
 
 <div class="hero">
   <div class="card-grid">
-    <div class="card half">
+
+    <!-- HERO SPLASH (wire wallpaper background) -->
+    <div class="card half hero-splash">
       <div class="kicker">Data • Systems • Security-minded analytics</div>
       <h1>Anthony McWhite</h1>
       <p>
@@ -22,38 +24,109 @@ permalink: /
         <div class="pill">Security fundamentals</div>
       </div>
 
-      <p style="margin-top:14px;">
-        <a href="{{ "/projects/" | relative_url }}">View projects</a> •
-        <a href="{{ "/credentials/" | relative_url }}">Credentials</a> •
-        <a href="{{ "/contact/" | relative_url }}">Contact</a>
+      <div class="cta-row">
+        <a class="cta" href="{{ "/projects/" | relative_url }}">View projects →</a>
+        <a class="cta" href="{{ "/credentials/" | relative_url }}">Credentials</a>
+        <a class="cta" href="{{ "/writing/" | relative_url }}">Writing</a>
+        <a class="cta" href="{{ "/contact/" | relative_url }}">Contact</a>
+      </div>
+
+      <p class="small-muted" style="margin-top:10px;">
+        Professional front door here • deeper builds and experiments live on <span style="color:var(--text);">civint.tech</span>
       </p>
     </div>
 
+    <!-- PROFILE -->
     <div class="card half">
       <div class="kicker">Profile</div>
-      <p style="margin:0 0 10px 0;">
-        Add a headshot for a stronger professional first impression.
+      <div style="display:flex; gap:16px; align-items:flex-start; flex-wrap:wrap;">
+        <img class="headshot" src="{{ "/assets/img/headshot.jpg" | relative_url }}" alt="Headshot">
+        <div style="min-width:240px; flex:1;">
+          <p style="margin:0 0 8px 0;">
+            <strong>What I’m known for</strong>
+          </p>
+          <ul class="mini-list">
+            <li>Turning messy data into reliable metrics</li>
+            <li>Building repeatable reporting + governance</li>
+            <li>Automation that reduces manual effort</li>
+          </ul>
+          <p class="small-muted" style="margin-top:10px;">
+            Based in Delaware • Open to analytics, operations, and systems-focused roles.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- FEATURED PROJECTS -->
+    <div class="card">
+      <div class="kicker">Featured projects</div>
+      <div class="card-grid" style="margin-top:10px;">
+        <div class="card third">
+          <p><strong>Workforce pipeline analytics</strong><br>
+            <span style="color:var(--muted)">Milestones, retention, employer outcomes.</span>
+          </p>
+          <p><a href="{{ "/projects/" | relative_url }}">Read more →</a></p>
+        </div>
+
+        <div class="card third">
+          <p><strong>Data governance & admin systems</strong><br>
+            <span style="color:var(--muted)">Validation, deduplication, config standards.</span>
+          </p>
+          <p><a href="{{ "/projects/" | relative_url }}">Read more →</a></p>
+        </div>
+
+        <div class="card third">
+          <p><strong>Automation & reporting workflows</strong><br>
+            <span style="color:var(--muted)">Repeatable pipelines, less manual work.</span>
+          </p>
+          <p><a href="{{ "/projects/" | relative_url }}">Read more →</a></p>
+        </div>
+      </div>
+    </div>
+
+    <!-- LATEST WRITING (dynamic) -->
+    <div class="card half">
+      <div class="kicker">Latest writing</div>
+
+      {% assign recent = site.posts | slice: 0, 3 %}
+      {% if recent.size > 0 %}
+        <div style="margin-top:10px;">
+          {% for post in recent %}
+            <div style="padding:12px 0; border-top: 1px solid var(--border);">
+              <div style="display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap;">
+                <a href="{{ post.url | relative_url }}"><strong>{{ post.title }}</strong></a>
+                <span class="small-muted">{{ post.date | date: "%b %d, %Y" }}</span>
+              </div>
+              {% if post.excerpt %}
+                <div class="small-muted" style="margin-top:6px;">{{ post.excerpt | strip_html | truncate: 140 }}</div>
+              {% endif %}
+            </div>
+          {% endfor %}
+        </div>
+        <p style="margin-top:12px;"><a href="{{ "/writing/" | relative_url }}">Browse all writing →</a></p>
+      {% else %}
+        <p class="small-muted" style="margin-top:10px;">Posts will appear here once you publish them.</p>
+      {% endif %}
+    </div>
+
+    <!-- CREDENTIALS PREVIEW -->
+    <div class="card half">
+      <div class="kicker">Credentials</div>
+      <p class="small-muted" style="margin-top:10px;">
+        Selected certifications and badges — built for credibility, not clutter.
       </p>
-      <img class="headshot" src="{{ "/assets/img/headshot.jpg" | relative_url }}" alt="Headshot">
-      <p style="color: var(--muted); margin-top: 10px;">
-        (Tip: use a square image. 800×800 works well.)
+
+      <div style="display:flex; flex-wrap:wrap; gap:10px; margin-top:10px;">
+        <img style="height:44px; width:auto;" src="{{ "/assets/img/badges/comptia-data-plus-256.png" | relative_url }}" alt="CompTIA Data+">
+        <img style="height:44px; width:auto;" src="{{ "/assets/img/badges/comptia-project-plus-256.png" | relative_url }}" alt="CompTIA Project+">
+        <img style="height:44px; width:auto;" src="{{ "/assets/img/badges/google-cybersecurity-256.png" | relative_url }}" alt="Google Cybersecurity">
+        <img style="height:44px; width:auto;" src="{{ "/assets/img/badges/bonterra-apricot-certified-admin-256.png" | relative_url }}" alt="Apricot Admin">
+      </div>
+
+      <p style="margin-top:12px;">
+        <a href="{{ "/credentials/" | relative_url }}">View credentials →</a>
       </p>
     </div>
 
-    <div class="card third">
-      <div class="kicker">Featured work</div>
-      <p><strong>Workforce pipeline analytics</strong><br><span style="color:var(--muted)">Retention, milestone reporting, operational dashboards.</span></p>
-    </div>
-
-    <div class="card third">
-      <div class="kicker">Featured work</div>
-      <p><strong>Data governance & admin systems</strong><br><span style="color:var(--muted)">Form logic, validation, deduplication, documentation.</span></p>
-    </div>
-
-    <div class="card third">
-      <div class="kicker">Writing</div>
-      <p><strong>Notes from the field</strong><br><span style="color:var(--muted)">Conference takeaways, builds, lessons learned.</span></p>
-      <p><a href="{{ "/writing/" | relative_url }}">Browse writing</a></p>
-    </div>
   </div>
 </div>
