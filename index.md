@@ -4,99 +4,65 @@ title: ""
 permalink: /
 ---
 
-<section class="home-hero hero-splash">
-  <div class="home-hero-inner">
-    <div class="home-hero-left">
-      <div class="kicker">Data • Systems • Practical analytics</div>
-      <h1>Building reporting systems people can trust.</h1>
-      <p>
-        I build durable reporting systems, automate messy workflows, and translate complex data into decisions people can act on.
-        My work sits at the intersection of impact measurement, operations, and security fundamentals.
-      </p>
-
-      <div class="home-actions">
-        <a class="btn primary" href="/projects/">Projects</a>
-        <a class="btn" href="/credentials/">Credentials</a>
-        <a class="btn" href="/writing/">Writing</a>
-        <a class="btn" href="/contact/">Contact</a>
-      </div>
-
-      <div class="pills">
-        <div class="pill">Impact & Reporting</div>
-        <div class="pill">CRM / Data Governance</div>
-        <div class="pill">Automation</div>
-        <div class="pill">Dashboards</div>
-      </div>
-    </div>
-
-    <div class="home-hero-right">
-      <img class="avatar" src="/assets/img/avatar-circle-512.png" alt="Portrait">
-      <div class="home-hero-meta">
-        <div class="meta-row">
-          <div class="meta-label">Focus</div>
-          <div class="meta-value">Measurement • Systems • Automation</div>
-        </div>
-        <div class="meta-row">
-          <div class="meta-label">Location</div>
-          <div class="meta-value">Delaware (US)</div>
-        </div>
-        <div class="meta-row">
-          <div class="meta-label">Strengths</div>
-          <div class="meta-value">Clarity, documentation, repeatability</div>
-        </div>
-      </div>
+<section class="signal-hero">
+  <div class="signal-hero-copy">
+    <div class="eyebrow">Anthony McWhite / Delaware</div>
+    <h1>Useful systems.<br><span>Curious fieldwork.</span></h1>
+    <p class="hero-statement">I work where data, operations, security, and hands-on technology meet—building systems people can trust and documenting what I learn along the way.</p>
+    <div class="hero-actions">
+      <a class="action action-primary" href="/projects/">Selected work</a>
+      <a class="action" href="/writing/">Field notes</a>
     </div>
   </div>
-</section>
-
-<section class="home-section">
-  <div class="section-head">
-    <h2>Featured work</h2>
-    <a class="section-link" href="/projects/">View all →</a>
-  </div>
-
-  <div class="feature-tiles">
-    <a class="feature-tile" href="/projects/">
-      <div class="feature-title">Workforce pipeline analytics</div>
-      <div class="feature-desc">Milestones, retention, and outcome reporting with operational dashboards.</div>
-      <div class="feature-foot">Read more →</div>
-    </a>
-
-    <a class="feature-tile" href="/projects/">
-      <div class="feature-title">Data governance & admin systems</div>
-      <div class="feature-desc">Validation, deduplication, standards, and documentation that prevents drift.</div>
-      <div class="feature-foot">Read more →</div>
-    </a>
-
-    <a class="feature-tile" href="/projects/">
-      <div class="feature-title">Automation & reporting workflows</div>
-      <div class="feature-desc">Repeatable pipelines that reduce manual effort, errors, and cycle time.</div>
-      <div class="feature-foot">Read more →</div>
-    </a>
+  <div class="lab-plate" aria-label="Devious Designs Applied Technology Lab">
+    <div class="lab-mark" aria-hidden="true"><i></i><b></b><em></em></div>
+    <div class="plate-index">DD·ATL / 01</div>
+    <div class="plate-title">Devious Designs</div>
+    <div class="plate-name">Applied Technology Lab</div>
+    <div class="plate-topics">hardware · field systems · signals · security</div>
   </div>
 </section>
 
-<section class="home-section">
-  <div class="section-head">
-    <h2>Writing</h2>
-    <a class="section-link" href="/writing/">Browse all →</a>
+<section class="intro-grid">
+  <div class="section-label">01 / Practice</div>
+  <div>
+    <p class="large-copy">My professional work centers on data quality, reporting systems, workflow automation, and translating complicated operations into something people can actually use.</p>
+    <p>My independent lab extends that same discipline into embedded systems, radio, wireless networking, defensive security research, and field computing.</p>
   </div>
-
-  <p class="muted">
-    Latest posts appear on the Writing page.
-  </p>
 </section>
 
-<section class="home-section">
-  <div class="section-head">
-    <h2>Credentials</h2>
-    <a class="section-link" href="/credentials/">See details →</a>
+<section class="work-section">
+  <div class="section-heading">
+    <div>
+      <div class="section-label">02 / Selected work</div>
+      <h2>Evidence, not inventory.</h2>
+    </div>
+    <a href="/projects/">View all work →</a>
   </div>
+  <div class="work-grid">
+    <a class="work-card amber" href="/projects/#data-systems">
+      <span>Data systems</span>
+      <h3>Operational reporting that survives real-world use</h3>
+      <p>Data governance, automated preparation, dashboards, and documentation built around the people doing the work.</p>
+    </a>
+    <a class="work-card green" href="/projects/#wilmington-mesh">
+      <span>Field systems</span>
+      <h3>Wilmington Meshtastic Network</h3>
+      <p>Node maintenance, hardware evaluation, antennas, configuration, and lessons from a community mesh effort.</p>
+    </a>
+    <a class="work-card bone" href="/projects/#applied-lab">
+      <span>Applied research</span>
+      <h3>Devious Designs Applied Technology Lab</h3>
+      <p>A living record of hardware experiments, radio learning, repairs, prototypes, and failed attempts worth remembering.</p>
+    </a>
+  </div>
+</section>
 
-  <div class="badge-strip">
-    <img src="/assets/img/badges/comptia-data-plus-256.png" alt="CompTIA Data+">
-    <img src="/assets/img/badges/comptia-project-plus-256.png" alt="CompTIA Project+">
-    <img src="/assets/img/badges/google-cybersecurity-256.png" alt="Google Cybersecurity">
-    <img src="/assets/img/badges/bonterra-apricot-certified-admin-256.png" alt="Apricot Admin">
+<section class="note-callout">
+  <div class="section-label">03 / Notebook</div>
+  <div>
+    <h2>Short observations are still research.</h2>
+    <p>The notebook holds concise writing, workbench findings, project decisions, and longer reflections—including the ongoing story of how radio changed the way I listen to the world around me.</p>
+    <a href="/writing/">Open the notebook →</a>
   </div>
 </section>
