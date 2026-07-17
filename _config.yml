@@ -1,7 +1,7 @@
 theme: minima
 
 title: "Anthony McWhite"
-description: "Data & Impact | Systems | Security-Minded Analytics"
+description: "Data, systems, applied technology, and field research"
 author: "Anthony McWhite"
 
 # If my repo is "my-name".github.io, baseurl (below) should be empty. Nothing in -->  "".
@@ -13,9 +13,9 @@ minima:
 
 header_pages:
   - about.md
-  - credentials.md
   - projects.md
   - writing.md
+  - credentials.md
   - contact.md
 
 plugins:
