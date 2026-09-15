@@ -18,12 +18,18 @@ permalink: /
     <div class="operator-frame">
       <img class="operator-photo" src="/assets/img/avatar-circle-512.png" alt="Portrait of Anthony McWhite">
     </div>
-    <div class="lab-mark" aria-hidden="true"><i></i><b></b><em></em></div>
     <div class="plate-index">DD·ATL / 01</div>
+    <div class="plate-intro">
+      <div class="person-name">Anthony McWhite</div>
+      <div class="person-meta">Wilmington, Delaware · Community &amp; Systems</div>
+      <p>I work at the intersection of data, technology, and community—building practical systems that help people make better decisions and keep important work moving.</p>
+    </div>
+    <div class="plate-divider" aria-hidden="true"><span></span><i></i><span></span></div>
     <div class="plate-copy">
       <div class="plate-title">Devious Designs</div>
       <div class="plate-name">Applied Technology Lab</div>
       <div class="plate-topics">hardware · field systems · signals · security</div>
+      <p class="lab-note">Outside of my professional work, I dedicate time to building, designing prototypes, and testing equipment—learning by putting ideas into the field.</p>
       <div class="telemetry" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
     </div>
   </div>
