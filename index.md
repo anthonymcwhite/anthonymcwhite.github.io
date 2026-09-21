@@ -7,8 +7,8 @@ permalink: /
 <section class="signal-hero">
   <div class="signal-hero-copy">
     <div class="eyebrow"><i class="live-dot"></i> Anthony McWhite / Systems in practice</div>
-    <h1>Systems that hold up<br><span>when the work gets real.</span></h1>
-    <p class="hero-statement">I turn fragile processes into durable systems—cleaner data, clearer decisions, less repetitive work, and less institutional knowledge trapped in one person’s head.</p>
+    <h1>I build systems<br><span>people can rely on.</span></h1>
+    <p class="hero-statement">I turn complex processes into practical systems that support cleaner data, clearer decisions, less repetitive work, and better continuity.</p>
     <div class="hero-actions">
       <a class="action action-primary" href="/projects/">Selected work</a>
       <a class="action" href="/writing/">Field notes</a>
@@ -22,14 +22,14 @@ permalink: /
     <div class="plate-intro">
       <div class="person-name">Anthony McWhite</div>
       <div class="person-meta">Wilmington, Delaware · Community &amp; Systems</div>
-      <p>I work at the intersection of data, technology, and community—building practical systems that help people make better decisions and keep important work moving.</p>
+      <p>I work at the intersection of data, technology, and community, building practical systems that help people make better decisions and keep important work moving.</p>
     </div>
     <div class="plate-divider" aria-hidden="true"><span></span><i></i><span></span></div>
     <div class="plate-copy">
       <div class="plate-title">Devious Designs</div>
       <div class="plate-name">Applied Technology Lab</div>
       <div class="plate-topics">hardware · field systems · signals · security</div>
-      <p class="lab-note">Outside of my professional work, I dedicate time to building, designing prototypes, and testing equipment—learning by putting ideas into the field.</p>
+      <p class="lab-note">Outside of my professional work, I dedicate time to building, designing prototypes, and testing equipment, learning by putting ideas into the field.</p>
       <div class="telemetry" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
     </div>
   </div>
@@ -55,8 +55,8 @@ permalink: /
     <a class="work-card amber" href="/projects/#data-systems">
       <span>Data systems</span>
       <h3>From scattered records to decision-ready information</h3>
-      <p>Governance, automated preparation, dashboards, and documentation designed around the people responsible for the outcome.</p>
-      <small>METHOD / AUTOMATION / REPORTING</small>
+      <p>Data administration, workflow design, reporting, and documentation built around the people responsible for the outcome.</p>
+      <small>DATA / WORKFLOWS / REPORTING</small>
     </a>
     <a class="work-card green" href="/projects/#wilmington-mesh">
       <span>Field systems</span>
@@ -77,7 +77,7 @@ permalink: /
   <div class="section-label">03 / Notebook</div>
   <div>
     <h2>Proof accumulates one observation at a time.</h2>
-    <p>The notebook holds concise writing, workbench findings, project decisions, and longer reflections—including the ongoing story of how radio changed the way I listen to the world around me. Each entry is meant to leave behind something inspectable: an artifact, a method, a result, or an honest lesson.</p>
+    <p>The notebook holds concise writing, workbench findings, project decisions, and longer reflections, including the ongoing story of how radio changed the way I listen to the world around me. Each entry is meant to leave behind something inspectable: an artifact, a method, a result, or an honest lesson.</p>
     <a href="/writing/">Open the notebook →</a>
   </div>
 </section>
