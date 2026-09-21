@@ -19,11 +19,21 @@ permalink: /projects/
   <div class="evidence-line"><span>Evidence being prepared</span> Process maps · sample dictionaries · automation patterns · dashboard concepts</div>
 </article>
 
+<article class="case-study" id="apricot">
+  <div class="case-meta">Professional practice · Bonterra Apricot</div>
+  <h2>Apricot for workforce and community programs</h2>
+  <p><strong>Context:</strong> Apricot served as a core case-management and program-data platform supporting workforce development and community engagement work across staff and partner organizations.</p>
+  <p><strong>Practice:</strong> I supported administration, user access and permissions, workflow design, reporting, data quality, documentation, and troubleshooting. I translated program requirements into practical structures that staff could use consistently.</p>
+  <p><strong>Application:</strong> I developed and improved an employment pipeline that connected referrals, workforce readiness, assessments, applications, interviews, employment outcomes, and retention follow-up. The workflow included 30, 60, 90, 180, and 365 day retention checkpoints.</p>
+  <p><strong>Outcome:</strong> The employment pipeline supported <strong>64 individuals who secured employment</strong> while creating a more consistent way to understand readiness, placement, support, and retention.</p>
+  <div class="evidence-line"><span>Practice</span> Administration · permissions · workflows · reporting · data quality · troubleshooting</div>
+</article>
+
 <div class="case-grid">
   <article class="case-study compact">
     <div class="case-meta">Program analytics</div>
     <h2>Making an employment pipeline measurable</h2>
-    <p>Translated a multi-partner employment process into trackable milestones, readiness checks, placement outcomes, and retention follow-up—giving program staff a shared operational picture instead of disconnected records.</p>
+    <p>Translated a multi-partner employment process into trackable milestones, readiness checks, placement outcomes, and retention follow-up, giving program staff a shared operational picture instead of disconnected records.</p>
     <div class="evidence-line"><span>Proof planned</span> Sanitized workflow · milestone model · reporting logic</div>
   </article>
 
@@ -44,7 +54,7 @@ permalink: /projects/
   <article class="case-study compact">
     <div class="case-meta">Responsible AI</div>
     <h2>Turning AI enthusiasm into an adoption baseline</h2>
-    <p>Designed and analyzed an internal readiness assessment covering use patterns, time savings, trust, privacy concerns, and preferred training formats—creating evidence for policy and support decisions.</p>
+    <p>Designed and analyzed an internal readiness assessment covering use patterns, time savings, trust, privacy concerns, and preferred training formats, creating evidence for policy and support decisions.</p>
     <div class="evidence-line"><span>Proof planned</span> De-identified instrument · summary charts · recommendations</div>
   </article>
 </div>
@@ -60,7 +70,7 @@ permalink: /projects/
 <article class="case-study" id="applied-lab">
   <div class="case-meta">Independent lab · Hardware & research</div>
   <h2>Devious Designs Applied Technology Lab</h2>
-  <p>The lab is where curiosity becomes a reproducible practice. It records the full arc from question to setup to observation—including failures—across Raspberry Pi systems, SDR, Meshtastic, antennas, embedded devices, radio, repairs, and prototypes.</p>
+  <p>The lab is where curiosity becomes a reproducible practice. It records the full arc from question to setup to observation, including failures, across Raspberry Pi systems, SDR, Meshtastic, antennas, embedded devices, radio, repairs, and prototypes.</p>
   <div class="evidence-line"><span>Evidence</span> Photographs · experiment records · configurations · diagrams · code</div>
   <p><a href="https://github.com/anthonymcwhite/Devious-Designs-HHL/tree/agent/applied-technology-lab-cleanup">Enter the lab repository →</a></p>
 </article>
