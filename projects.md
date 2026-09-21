@@ -21,12 +21,13 @@ permalink: /projects/
 
 <article class="case-study" id="apricot">
   <div class="case-meta">Professional practice · Bonterra Apricot</div>
-  <h2>Apricot for workforce and community programs</h2>
-  <p><strong>Context:</strong> Apricot served as a core case-management and program-data platform supporting workforce development and community engagement work across staff and partner organizations.</p>
-  <p><strong>Practice:</strong> I supported administration, user access and permissions, workflow design, reporting, data quality, documentation, and troubleshooting. I translated program requirements into practical structures that staff could use consistently.</p>
+  <h2>Bonterra Apricot for workforce and community engagement</h2>
+  <p><strong>Context:</strong> Bonterra Apricot served as a core case-management and program-data platform supporting workforce development and community engagement work across staff and partner organizations. A platform like Apricot can give community organizations a shared structure for connecting participant information, services, referrals, outcomes, and follow-up.</p>
+  <p><strong>Value:</strong> In this type of work, the value is not simply having a place to store records. A well-configured Apricot environment can help program staff coordinate services, maintain consistent information, understand the participant journey, and turn day-to-day program activity into useful reporting and decision-making information.</p>
+  <p><strong>Practice:</strong> I supported administration, user access and permissions, workflow design, reporting, data quality, documentation, and troubleshooting. I translated program requirements into practical structures that staff could use consistently and supported end users as those workflows evolved.</p>
   <p><strong>Application:</strong> I developed and improved an employment pipeline that connected referrals, workforce readiness, assessments, applications, interviews, employment outcomes, and retention follow-up. The workflow included 30, 60, 90, 180, and 365 day retention checkpoints.</p>
   <p><strong>Outcome:</strong> The employment pipeline supported <strong>64 individuals who secured employment</strong> while creating a more consistent way to understand readiness, placement, support, and retention.</p>
-  <div class="evidence-line"><span>Practice</span> Administration · permissions · workflows · reporting · data quality · troubleshooting</div>
+  <div class="evidence-line"><span>Practice</span> Bonterra Apricot · Administration · permissions · workflows · reporting · data quality · troubleshooting · end user support</div>
 </article>
 
 <div class="case-grid">
